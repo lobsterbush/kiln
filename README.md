@@ -1,80 +1,108 @@
-# Kiln — Where Thinking Hardens
+# Kiln — The Socratic Method, Scaled
 
-Real-time classroom activities designed so AI can't help. Kiln replaces detection-based academic integrity approaches with **structurally AI-resistant pedagogy**: timed peer critique rounds, adaptive Socratic chains, and live annotation exercises where the activity design itself makes AI use infeasible.
+Kiln is a real-time active learning platform for higher education classrooms. In 60 seconds you can have every student writing, arguing, and defending their thinking — while you watch it happen live.
 
-## Authors
+**Author**: Charles Crabtree, Senior Lecturer, School of Social Sciences, Monash University and K-Club Professor, University College, Korea University.
 
-Charles Crabtree, Senior Lecturer, School of Social Sciences, Monash University and K-Club Professor, University College, Korea University.
+---
 
-## Overview
+## How it works
 
-The academic integrity crisis isn't solvable by detection — 94% of AI-generated work goes undetected, and AI detectors produce a 61% false positive rate for non-native English speakers. Kiln takes a different approach: instead of catching AI use after the fact, it designs activities where AI **can't help** in the first place.
+### Socratic Chain (AI-powered)
 
-### How it works
+1. You post an opening question and optional learning objectives.
+2. Every student writes a response simultaneously in a timed round.
+3. Claude reads each student's specific argument and generates a **personalized follow-up** targeting the weakest point in *their* reasoning.
+4. Students must answer *their own* follow-up — no two students get the same question.
+5. You watch comprehension unfold in real time on the live monitor.
 
-1. **Instructor creates an activity** (Peer Critique or Socratic Chain)
-2. **Students join via a 6-character code** — no signup required
-3. **Timed rounds** (30–90 seconds) keep responses sharp and genuine
-4. **Peer-dependent chains** mean each student's work depends on a classmate's specific argument
-5. **AI-powered follow-ups** (instructor side only) probe the weakest point in each student's reasoning
+No lectures interrupted. No hands raised. Every student pushed, individually.
 
-### Activity Types
+### Peer Critique
 
-- **Peer Critique**: Claim → Critique → Rebuttal in timed rounds with rotating partners
-- **Socratic Chain**: AI generates personalized follow-up questions that probe each student's reasoning
+1. Students write a position in response to your prompt.
+2. Kiln anonymously pairs each student with a peer's argument.
+3. Students critique the argument they received.
+4. Students defend their own original claim against the critique they received.
 
-## Requirements
+Three rounds of structured argumentation, zero administrative overhead.
 
-- Node.js 20+
-- A [Supabase](https://supabase.com) project (free tier works)
-- An [Anthropic API key](https://console.anthropic.com) (for Socratic Chain activities)
+---
 
-## Setup
+## Quick start
 
-1. Clone and install:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/kiln.git
-   cd kiln
-   npm install
-   ```
+### Prerequisites
 
-2. Create a Supabase project at [supabase.com](https://supabase.com) and run the migration:
-   - Go to SQL Editor in the Supabase dashboard
+- Node.js 18+
+- [Supabase](https://supabase.com) project (free tier works)
+- [Anthropic API key](https://console.anthropic.com) (for Socratic Chain follow-ups)
+
+### Local development
+
+```bash
+git clone https://github.com/YOUR_USERNAME/kiln.git
+cd kiln
+npm install
+cp .env.example .env   # fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+npm run dev
+```
+
+### Supabase setup
+
+1. Run the migration against your project:
+   - Open the SQL Editor in your Supabase dashboard
    - Paste and run `supabase/migrations/001_initial_schema.sql`
 
-3. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Supabase URL and anon key
-   ```
-
-4. For Socratic Chain activities, deploy the Edge Function:
+2. Deploy the edge function and set the API key:
    ```bash
    supabase functions deploy generate-followup
-   supabase secrets set ANTHROPIC_API_KEY=your-key
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
 
-5. Run locally:
-   ```bash
-   npm run dev
-   ```
+3. (Optional) Enable Google OAuth in your Supabase Auth settings for Google sign-in.
 
-## Deployment
+### GitHub Pages deployment
 
-Kiln deploys to GitHub Pages via GitHub Actions. Push to `main` to trigger a deploy.
+Push to `main`. GitHub Actions builds and deploys automatically.
 
 Add these secrets to your GitHub repo settings:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-## Stack
+---
+
+## Project structure
+
+```
+src/
+  pages/          # Route-level page components
+  components/     # Shared UI components
+  lib/            # Supabase client, auth context, utilities
+supabase/
+  functions/      # Edge functions (generate-followup)
+  migrations/     # Database schema
+```
+
+---
+
+## Key commands
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Local dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+
+---
+
+## Tech stack
 
 - **Frontend**: React 19 + TypeScript + TailwindCSS + Vite
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime, Edge Functions)
-- **AI**: Anthropic Claude API (Socratic Chain follow-ups)
+- **AI**: Anthropic Claude API (Socratic Chain follow-up generation)
 - **Hosting**: GitHub Pages (static SPA)
 
-## Replication
+---
 
 We will make all data and code used to generate our results available at a figshare repository at the time of publication.
 

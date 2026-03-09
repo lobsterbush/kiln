@@ -7,6 +7,7 @@ interface AuthState {
   session: Session | null
   loading: boolean
   signIn: (email: string) => Promise<{ error: Error | null }>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -34,6 +35,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  async function signInWithGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}instructor`,
+      },
+    })
+  }
+
   async function signIn(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -51,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   )

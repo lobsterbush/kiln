@@ -12,6 +12,20 @@ export function Layout() {
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-kiln-600 transition-colors">Kiln</span>
           </Link>
+          <nav className="flex items-center gap-5">
+            <a
+              href={`${import.meta.env.BASE_URL}#pricing`}
+              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
+            >
+              Pricing
+            </a>
+            <Link
+              to="/instructor"
+              className="text-sm font-medium px-4 py-2 bg-kiln-50 text-kiln-700 rounded-xl hover:bg-kiln-100 transition-colors"
+            >
+              Instructor Sign In
+            </Link>
+          </nav>
         </div>
       </header>
       <main className="max-w-5xl mx-auto px-4 py-8 w-full flex-1">

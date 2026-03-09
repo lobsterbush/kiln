@@ -3,7 +3,53 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import type { ActivityType } from '../lib/types'
-import { Users, BookOpen } from 'lucide-react'
+import { Users, BookOpen, Zap } from 'lucide-react'
+
+interface Template {
+  label: string
+  title: string
+  prompt: string
+  objectives?: string
+}
+
+const PEER_CRITIQUE_TEMPLATES: Template[] = [
+  {
+    label: 'Policy debate',
+    title: 'Policy Debate',
+    prompt: 'What is the strongest argument in favor of the policy we discussed today? State your position and the single best piece of evidence for it.',
+  },
+  {
+    label: 'Causal claim',
+    title: 'Causal Argument',
+    prompt: 'Identify the primary cause of the phenomenon discussed in today\'s reading. Make a clear causal claim and explain the mechanism.',
+  },
+  {
+    label: 'Normative stance',
+    title: 'Normative Position',
+    prompt: 'Take a position on the ethical question raised in class today. Defend your stance with a principled argument.',
+  },
+]
+
+const SOCRATIC_CHAIN_TEMPLATES: Template[] = [
+  {
+    label: 'Explain a concept',
+    title: 'Concept Check',
+    prompt: 'In your own words, explain the key concept from today\'s lecture. What does it mean and why does it matter?',
+    objectives: 'Demonstrate understanding of the core concept\nConnect concept to course themes\nIdentify implications or applications',
+  },
+  {
+    label: 'Evaluate evidence',
+    title: 'Evidence Evaluation',
+    prompt: 'What do you see as the strongest evidence from the assigned reading? Why is this evidence compelling?',
+    objectives: 'Distinguish strong from weak evidence\nExplain standards of evaluation\nIdentify potential counterevidence',
+  },
+  {
+    label: 'Apply theory',
+    title: 'Theory Application',
+    prompt: 'Apply the theoretical framework from class to a real-world case of your choice. What does the theory predict and why?',
+    objectives: 'Identify observable implications of the theory\nMatch theory to empirical patterns\nRecognize scope conditions',
+  },
+]
 
 export function CreateActivity() {
   const { user } = useAuth()
@@ -88,6 +134,14 @@ export function CreateActivity() {
     )
   }
 
+  const templates = type === 'peer_critique' ? PEER_CRITIQUE_TEMPLATES : SOCRATIC_CHAIN_TEMPLATES
+
+  function applyTemplate(t: Template) {
+    setTitle(t.title)
+    setPrompt(t.prompt)
+    if (t.objectives) setObjectives(t.objectives)
+  }
+
   // Step 2: Configure
   return (
     <div className="max-w-lg mx-auto animate-fade-in">
@@ -96,10 +150,29 @@ export function CreateActivity() {
       </h1>
       <button
         onClick={() => setType(null)}
-        className="text-sm text-slate-500 hover:text-kiln-600 mb-8 transition-colors"
+        className="text-sm text-slate-500 hover:text-kiln-600 mb-6 transition-colors"
       >
         ← Change type
       </button>
+
+      <div className="mb-6">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Zap className="w-3.5 h-3.5 text-kiln-500" />
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick start</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {templates.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              onClick={() => applyTemplate(t)}
+              className="px-3 py-1.5 text-sm bg-kiln-50 text-kiln-700 rounded-full border border-kiln-200 hover:bg-kiln-100 hover:border-kiln-300 transition-colors font-medium"
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div>

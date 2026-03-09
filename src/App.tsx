@@ -8,6 +8,7 @@ import { InstructorDashboard } from './pages/InstructorDashboard'
 import { CreateActivity } from './pages/CreateActivity'
 import { InstructorSession } from './pages/InstructorSession'
 import { Results } from './pages/Results'
+import { EditActivity } from './pages/EditActivity'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/instructor/create" element={<CreateActivity />} />
             <Route path="/instructor/session/:id" element={<InstructorSession />} />
             <Route path="/instructor/results/:id" element={<Results />} />
+            <Route path="/instructor/edit/:id" element={<EditActivity />} />
           </Route>
         </Routes>
       </BrowserRouter>

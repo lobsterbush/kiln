@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Flame, ArrowRight, BookOpen, Users, Clock, Zap, BarChart3 } from 'lucide-react'
+import { Flame, ArrowRight, BookOpen, Users, Clock, Zap, BarChart3, Check } from 'lucide-react'
 
 export function Home() {
   const [code, setCode] = useState('')
@@ -123,8 +123,77 @@ export function Home() {
         </div>
       </div>
 
+      {/* Pricing */}
+      <div id="pricing" className="w-full max-w-3xl mx-auto px-4 py-16">
+        <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">Simple pricing</h2>
+        <p className="text-slate-500 text-center mb-10">Free to try. No credit card required.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Free tier */}
+          <div className="flex flex-col p-8 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
+            <div className="mb-4">
+              <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 px-3 py-1 rounded-full uppercase tracking-wider">Free beta</span>
+            </div>
+            <div className="mb-6">
+              <span className="text-4xl font-extrabold text-slate-900">$0</span>
+              <span className="text-slate-500 ml-1">/ semester</span>
+            </div>
+            <ul className="flex flex-col gap-3 mb-8 flex-1">
+              {[
+                'Unlimited activities',
+                'Up to 50 students per session',
+                'Peer Critique &amp; Socratic Chain',
+                'Live monitor dashboard',
+                'Session history',
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
+                  <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />
+                  <span dangerouslySetInnerHTML={{ __html: f }} />
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/instructor"
+              className="block text-center px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+            >
+              Get started free
+            </Link>
+          </div>
+
+          {/* Institution tier */}
+          <div className="flex flex-col p-8 bg-slate-50 rounded-2xl border-2 border-slate-200">
+            <div className="mb-4">
+              <span className="inline-block text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full uppercase tracking-wider">Institution</span>
+            </div>
+            <div className="mb-6">
+              <span className="text-4xl font-extrabold text-slate-400">—</span>
+              <span className="inline-block ml-3 text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">Coming soon</span>
+            </div>
+            <ul className="flex flex-col gap-3 mb-8 flex-1">
+              {[
+                'Everything in Free',
+                'Canvas &amp; Moodle LMS integration',
+                'Advanced analytics &amp; exports',
+                'SSO / institutional login',
+                'Priority support',
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-slate-500">
+                  <Check className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
+                  <span dangerouslySetInnerHTML={{ __html: f }} />
+                </li>
+              ))}
+            </ul>
+            <button
+              disabled
+              className="block w-full text-center px-5 py-3 bg-slate-200 text-slate-400 font-semibold rounded-xl cursor-not-allowed"
+            >
+              Notify me
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Instructor CTA */}
-      <div className="w-full py-16 text-center">
+      <div className="w-full py-16 text-center border-t border-slate-100">
         <p className="text-slate-500 mb-4">Start your first activity in under a minute.</p>
         <Link
           to="/instructor"
