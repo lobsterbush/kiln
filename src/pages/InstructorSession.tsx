@@ -153,15 +153,19 @@ export function InstructorSession() {
     setSession((prev) => prev ? { ...prev, current_round: nextRound, round_started_at: now, status: 'active' } : null)
 
     if (activity.type === 'peer_critique') {
-      const isCritiqueRound = nextRound === 2
-      const prompt = isCritiqueRound
-        ? 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
-        : 'Below is a peer\'s critique of your original argument. Write a rebuttal defending your position.'
-      await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
-      if (isCritiqueRound) {
+      if (nextRound === 2) {
+        const prompt = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
         await assignPeers(currentResponses, session.current_round)
-      } else {
+      } else if (nextRound === 3) {
+        const prompt = 'Below is a peer\'s critique of your original argument. Write a rebuttal defending your position.'
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
         await assignRebuttals(currentResponses, session.current_round)
+      } else {
+        // Rounds 4+ should not normally be reached with peer critique;
+        // broadcast a generic independent response round as a safe fallback.
+        const prompt = 'Continue developing your argument based on the discussion so far.'
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
       }
     } else if (activity.type === 'socratic_chain') {
       const prompt = 'Your personalised follow-up question is being generated…'

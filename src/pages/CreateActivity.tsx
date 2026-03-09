@@ -224,8 +224,12 @@ export function CreateActivity() {
               onChange={(e) => setRounds(Number(e.target.value))}
               className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             >
-              {[2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n} rounds</option>
+              {(type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
+                <option key={n} value={n}>
+                  {n === 2 && type === 'peer_critique' ? '2 — Claim + Critique'
+                    : n === 3 && type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
+                    : `${n} rounds`}
+                </option>
               ))}
             </select>
           </div>

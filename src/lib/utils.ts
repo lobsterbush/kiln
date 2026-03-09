@@ -38,16 +38,6 @@ export function clearStudentToken(): void {
   localStorage.removeItem(STUDENT_TOKEN_KEY)
 }
 
-/** Calculate remaining seconds from a server timestamp + duration */
-export function getRemainingSeconds(
-  serverTimestamp: string,
-  durationSec: number
-): number {
-  const started = new Date(serverTimestamp).getTime()
-  const elapsed = (Date.now() - started) / 1000
-  return Math.max(0, Math.ceil(durationSec - elapsed))
-}
-
 /** Format seconds as MM:SS */
 export function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)

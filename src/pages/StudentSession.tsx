@@ -199,7 +199,7 @@ export function StudentSession() {
         <PeerCritiqueView
           peerResponse={peerResponse.content}
           peerName={peerResponse.name}
-          critiquePrompt="Identify the weakest assumption in this argument."
+          critiquePrompt={roundEvent.prompt}
           serverTimestamp={roundEvent.server_timestamp}
           durationSec={roundEvent.duration_sec}
           onSubmit={handleSubmitResponse}

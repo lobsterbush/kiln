@@ -14,6 +14,7 @@ export function Results() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
   const [assignments, setAssignments] = useState<PeerAssignment[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -25,45 +26,48 @@ export function Results() {
   }, [id, user])
 
   async function loadData() {
-    const { data: sess } = await supabase
-      .from('sessions')
-      .select('*, activity:activities(*)')
-      .eq('id', id)
-      .single()
-    if (sess) {
-      setSession(sess)
-      setActivity(sess.activity as Activity)
+    const [sessResult, partsResult, respsResult, assignsResult] = await Promise.all([
+      supabase.from('sessions').select('*, activity:activities(*)').eq('id', id!).single(),
+      supabase.from('participants').select('*').eq('session_id', id!),
+      supabase.from('responses').select('*').eq('session_id', id!)
+        .order('round', { ascending: true }).order('submitted_at', { ascending: true }),
+      supabase.from('peer_assignments').select('*').eq('session_id', id!),
+    ])
+
+    if (sessResult.error || partsResult.error || respsResult.error) {
+      setLoadError('Could not load session data. Please refresh.')
+      return
     }
 
-    const { data: parts } = await supabase
-      .from('participants')
-      .select('*')
-      .eq('session_id', id!)
-    if (parts) setParticipants(parts)
-
-    const { data: resps } = await supabase
-      .from('responses')
-      .select('*')
-      .eq('session_id', id!)
-      .order('round', { ascending: true })
-      .order('submitted_at', { ascending: true })
-    if (resps) setResponses(resps)
-
-    const { data: assigns } = await supabase
-      .from('peer_assignments')
-      .select('*')
-      .eq('session_id', id!)
-    if (assigns) setAssignments(assigns)
+    if (sessResult.data) {
+      setSession(sessResult.data)
+      setActivity(sessResult.data.activity as Activity)
+    }
+    if (partsResult.data) setParticipants(partsResult.data)
+    if (respsResult.data) setResponses(respsResult.data)
+    if (assignsResult.data) setAssignments(assignsResult.data)
   }
 
   function exportCSV() {
-    const headers = ['participant', 'round', 'type', 'content', 'time_taken_ms', 'submitted_at']
+    const headers = ['participant', 'round', 'type', 'responding_to', 'content', 'time_taken_ms', 'submitted_at']
     const rows = responses.map((r) => {
       const p = participants.find((p) => p.id === r.participant_id)
+      // Peer context: who did this participant respond to?
+      const asReviewer = assignments.find((a) => a.reviewer_id === r.participant_id && a.round === r.round)
+      const asAuthor = assignments.find((a) => a.author_id === r.participant_id && a.round === r.round - 1)
+      let respondingTo = ''
+      if (asReviewer) {
+        const author = participants.find((q) => q.id === asReviewer.author_id)
+        respondingTo = author?.display_name ?? ''
+      } else if (asAuthor && r.response_type === 'rebuttal') {
+        const reviewer = participants.find((q) => q.id === asAuthor.reviewer_id)
+        respondingTo = reviewer?.display_name ?? ''
+      }
       return [
         p?.display_name ?? 'Unknown',
         r.round,
         r.response_type,
+        respondingTo,
         `"${r.content.replace(/"/g, '""')}"`,
         r.time_taken_ms ?? '',
         r.submitted_at,
@@ -81,6 +85,10 @@ export function Results() {
 
   if (authLoading) {
     return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
+  }
+
+  if (loadError) {
+    return <div className="flex justify-center py-20 text-red-500">{loadError}</div>
   }
 
   if (!session || !activity) {

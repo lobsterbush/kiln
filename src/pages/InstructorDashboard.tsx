@@ -13,6 +13,8 @@ export function InstructorDashboard() {
   const [email, setEmail] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [loadingActivities, setLoadingActivities] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [sessionError, setSessionError] = useState<string | null>(null)
   const [activeSessions, setActiveSessions] = useState<{ id: string; join_code: string; status: string; activity: { title: string }[] | null }[]>([])
@@ -64,12 +66,15 @@ export function InstructorDashboard() {
   }
 
   async function loadActivities() {
-    const { data } = await supabase
+    setLoadingActivities(true)
+    const { data, error } = await supabase
       .from('activities')
       .select('*')
       .eq('instructor_id', user!.id)
       .order('created_at', { ascending: false })
+    if (error) setLoadError('Could not load activities. Please refresh.')
     if (data) setActivities(data)
+    setLoadingActivities(false)
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -103,6 +108,7 @@ export function InstructorDashboard() {
       return
     }
 
+    setStarting(false)
     navigate(`/instructor/session/${session.id}`)
   }
 
@@ -229,7 +235,17 @@ export function InstructorDashboard() {
         </div>
       </div>
 
-      {activities.length === 0 ? (
+      {loadError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{loadError}</p>
+      )}
+
+      {loadingActivities ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      ) : activities.length === 0 ? (
         <div className="text-center py-20 animate-slide-up">
           <div className="p-4 bg-slate-100 rounded-2xl w-fit mx-auto mb-5">
             <Plus className="w-8 h-8 text-slate-400" />

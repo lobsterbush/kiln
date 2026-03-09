@@ -6,7 +6,7 @@ import type { Activity } from '../lib/types'
 
 export function EditActivity() {
   const { id } = useParams<{ id: string }>()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [activity, setActivity] = useState<Activity | null>(null)
@@ -19,15 +19,20 @@ export function EditActivity() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!authLoading && !user) navigate('/instructor')
+  }, [user, authLoading, navigate])
+
+  useEffect(() => {
+    if (!id || !user) return
     loadActivity()
-  }, [id])
+  }, [id, user])
 
   async function loadActivity() {
     const { data } = await supabase
       .from('activities')
       .select('*')
       .eq('id', id)
+      .eq('instructor_id', user!.id)
       .single()
     if (data) {
       setActivity(data)
@@ -61,6 +66,7 @@ export function EditActivity() {
         },
       })
       .eq('id', id)
+      .eq('instructor_id', user!.id)
 
     if (error) {
       setSaveError('Failed to save changes. Please try again.')
@@ -69,6 +75,10 @@ export function EditActivity() {
     }
 
     navigate('/instructor')
+  }
+
+  if (authLoading) {
+    return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
   }
 
   if (!activity) {
@@ -134,8 +144,12 @@ export function EditActivity() {
               onChange={(e) => setRounds(Number(e.target.value))}
               className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             >
-              {[2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n} rounds</option>
+              {(activity.type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
+                <option key={n} value={n}>
+                  {n === 2 && activity.type === 'peer_critique' ? '2 — Claim + Critique'
+                    : n === 3 && activity.type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
+                    : `${n} rounds`}
+                </option>
               ))}
             </select>
           </div>

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { getRemainingSeconds, formatTime, cn } from '../../lib/utils'
+import { useEffect, useState, useRef } from 'react'
+import { formatTime, cn } from '../../lib/utils'
 
 interface TimerProps {
   serverTimestamp: string
@@ -9,13 +9,31 @@ interface TimerProps {
 }
 
 export function Timer({ serverTimestamp, durationSec, onExpire, className }: TimerProps) {
-  const [remaining, setRemaining] = useState(() =>
-    getRemainingSeconds(serverTimestamp, durationSec)
+  // Compute initial remaining from server timestamp, clamped to [0, durationSec].
+  // This absorbs clock skew at the start; subsequent ticks use purely local time delta
+  // to avoid drift from ongoing skew accumulation.
+  const localStartRef = useRef(Date.now())
+  const initialRemainingRef = useRef(
+    Math.max(0, Math.min(durationSec,
+      Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
+    ))
   )
+
+  const [remaining, setRemaining] = useState(initialRemainingRef.current)
+
+  // Reset refs when serverTimestamp or durationSec changes (new round)
+  useEffect(() => {
+    localStartRef.current = Date.now()
+    initialRemainingRef.current = Math.max(0, Math.min(durationSec,
+      Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
+    ))
+    setRemaining(initialRemainingRef.current)
+  }, [serverTimestamp, durationSec])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const r = getRemainingSeconds(serverTimestamp, durationSec)
+      const elapsedSec = (Date.now() - localStartRef.current) / 1000
+      const r = Math.max(0, Math.ceil(initialRemainingRef.current - elapsedSec))
       setRemaining(r)
       if (r <= 0) {
         clearInterval(interval)
