@@ -22,18 +22,20 @@ export function SocraticView({
 }: SocraticViewProps) {
   if (loading || !followUpPrompt) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-        <p className="text-slate-500">Generating your follow-up question...</p>
+      <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">
+        <div className="p-4 bg-kiln-50 rounded-2xl">
+          <Loader2 className="w-8 h-8 text-kiln-500 animate-spin" />
+        </div>
+        <p className="text-sm text-slate-500 font-medium">Generating your follow-up question...</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-slate-100 border border-slate-200 rounded-lg p-4">
-        <p className="text-xs font-medium text-slate-500 mb-1">
-          Your Round {round - 1} response:
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 rounded-2xl p-5">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          Your Round {round - 1} response
         </p>
         <p className="text-sm text-slate-600 leading-relaxed">{previousResponse}</p>
       </div>

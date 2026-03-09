@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react'
+import { Users, Loader2 } from 'lucide-react'
 import type { Participant } from '../../lib/types'
 
 interface SessionLobbyProps {
@@ -10,27 +10,35 @@ interface SessionLobbyProps {
 
 export function SessionLobby({ joinCode, participants, isInstructor, onStart }: SessionLobbyProps) {
   return (
-    <div className="flex flex-col items-center gap-8 py-12">
+    <div className="flex flex-col items-center gap-10 py-16 animate-fade-in">
       <div className="text-center">
-        <p className="text-sm text-slate-500 uppercase tracking-wide mb-2">Join Code</p>
-        <p className="text-5xl font-mono font-bold tracking-widest text-slate-900">
-          {joinCode}
-        </p>
+        <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Session Code</p>
+        <div className="flex items-center justify-center gap-2">
+          {joinCode.split('').map((char, i) => (
+            <span
+              key={i}
+              className="w-14 h-16 flex items-center justify-center text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
+            >
+              {char}
+            </span>
+          ))}
+        </div>
+        <p className="text-sm text-slate-400 mt-3">Share this code with your students</p>
       </div>
 
-      <div className="flex items-center gap-2 text-slate-600">
-        <Users className="w-5 h-5" />
-        <span className="text-lg">
+      <div className="flex items-center gap-2.5 px-4 py-2 bg-kiln-50 rounded-full">
+        <Users className="w-4 h-4 text-kiln-600" />
+        <span className="text-sm font-semibold text-kiln-700">
           {participants.length} {participants.length === 1 ? 'student' : 'students'} joined
         </span>
       </div>
 
-      <div className="w-full max-w-sm">
-        <div className="flex flex-wrap gap-2 justify-center">
+      <div className="w-full max-w-md">
+        <div className="flex flex-wrap gap-2 justify-center stagger-children">
           {participants.map((p) => (
             <span
               key={p.id}
-              className="px-3 py-1 bg-white rounded-full text-sm text-slate-700 border border-slate-200 shadow-sm"
+              className="px-3.5 py-1.5 bg-white rounded-full text-sm font-medium text-slate-700 border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
             >
               {p.display_name}
             </span>
@@ -42,14 +50,17 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart }: 
         <button
           onClick={onStart}
           disabled={participants.length < 2}
-          className="px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
+          className="px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 hover:shadow-lg hover:shadow-kiln-300 active:scale-95 text-lg"
         >
           Start Session
         </button>
       )}
 
       {!isInstructor && (
-        <p className="text-slate-500 animate-pulse">Waiting for instructor to start...</p>
+        <div className="flex items-center gap-2 text-slate-400">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <p className="text-sm">Waiting for instructor to start...</p>
+        </div>
       )}
     </div>
   )

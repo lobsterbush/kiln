@@ -81,27 +81,27 @@ export function Results() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/instructor" className="text-sm text-slate-500 hover:text-orange-600 flex items-center gap-1 mb-2">
+          <Link to="/instructor" className="text-sm text-slate-400 hover:text-kiln-600 flex items-center gap-1 mb-3 transition-colors">
             <ArrowLeft className="w-3 h-3" /> Back to dashboard
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">{activity.title}</h1>
-          <p className="text-sm text-slate-500">
-            Session {session.join_code} · {participants.length} participants · {activity.config.rounds} rounds
+          <p className="text-sm text-slate-500 mt-1">
+            Session <span className="font-mono font-semibold">{session.join_code}</span> · {participants.length} participants · {activity.config.rounds} rounds
           </p>
         </div>
         <button
           onClick={exportCSV}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-300 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
         >
           <Download className="w-4 h-4" />
           Export CSV
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 stagger-children">
         {byParticipant.map(({ participant, chain }) => (
-          <div key={participant.id} className="bg-white rounded-lg border border-slate-200 p-4">
-            <h3 className="font-semibold text-slate-900 mb-3">{participant.display_name}</h3>
+          <div key={participant.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
+            <h3 className="font-semibold text-slate-900 mb-4">{participant.display_name}</h3>
             <div className="flex flex-col gap-3">
               {chain.map((r) => (
                 <div key={r.id} className="flex gap-3">

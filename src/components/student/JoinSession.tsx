@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Flame, ArrowRight } from 'lucide-react'
+import { Flame, ArrowRight, Loader2 } from 'lucide-react'
 
 interface JoinSessionProps {
   onJoin: (code: string, name: string) => Promise<void>
@@ -24,16 +24,18 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Flame className="w-8 h-8 text-orange-500" />
-          <h1 className="text-3xl font-bold text-slate-900">Join Session</h1>
+        <div className="flex flex-col items-center gap-3 mb-10">
+          <div className="p-3 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-2xl shadow-lg shadow-kiln-200">
+            <Flame className="w-7 h-7 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Join Session</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="code" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Session Code
             </label>
             <input
@@ -43,13 +45,13 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="ABCDEF"
               maxLength={6}
-              className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full px-4 py-3.5 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
               autoFocus
             />
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="name" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Your Name
             </label>
             <input
@@ -59,20 +61,20 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               maxLength={50}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full px-4 py-3.5 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={joining || !code.trim() || !name.trim()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
           >
-            {joining ? 'Joining...' : 'Join'}
+            {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join'}
             {!joining && <ArrowRight className="w-4 h-4" />}
           </button>
         </form>

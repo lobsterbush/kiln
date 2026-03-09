@@ -18,10 +18,10 @@ export function PeerCritiqueView({
   onSubmit,
 }: PeerCritiqueViewProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm font-medium text-blue-600 mb-2">
-          {peerName}'s response:
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5">
+        <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-2">
+          {peerName}'s response
         </p>
         <p className="text-slate-800 leading-relaxed">{peerResponse}</p>
       </div>

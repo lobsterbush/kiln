@@ -55,8 +55,8 @@ export function ResponsePanel({
         onExpire={handleExpire}
       />
 
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <p className="text-lg font-medium text-slate-800 mb-4">{prompt}</p>
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm animate-slide-up">
+        <p className="text-lg font-semibold text-slate-800 mb-4 leading-relaxed">{prompt}</p>
 
         <textarea
           ref={textareaRef}
@@ -65,23 +65,28 @@ export function ResponsePanel({
           disabled={isDisabled}
           placeholder="Type your response..."
           className={cn(
-            'w-full h-40 p-3 border rounded-lg resize-none text-base transition-colors focus:outline-none focus:ring-2 focus:ring-orange-300',
+            'w-full h-44 p-4 border-2 rounded-xl resize-none text-base leading-relaxed transition-all focus:outline-none',
             isDisabled
-              ? 'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed'
-              : 'bg-white text-slate-900 border-slate-300'
+              ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed'
+              : 'bg-white text-slate-900 border-slate-200 focus:border-kiln-400'
           )}
         />
 
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-sm text-slate-400">
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-xs text-slate-400 font-medium">
             {content.length} characters
           </span>
           <button
             onClick={handleSubmit}
             disabled={isDisabled || !content.trim()}
-            className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className={cn(
+              'px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95',
+              submitted
+                ? 'bg-emerald-500 text-white'
+                : 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-md shadow-kiln-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
+            )}
           >
-            {submitted ? 'Submitted ✓' : 'Submit'}
+            {submitted ? '✓ Submitted' : 'Submit'}
           </button>
         </div>
       </div>

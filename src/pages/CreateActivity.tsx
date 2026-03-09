@@ -4,7 +4,6 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import type { ActivityType } from '../lib/types'
 import { Users, BookOpen } from 'lucide-react'
-import { cn } from '../lib/utils'
 
 export function CreateActivity() {
   const { user } = useAuth()
@@ -50,29 +49,34 @@ export function CreateActivity() {
   // Step 1: Choose type
   if (!type) {
     return (
-      <div className="max-w-lg mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">Create Activity</h1>
-        <div className="flex flex-col gap-4">
+      <div className="max-w-lg mx-auto animate-fade-in">
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">Create Activity</h1>
+        <p className="text-sm text-slate-500 mb-8">Choose an activity type to get started.</p>
+        <div className="flex flex-col gap-4 stagger-children">
           <button
             onClick={() => setType('peer_critique')}
-            className="flex items-center gap-4 p-6 bg-white rounded-lg border-2 border-slate-200 hover:border-orange-400 transition-colors text-left"
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-kiln-400 hover:shadow-md transition-all duration-200 text-left"
           >
-            <Users className="w-10 h-10 text-orange-500 shrink-0" />
+            <div className="p-3 bg-kiln-50 rounded-xl group-hover:bg-kiln-100 transition-colors shrink-0">
+              <Users className="w-7 h-7 text-kiln-600" />
+            </div>
             <div>
               <h3 className="font-semibold text-slate-900">Peer Critique</h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
                 Students write claims, critique each other's arguments, and respond to criticism in timed rounds.
               </p>
             </div>
           </button>
           <button
             onClick={() => setType('socratic_chain')}
-            className="flex items-center gap-4 p-6 bg-white rounded-lg border-2 border-slate-200 hover:border-orange-400 transition-colors text-left"
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-kiln-400 hover:shadow-md transition-all duration-200 text-left"
           >
-            <BookOpen className="w-10 h-10 text-orange-500 shrink-0" />
+            <div className="p-3 bg-kiln-50 rounded-xl group-hover:bg-kiln-100 transition-colors shrink-0">
+              <BookOpen className="w-7 h-7 text-kiln-600" />
+            </div>
             <div>
               <h3 className="font-semibold text-slate-900">Socratic Chain</h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
                 AI generates personalized follow-up questions that probe each student's reasoning.
               </p>
             </div>
@@ -84,31 +88,31 @@ export function CreateActivity() {
 
   // Step 2: Configure
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto animate-fade-in">
       <h1 className="text-2xl font-bold text-slate-900 mb-1">
         {type === 'peer_critique' ? 'Peer Critique' : 'Socratic Chain'}
       </h1>
       <button
         onClick={() => setType(null)}
-        className="text-sm text-slate-500 hover:text-orange-600 mb-6"
+        className="text-sm text-slate-500 hover:text-kiln-600 mb-8 transition-colors"
       >
         ← Change type
       </button>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Activity Title</label>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Activity Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Democratic Backsliding Debate"
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
             {type === 'peer_critique' ? 'Opening Prompt' : 'Initial Question'}
           </label>
           <textarea
@@ -119,31 +123,31 @@ export function CreateActivity() {
                 ? 'What is the strongest argument for X?'
                 : 'What explains democratic backsliding in Hungary?'
             }
-            className="w-full h-28 px-4 py-2 border border-slate-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+            className="w-full h-32 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
           />
         </div>
 
         {type === 'socratic_chain' && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Learning Objectives (one per line)
             </label>
             <textarea
               value={objectives}
               onChange={(e) => setObjectives(e.target.value)}
               placeholder="Evaluate institutional vs cultural explanations&#10;Identify necessary vs sufficient conditions"
-              className="w-full h-20 px-4 py-2 border border-slate-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
             />
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Rounds</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rounds</label>
             <select
               value={rounds}
               onChange={(e) => setRounds(Number(e.target.value))}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             >
               {[2, 3, 4, 5].map((n) => (
                 <option key={n} value={n}>{n} rounds</option>
@@ -151,13 +155,11 @@ export function CreateActivity() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Time per Round</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Time per Round</label>
             <select
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className={cn(
-                'w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300'
-              )}
+              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             >
               {[30, 45, 60, 90, 120].map((s) => (
                 <option key={s} value={s}>{s} seconds</option>
@@ -169,7 +171,7 @@ export function CreateActivity() {
         <button
           type="submit"
           disabled={saving || !title.trim() || !prompt.trim()}
-          className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
         >
           {saving ? 'Creating...' : 'Create Activity'}
         </button>
