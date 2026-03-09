@@ -22,16 +22,23 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Fetch the student's response
+    // Validate: verify the response belongs to the claimed session and participant
     const { data: response } = await supabase
       .from('responses')
-      .select('content')
+      .select('content, session_id, participant_id')
       .eq('id', response_id)
       .single()
 
     if (!response) {
       return new Response(JSON.stringify({ error: 'Response not found' }), {
         status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (response.session_id !== session_id || response.participant_id !== participant_id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -63,7 +70,7 @@ Deno.serve(async (req) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 200,
         system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
         messages: [

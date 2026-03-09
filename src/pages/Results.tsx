@@ -1,20 +1,28 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import type { Session, Activity, Participant, Response as KilnResponse } from '../lib/types'
+import { useAuth } from '../lib/auth'
+import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment } from '../lib/types'
 import { Download, ArrowLeft } from 'lucide-react'
 
 export function Results() {
   const { id } = useParams<{ id: string }>()
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
   const [activity, setActivity] = useState<Activity | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
+  const [assignments, setAssignments] = useState<PeerAssignment[]>([])
 
   useEffect(() => {
-    if (!id) return
+    if (!authLoading && !user) navigate('/instructor')
+  }, [user, authLoading, navigate])
+
+  useEffect(() => {
+    if (!id || !user) return
     loadData()
-  }, [id])
+  }, [id, user])
 
   async function loadData() {
     const { data: sess } = await supabase
@@ -40,6 +48,12 @@ export function Results() {
       .order('round', { ascending: true })
       .order('submitted_at', { ascending: true })
     if (resps) setResponses(resps)
+
+    const { data: assigns } = await supabase
+      .from('peer_assignments')
+      .select('*')
+      .eq('session_id', id!)
+    if (assigns) setAssignments(assigns)
   }
 
   function exportCSV() {
@@ -65,17 +79,41 @@ export function Results() {
     URL.revokeObjectURL(url)
   }
 
+  if (authLoading) {
+    return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
+  }
+
   if (!session || !activity) {
     return <div className="flex justify-center py-20 text-slate-500">Loading results...</div>
   }
 
-  // Group responses by participant
-  const byParticipant = participants.map((p) => ({
-    participant: p,
-    chain: responses
+  // Group responses by participant, with peer context inline
+  const byParticipant = participants.map((p) => {
+    const chain = responses
       .filter((r) => r.participant_id === p.id)
-      .sort((a, b) => a.round - b.round),
-  }))
+      .sort((a, b) => a.round - b.round)
+
+    // For each response, find what the student was responding TO
+    const withContext = chain.map((r) => {
+      // Was this participant a reviewer in this round? If so, show whose work they critiqued.
+      const asReviewer = assignments.find((a) => a.reviewer_id === p.id && a.round === r.round)
+      // Was this participant the author being critiqued in this round? Show who critiqued them.
+      const asAuthor = assignments.find((a) => a.author_id === p.id && a.round === r.round - 1)
+
+      let context: string | null = null
+      if (asReviewer) {
+        const author = participants.find((q) => q.id === asReviewer.author_id)
+        context = `→ critiqued ${author?.display_name ?? 'a classmate'}`
+      } else if (asAuthor && r.response_type === 'rebuttal') {
+        const reviewer = participants.find((q) => q.id === asAuthor.reviewer_id)
+        context = `→ rebutted ${reviewer?.display_name ?? 'a classmate'}’s critique`
+      }
+
+      return { ...r, context }
+    })
+
+    return { participant: p, chain: withContext }
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,21 +144,24 @@ export function Results() {
               {chain.map((r) => (
                 <div key={r.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
                       {r.round}
                     </span>
                     {r.round < activity.config.rounds && (
-                      <div className="w-px h-full bg-slate-200 mt-1" />
+                      <div className="w-px flex-1 bg-slate-200 mt-1" />
                     )}
                   </div>
                   <div className="flex-1 pb-2">
-                    <span className="text-xs text-slate-400 capitalize">{r.response_type.replace('_', ' ')}</span>
-                    <p className="text-sm text-slate-700 mt-0.5">{r.content}</p>
-                    {r.time_taken_ms && (
-                      <span className="text-xs text-slate-400">
-                        {(r.time_taken_ms / 1000).toFixed(1)}s
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-slate-400 capitalize">{r.response_type.replace('_', ' ')}</span>
+                      {r.context && (
+                        <span className="text-xs text-kiln-500 font-medium">{r.context}</span>
+                      )}
+                      {r.time_taken_ms != null && (
+                        <span className="text-xs text-slate-300">{(r.time_taken_ms / 1000).toFixed(1)}s</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-700 mt-0.5 leading-relaxed">{r.content}</p>
                   </div>
                 </div>
               ))}

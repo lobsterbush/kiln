@@ -54,17 +54,17 @@ export function Join() {
       display_name: name,
     })
 
-    // Non-blocking broadcast so student lobbies update with the new participant
-    ;(async () => {
-      const bc = supabase.channel(`session:${session.id}`)
-      await bc.subscribe()
-      await bc.send({
-        type: 'broadcast',
-        event: 'participant:joined',
-        payload: { participant_id: participant.id, display_name: name },
-      })
-      supabase.removeChannel(bc)
-    })()
+    // Non-blocking broadcast: wait for SUBSCRIBED before sending to avoid race condition
+    const bc = supabase.channel(`session:${session.id}`)
+    bc.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        bc.send({
+          type: 'broadcast',
+          event: 'participant:joined',
+          payload: { participant_id: participant.id, display_name: name },
+        }).then(() => supabase.removeChannel(bc))
+      }
+    })
 
     navigate(`/session/${session.id}`)
   }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Flame, ArrowRight, BookOpen, Users, Clock, Zap, BarChart3, Check } from 'lucide-react'
+import { Flame, ArrowRight, BookOpen, Users, Clock, Zap, BarChart3, Check, Mail } from 'lucide-react'
 
 export function Home() {
   const [code, setCode] = useState('')
@@ -141,13 +141,13 @@ export function Home() {
               {[
                 'Unlimited activities',
                 'Up to 50 students per session',
-                'Peer Critique &amp; Socratic Chain',
+                'Peer Critique & Socratic Chain',
                 'Live monitor dashboard',
                 'Session history',
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
                   <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />
-                  <span dangerouslySetInnerHTML={{ __html: f }} />
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
@@ -171,23 +171,24 @@ export function Home() {
             <ul className="flex flex-col gap-3 mb-8 flex-1">
               {[
                 'Everything in Free',
-                'Canvas &amp; Moodle LMS integration',
-                'Advanced analytics &amp; exports',
+                'Canvas & Moodle LMS integration',
+                'Advanced analytics & exports',
                 'SSO / institutional login',
                 'Priority support',
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-slate-500">
                   <Check className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
-                  <span dangerouslySetInnerHTML={{ __html: f }} />
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
-            <button
-              disabled
-              className="block w-full text-center px-5 py-3 bg-slate-200 text-slate-400 font-semibold rounded-xl cursor-not-allowed"
+            <a
+              href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Institution%20Waitlist"
+              className="flex items-center justify-center gap-2 w-full text-center px-5 py-3 bg-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-300 transition-colors"
             >
-              Notify me
-            </button>
+              <Mail className="w-4 h-4" />
+              Join waitlist
+            </a>
           </div>
         </div>
       </div>

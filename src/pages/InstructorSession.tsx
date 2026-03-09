@@ -8,7 +8,7 @@ import type { Session, Activity, Participant, Response as KilnResponse } from '.
 
 export function InstructorSession() {
   const { id } = useParams<{ id: string }>()
-  useAuth() // ensure instructor is authenticated
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [session, setSession] = useState<Session | null>(null)
@@ -18,9 +18,13 @@ export function InstructorSession() {
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!authLoading && !user) navigate('/instructor')
+  }, [user, authLoading, navigate])
+
+  useEffect(() => {
+    if (!id || !user) return
     loadSession()
-  }, [id])
+  }, [id, user])
 
   async function loadSession() {
     const { data } = await supabase
@@ -133,83 +137,105 @@ export function InstructorSession() {
       return
     }
 
-    const now = new Date().toISOString()
+    // Fetch fresh responses from DB to avoid stale state race condition
+    const { data: freshResponses } = await supabase
+      .from('responses')
+      .select('*')
+      .eq('session_id', session.id)
+      .eq('round', session.current_round)
+    const currentResponses = freshResponses ?? []
 
+    const now = new Date().toISOString()
     await supabase
       .from('sessions')
       .update({ current_round: nextRound, round_started_at: now, status: 'active' })
       .eq('id', session.id)
-
     setSession((prev) => prev ? { ...prev, current_round: nextRound, round_started_at: now, status: 'active' } : null)
 
-    const prompt = activity.type === 'peer_critique'
-      ? nextRound === 2
-        ? 'Identify the weakest assumption in this argument.'
-        : 'Respond to this specific criticism.'
-      : 'Follow-up question will appear shortly.'
-
-    // Broadcast round:start first so students reset their UI state
-    await broadcastEvent('round:start', {
-      round: nextRound,
-      duration_sec: activity.config.round_duration_sec,
-      prompt,
-      server_timestamp: now,
-    })
-
-    // Then send per-student events after students have reset
-    if (activity.type === 'peer_critique' && session.current_round >= 1) {
-      await assignPeers()
-    }
-
-    if (activity.type === 'socratic_chain') {
-      await generateFollowUps()
+    if (activity.type === 'peer_critique') {
+      const isCritiqueRound = nextRound === 2
+      const prompt = isCritiqueRound
+        ? 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+        : 'Below is a peer\'s critique of your original argument. Write a rebuttal defending your position.'
+      await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+      if (isCritiqueRound) {
+        await assignPeers(currentResponses, session.current_round)
+      } else {
+        await assignRebuttals(currentResponses, session.current_round)
+      }
+    } else if (activity.type === 'socratic_chain') {
+      const prompt = 'Your personalised follow-up question is being generated…'
+      await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+      await generateFollowUps(currentResponses, session.current_round)
     }
   }
 
-  async function assignPeers() {
-    if (!session) return
-    const currentResponses = responses.filter((r) => r.round === session.current_round)
-    if (currentResponses.length < 2) return
-
-    // Round-robin shuffle
+  async function assignPeers(currentResponses: KilnResponse[], fromRound: number) {
+    if (!session || currentResponses.length < 2) return
     const shuffled = [...currentResponses].sort(() => Math.random() - 0.5)
-    for (let i = 0; i < shuffled.length; i++) {
-      const reviewer = shuffled[i]
-      const author = shuffled[(i + 1) % shuffled.length]
-      const authorParticipant = participants.find((p) => p.id === author.participant_id)
 
-      await supabase.from('peer_assignments').insert({
-        session_id: session.id,
-        round: session.current_round,
+    // Bulk insert all assignments in one round trip
+    const insertRows = shuffled.map((reviewer, i) => {
+      const author = shuffled[(i + 1) % shuffled.length]
+      return {
+        session_id: session!.id,
+        round: fromRound,
         reviewer_id: reviewer.participant_id,
         author_id: author.participant_id,
         response_id: author.id,
-      })
+      }
+    })
+    await supabase.from('peer_assignments').insert(insertRows)
 
+    // Broadcast each reviewer their assigned response
+    for (const row of insertRows) {
+      const authorResponse = currentResponses.find((r) => r.id === row.response_id)
+      const authorParticipant = participants.find((p) => p.id === row.author_id)
       await broadcastEvent('peer:assigned', {
-        participant_id: reviewer.participant_id,
-        response_content: author.content,
+        participant_id: row.reviewer_id,
+        response_content: authorResponse?.content ?? '',
         author_name: authorParticipant?.display_name ?? 'A classmate',
+        response_type: 'critique',
       })
     }
   }
 
-  async function generateFollowUps() {
+  async function assignRebuttals(critiqueResponses: KilnResponse[], fromRound: number) {
     if (!session) return
-    const currentResponses = responses.filter((r) => r.round === session.current_round)
+    // Look up who critiqued whom in the previous round
+    const { data: prevAssignments } = await supabase
+      .from('peer_assignments')
+      .select('*')
+      .eq('session_id', session.id)
+      .eq('round', fromRound - 1)
+    if (!prevAssignments) return
 
+    for (const assignment of prevAssignments) {
+      const critique = critiqueResponses.find((r) => r.participant_id === assignment.reviewer_id)
+      if (!critique) continue
+      // Send the original author the critique of their work
+      await broadcastEvent('peer:assigned', {
+        participant_id: assignment.author_id,
+        response_content: critique.content,
+        author_name: 'Peer critique',
+        response_type: 'rebuttal',
+      })
+    }
+  }
+
+  async function generateFollowUps(currentResponses: KilnResponse[], fromRound: number) {
+    if (!session) return
     await Promise.all(
       currentResponses.map(async (response) => {
         try {
           const { data } = await supabase.functions.invoke('generate-followup', {
             body: {
               response_id: response.id,
-              session_id: session.id,
+              session_id: session!.id,
               participant_id: response.participant_id,
-              round: session.current_round,
+              round: fromRound,
             },
           })
-
           if (data?.prompt) {
             await broadcastEvent('followup:ready', {
               participant_id: response.participant_id,
@@ -234,6 +260,10 @@ export function InstructorSession() {
     navigate(`/instructor/results/${session.id}`)
   }
 
+
+  if (authLoading || (!user && !authLoading)) {
+    return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
+  }
 
   if (!session || !activity) {
     return <div className="flex justify-center py-20 text-slate-500">Loading session...</div>

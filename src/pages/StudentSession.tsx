@@ -18,6 +18,8 @@ export function StudentSession() {
   const [roundEvent, setRoundEvent] = useState<RoundStartEvent | null>(null)
   const [peerResponse, setPeerResponse] = useState<{ content: string; name: string } | null>(null)
   const [followUp, setFollowUp] = useState<string | null>(null)
+  const [peerResponseType, setPeerResponseType] = useState<'critique' | 'rebuttal'>('critique')
+  const [myResponses, setMyResponses] = useState<{ round: number; prompt: string; content: string }[]>([])
   const [previousResponse, setPreviousResponse] = useState('')
   const [waitingForNext, setWaitingForNext] = useState(false)
   const [followUpLoading, setFollowUpLoading] = useState(false)
@@ -38,14 +40,13 @@ export function StudentSession() {
       setSession(data)
       const act = data.activity as Activity
       setActivity(act)
-      // Reconstruct round state for students joining a session already in progress
-      if (data.status === 'active' && data.round_started_at) {
+      // Only synthesise a round event for late-joiners on round 1.
+      // Rounds 2+ require peer assignments that have already been sent — show waiting.
+      if (data.status === 'active' && data.round_started_at && data.current_round === 1) {
         setRoundEvent({
-          round: data.current_round,
+          round: 1,
           duration_sec: act.config.round_duration_sec,
-          prompt: data.current_round === 1
-            ? act.config.initial_prompt
-            : 'Session in progress — respond to the current prompt.',
+          prompt: act.config.initial_prompt,
           server_timestamp: data.round_started_at,
         })
       }
@@ -80,6 +81,7 @@ export function StudentSession() {
       .on('broadcast', { event: 'peer:assigned' }, ({ payload }) => {
         if (payload.participant_id === studentToken.participant_id) {
           setPeerResponse({ content: payload.response_content, name: payload.author_name })
+          setPeerResponseType(payload.response_type === 'rebuttal' ? 'rebuttal' : 'critique')
           setWaitingForNext(false)
         }
       })
@@ -109,8 +111,8 @@ export function StudentSession() {
       if (!studentToken || !roundEvent || !id) return
 
       const responseType =
-        peerResponse ? 'critique' :
         followUp ? 'followup_answer' :
+        peerResponse ? peerResponseType :
         'initial'
 
       await supabase.from('responses').insert({
@@ -122,6 +124,7 @@ export function StudentSession() {
         time_taken_ms: timeTakenMs,
       })
 
+      setMyResponses((prev) => [...prev, { round: roundEvent.round, prompt: roundEvent.prompt, content }])
       setPreviousResponse(content)
       setWaitingForNext(true)
 
@@ -129,7 +132,7 @@ export function StudentSession() {
         setFollowUpLoading(true)
       }
     },
-    [studentToken, roundEvent, id, peerResponse, followUp, activity]
+    [studentToken, roundEvent, id, peerResponse, peerResponseType, followUp, activity]
   )
 
   if (!studentToken) {
@@ -154,9 +157,27 @@ export function StudentSession() {
   // Completed
   if (session.status === 'completed') {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Session Complete</h2>
-        <p className="text-slate-500">Thanks for participating!</p>
+      <div className="flex flex-col items-center gap-8 py-16 animate-fade-in">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Session Complete</h2>
+          <p className="text-slate-500">Here's what you wrote this session.</p>
+        </div>
+        {myResponses.length > 0 ? (
+          <div className="w-full max-w-lg flex flex-col gap-4">
+            {myResponses.map((r, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-mono bg-slate-100 text-slate-500 w-6 h-6 rounded-full flex items-center justify-center">{r.round}</span>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Round {r.round}</p>
+                </div>
+                <p className="text-xs text-slate-400 mb-2 italic line-clamp-2">{r.prompt}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{r.content}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-slate-400 text-sm">No responses recorded this session.</p>
+        )}
       </div>
     )
   }

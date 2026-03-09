@@ -1,4 +1,4 @@
-export type ActivityType = 'peer_critique' | 'socratic_chain' | 'evidence_eval' | 'concept_synthesis'
+export type ActivityType = 'peer_critique' | 'socratic_chain'
 
 export type SessionStatus = 'lobby' | 'active' | 'between_rounds' | 'completed'
 
@@ -84,7 +84,9 @@ export interface RoundStartEvent {
 
 export interface PeerAssignedEvent {
   participant_id: string
-  assignment: PeerAssignment
+  response_content: string
+  author_name: string
+  response_type: 'critique' | 'rebuttal'
 }
 
 export interface FollowUpReadyEvent {
