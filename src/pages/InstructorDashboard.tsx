@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { generateJoinCode } from '../lib/utils'
 import type { Activity } from '../lib/types'
-import { Plus, Play, LogOut, Mail, ArrowRight } from 'lucide-react'
+import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight } from 'lucide-react'
 
 export function InstructorDashboard() {
   const { user, loading, signIn, signOut } = useAuth()
@@ -14,10 +14,26 @@ export function InstructorDashboard() {
   const [emailSent, setEmailSent] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  const [sessionError, setSessionError] = useState<string | null>(null)
+  const [activeSessions, setActiveSessions] = useState<{ id: string; join_code: string; status: string; activity: { title: string }[] | null }[]>([])
 
   useEffect(() => {
-    if (user) loadActivities()
+    if (user) {
+      loadActivities()
+      loadActiveSessions()
+    }
   }, [user])
+
+  async function loadActiveSessions() {
+    const { data } = await supabase
+      .from('sessions')
+      .select('id, join_code, status, activity:activities(title)')
+      .eq('instructor_id', user!.id)
+      .in('status', ['lobby', 'active', 'between_rounds'])
+      .order('created_at', { ascending: false })
+      .limit(5)
+    if (data) setActiveSessions(data as typeof activeSessions)
+  }
 
   async function loadActivities() {
     const { data } = await supabase
@@ -54,7 +70,7 @@ export function InstructorDashboard() {
       .single()
 
     if (error || !session) {
-      alert('Failed to create session')
+      setSessionError('Failed to create session. Please try again.')
       setStarting(false)
       return
     }
@@ -115,6 +131,38 @@ export function InstructorDashboard() {
   // Dashboard
   return (
     <div className="flex flex-col gap-8 animate-fade-in">
+      {activeSessions.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Resume Session</p>
+          <div className="flex flex-col gap-2">
+            {activeSessions.map((s) => (
+              <div key={s.id} className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-slate-800 text-sm">{s.activity?.[0]?.title ?? 'Untitled'}</span>
+                  <span className="font-mono text-xs text-slate-500">{s.join_code}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    s.status === 'lobby' ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {s.status === 'between_rounds' ? 'paused' : s.status}
+                  </span>
+                </div>
+                <button
+                  onClick={() => navigate(`/instructor/session/${s.id}`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  Resume
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {sessionError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{sessionError}</p>
+      )}
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Your Activities</h1>
         <div className="flex gap-3">

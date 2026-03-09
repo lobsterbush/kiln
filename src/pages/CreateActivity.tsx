@@ -16,12 +16,14 @@ export function CreateActivity() {
   const [duration, setDuration] = useState(90)
   const [objectives, setObjectives] = useState('')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!user || !type || !title.trim() || !prompt.trim()) return
 
     setSaving(true)
+    setSaveError(null)
     const { error } = await supabase.from('activities').insert({
       instructor_id: user.id,
       title: title.trim(),
@@ -38,7 +40,7 @@ export function CreateActivity() {
     })
 
     if (error) {
-      alert('Failed to create activity')
+      setSaveError('Failed to create activity. Please try again.')
       setSaving(false)
       return
     }
@@ -167,6 +169,10 @@ export function CreateActivity() {
             </select>
           </div>
         </div>
+
+        {saveError && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{saveError}</p>
+        )}
 
         <button
           type="submit"

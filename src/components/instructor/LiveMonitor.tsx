@@ -95,19 +95,22 @@ export function LiveMonitor({
 
       {/* Controls */}
       <div className="flex gap-3 justify-end">
-        {sessionStatus === 'between_rounds' && (
-          <button
-            onClick={onAdvanceRound}
-            className="px-6 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-medium rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
-          >
-            Next Round →
-          </button>
-        )}
         <button
           onClick={onEndSession}
           className="px-6 py-2.5 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 transition-colors"
         >
           End Session
+        </button>
+        <button
+          onClick={onAdvanceRound}
+          className={cn(
+            'px-6 py-2.5 font-medium rounded-xl transition-all shadow-md active:scale-95',
+            sessionStatus === 'between_rounds'
+              ? 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-kiln-200'
+              : 'bg-slate-200 text-slate-500 hover:bg-slate-300 shadow-slate-100'
+          )}
+        >
+          {sessionStatus === 'between_rounds' ? 'Next Round →' : 'Advance Early →'}
         </button>
       </div>
     </div>
