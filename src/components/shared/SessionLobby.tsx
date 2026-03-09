@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Users, Loader2 } from 'lucide-react'
 import type { Participant } from '../../lib/types'
 
@@ -5,10 +6,13 @@ interface SessionLobbyProps {
   joinCode: string
   participants: Participant[]
   isInstructor: boolean
-  onStart?: () => void
+  onStart?: (customPrompt?: string) => void
+  initialPrompt?: string
 }
 
-export function SessionLobby({ joinCode, participants, isInstructor, onStart }: SessionLobbyProps) {
+export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt }: SessionLobbyProps) {
+  const [customPrompt, setCustomPrompt] = useState(initialPrompt ?? '')
+
   return (
     <div className="flex flex-col items-center gap-10 py-16 animate-fade-in">
       <div className="text-center">
@@ -47,13 +51,28 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart }: 
       </div>
 
       {isInstructor && (
-        <button
-          onClick={onStart}
-          disabled={participants.length < 2}
-          className="px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 hover:shadow-lg hover:shadow-kiln-300 active:scale-95 text-lg"
-        >
-          Start Session
-        </button>
+        <>
+          {initialPrompt !== undefined && (
+            <div className="w-full max-w-lg flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                Opening Prompt
+                <span className="ml-2 normal-case font-normal">— edit to reference today’s discussion</span>
+              </label>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors text-sm leading-relaxed h-24"
+              />
+            </div>
+          )}
+          <button
+            onClick={() => onStart?.(customPrompt.trim() || undefined)}
+            disabled={participants.length < 2}
+            className="px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 hover:shadow-lg hover:shadow-kiln-300 active:scale-95 text-lg"
+          >
+            Start Session
+          </button>
+        </>
       )}
 
       {!isInstructor && (

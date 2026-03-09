@@ -104,7 +104,7 @@ export function InstructorSession() {
     setSession((prev) => prev ? { ...prev, status: 'between_rounds' } : null)
   }
 
-  async function startSession() {
+  async function startSession(customPrompt?: string) {
     if (!session || !activity) return
 
     const now = new Date().toISOString()
@@ -119,7 +119,7 @@ export function InstructorSession() {
     await broadcastEvent('round:start', {
       round: 1,
       duration_sec: activity.config.round_duration_sec,
-      prompt: activity.config.initial_prompt,
+      prompt: customPrompt ?? activity.config.initial_prompt,
       server_timestamp: now,
     })
   }
@@ -246,6 +246,7 @@ export function InstructorSession() {
         participants={participants}
         isInstructor={true}
         onStart={startSession}
+        initialPrompt={activity.config.initial_prompt}
       />
     )
   }
