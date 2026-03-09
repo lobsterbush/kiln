@@ -13,6 +13,7 @@ export function InstructorDashboard() {
   const [email, setEmail] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
 
   useEffect(() => {
     if (user) loadActivities()
@@ -39,6 +40,8 @@ export function InstructorDashboard() {
   }
 
   async function startSession(activity: Activity) {
+    if (starting) return
+    setStarting(true)
     const joinCode = generateJoinCode()
     const { data: session, error } = await supabase
       .from('sessions')
@@ -52,6 +55,7 @@ export function InstructorDashboard() {
 
     if (error || !session) {
       alert('Failed to create session')
+      setStarting(false)
       return
     }
 
@@ -156,7 +160,8 @@ export function InstructorDashboard() {
                 </div>
                 <button
                   onClick={() => startSession(a)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 transition-all shadow-sm active:scale-95"
+                  disabled={starting}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
                 >
                   <Play className="w-3.5 h-3.5" />
                   Start

@@ -10,6 +10,7 @@ interface LiveMonitorProps {
   durationSec: number
   onAdvanceRound: () => void
   onEndSession: () => void
+  onRoundExpire: () => void
   sessionStatus: string
 }
 
@@ -21,6 +22,7 @@ export function LiveMonitor({
   durationSec,
   onAdvanceRound,
   onEndSession,
+  onRoundExpire,
   sessionStatus,
 }: LiveMonitorProps) {
   const roundResponses = responses.filter((r) => r.round === currentRound)
@@ -41,6 +43,7 @@ export function LiveMonitor({
           <Timer
             serverTimestamp={serverTimestamp}
             durationSec={durationSec}
+            onExpire={onRoundExpire}
             className="w-48"
           />
         )}

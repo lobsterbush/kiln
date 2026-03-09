@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -15,6 +15,7 @@ export function InstructorSession() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
+  const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -45,11 +46,14 @@ export function InstructorSession() {
     if (resps) setResponses(resps)
   }
 
-  // Listen for new participants and responses
+  // Listen for new participants and responses; set up persistent broadcast channel
   useEffect(() => {
     if (!id) return
 
-    const channel = supabase.channel(`instructor:${id}`)
+    // Persistent channel for broadcasting events to students
+    const bc = supabase.channel(`session:${id}`)
+    bc.subscribe()
+    broadcastChannelRef.current = bc
 
     // Listen for new participants via postgres changes
     const participantSub = supabase
@@ -77,7 +81,8 @@ export function InstructorSession() {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(bc)
+      broadcastChannelRef.current = null
       supabase.removeChannel(participantSub)
       supabase.removeChannel(responseSub)
     }
@@ -85,13 +90,19 @@ export function InstructorSession() {
 
   const broadcastEvent = useCallback(
     async (event: string, payload: Record<string, unknown>) => {
-      const channel = supabase.channel(`session:${id}`)
-      await channel.subscribe()
-      await channel.send({ type: 'broadcast', event, payload })
-      supabase.removeChannel(channel)
+      await broadcastChannelRef.current?.send({ type: 'broadcast', event, payload })
     },
-    [id]
+    []
   )
+
+  async function handleRoundExpire() {
+    if (!session) return
+    await supabase
+      .from('sessions')
+      .update({ status: 'between_rounds' })
+      .eq('id', session.id)
+    setSession((prev) => prev ? { ...prev, status: 'between_rounds' } : null)
+  }
 
   async function startSession() {
     if (!session || !activity) return
@@ -124,16 +135,6 @@ export function InstructorSession() {
 
     const now = new Date().toISOString()
 
-    // For peer critique: assign peers before starting next round
-    if (activity.type === 'peer_critique' && session.current_round >= 1) {
-      await assignPeers()
-    }
-
-    // For socratic chain: generate follow-ups
-    if (activity.type === 'socratic_chain') {
-      await generateFollowUps()
-    }
-
     await supabase
       .from('sessions')
       .update({ current_round: nextRound, round_started_at: now, status: 'active' })
@@ -147,12 +148,22 @@ export function InstructorSession() {
         : 'Respond to this specific criticism.'
       : 'Follow-up question will appear shortly.'
 
+    // Broadcast round:start first so students reset their UI state
     await broadcastEvent('round:start', {
       round: nextRound,
       duration_sec: activity.config.round_duration_sec,
       prompt,
       server_timestamp: now,
     })
+
+    // Then send per-student events after students have reset
+    if (activity.type === 'peer_critique' && session.current_round >= 1) {
+      await assignPeers()
+    }
+
+    if (activity.type === 'socratic_chain') {
+      await generateFollowUps()
+    }
   }
 
   async function assignPeers() {
@@ -187,27 +198,29 @@ export function InstructorSession() {
     if (!session) return
     const currentResponses = responses.filter((r) => r.round === session.current_round)
 
-    for (const response of currentResponses) {
-      try {
-        const { data } = await supabase.functions.invoke('generate-followup', {
-          body: {
-            response_id: response.id,
-            session_id: session.id,
-            participant_id: response.participant_id,
-            round: session.current_round,
-          },
-        })
-
-        if (data?.prompt) {
-          await broadcastEvent('followup:ready', {
-            participant_id: response.participant_id,
-            prompt: data.prompt,
+    await Promise.all(
+      currentResponses.map(async (response) => {
+        try {
+          const { data } = await supabase.functions.invoke('generate-followup', {
+            body: {
+              response_id: response.id,
+              session_id: session.id,
+              participant_id: response.participant_id,
+              round: session.current_round,
+            },
           })
+
+          if (data?.prompt) {
+            await broadcastEvent('followup:ready', {
+              participant_id: response.participant_id,
+              prompt: data.prompt,
+            })
+          }
+        } catch (err) {
+          console.error('Failed to generate follow-up:', err)
         }
-      } catch (err) {
-        console.error('Failed to generate follow-up:', err)
-      }
-    }
+      })
+    )
   }
 
   async function endSession() {
@@ -251,6 +264,7 @@ export function InstructorSession() {
       durationSec={activity.config.round_duration_sec}
       onAdvanceRound={advanceRound}
       onEndSession={endSession}
+      onRoundExpire={handleRoundExpire}
       sessionStatus={session.status}
     />
   )

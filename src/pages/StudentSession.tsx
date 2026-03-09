@@ -36,7 +36,19 @@ export function StudentSession() {
       .single()
     if (data) {
       setSession(data)
-      setActivity(data.activity as Activity)
+      const act = data.activity as Activity
+      setActivity(act)
+      // Reconstruct round state for students joining a session already in progress
+      if (data.status === 'active' && data.round_started_at) {
+        setRoundEvent({
+          round: data.current_round,
+          duration_sec: act.config.round_duration_sec,
+          prompt: data.current_round === 1
+            ? act.config.initial_prompt
+            : 'Session in progress — respond to the current prompt.',
+          server_timestamp: data.round_started_at,
+        })
+      }
     }
 
     const { data: parts } = await supabase
