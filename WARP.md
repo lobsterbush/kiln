@@ -1,6 +1,6 @@
 # Kiln
 
-**Status**: Active (Beta development)
+**Status**: Active (Launched)
 
 AI-resistant active learning platform for higher education classrooms.
 
