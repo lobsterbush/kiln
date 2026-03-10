@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getStudentToken } from '../lib/utils'
 import { SessionLobby } from '../components/shared/SessionLobby'
@@ -31,6 +32,21 @@ export function StudentSession() {
   const [previousResponse, setPreviousResponse] = useState('')
   const [waitingForNext, setWaitingForNext] = useState(false)
   const [followUpLoading, setFollowUpLoading] = useState(false)
+
+  // Restore response history from sessionStorage on mount (survives page refresh)
+  useEffect(() => {
+    if (!id) return
+    const stored = sessionStorage.getItem(`kiln_responses_${id}`)
+    if (stored) {
+      try { setMyResponses(JSON.parse(stored)) } catch {}
+    }
+  }, [id])
+
+  // Persist response history to sessionStorage whenever it changes
+  useEffect(() => {
+    if (!id || myResponses.length === 0) return
+    sessionStorage.setItem(`kiln_responses_${id}`, JSON.stringify(myResponses))
+  }, [myResponses, id])
 
   // Load session data
   useEffect(() => {
@@ -206,6 +222,18 @@ export function StudentSession() {
 
   // Active round
   if (roundEvent) {
+    // Peer critique round 2+: waiting for the peer:assigned broadcast to arrive
+    if (activity.type === 'peer_critique' && roundEvent.round > 1 && !peerResponse) {
+      return (
+        <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">
+          <div className="p-4 bg-blue-50 rounded-2xl">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          </div>
+          <p className="text-sm text-slate-500 font-medium">Receiving your peer assignment…</p>
+        </div>
+      )
+    }
+
     // Peer critique: show peer's response
     if (peerResponse && activity.type === 'peer_critique') {
       return (

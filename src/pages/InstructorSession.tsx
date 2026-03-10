@@ -29,35 +29,26 @@ export function InstructorSession() {
   }, [id, user])
 
   async function loadSession() {
-    const { data } = await supabase
-      .from('sessions')
-      .select('*, activity:activities(*)')
-      .eq('id', id)
-      .eq('instructor_id', user!.id)
-      .single()
-    if (!data) {
+    const [sessResult, partsResult, respsResult] = await Promise.all([
+      supabase.from('sessions').select('*, activity:activities(*)')
+        .eq('id', id).eq('instructor_id', user!.id).single(),
+      supabase.from('participants').select('*').eq('session_id', id!),
+      supabase.from('responses').select('*').eq('session_id', id!),
+    ])
+
+    if (!sessResult.data) {
       navigate('/instructor')
       return
     }
-    setSession(data)
-    const act = data.activity as Activity
+    setSession(sessResult.data)
+    const act = sessResult.data.activity as Activity
     setActivity(act)
     // Reconstruct prompt for active round 1 on page reload
-    if (data.status === 'active' && data.current_round === 1) {
+    if (sessResult.data.status === 'active' && sessResult.data.current_round === 1) {
       setCurrentPrompt(act.config.initial_prompt)
     }
-
-    const { data: parts } = await supabase
-      .from('participants')
-      .select('*')
-      .eq('session_id', id!)
-    if (parts) setParticipants(parts)
-
-    const { data: resps } = await supabase
-      .from('responses')
-      .select('*')
-      .eq('session_id', id!)
-    if (resps) setResponses(resps)
+    if (partsResult.data) setParticipants(partsResult.data)
+    if (respsResult.data) setResponses(respsResult.data)
   }
 
   // Listen for new participants and responses; set up persistent broadcast channel
@@ -317,6 +308,7 @@ export function InstructorSession() {
       responses={responses}
       currentRound={session.current_round}
       roundPrompt={currentPrompt}
+      joinCode={session.join_code}
       serverTimestamp={session.round_started_at}
       durationSec={activity.config.round_duration_sec}
       onAdvanceRound={advanceRound}

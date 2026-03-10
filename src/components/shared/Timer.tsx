@@ -18,6 +18,9 @@ export function Timer({ serverTimestamp, durationSec, onExpire, className }: Tim
       Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
     ))
   )
+  // Guard: onExpire must fire at most once per round even if the effect re-runs
+  // (e.g. when onExpire reference changes due to parent re-renders from keystroke state)
+  const firedRef = useRef(false)
 
   const [remaining, setRemaining] = useState(initialRemainingRef.current)
 
@@ -27,6 +30,7 @@ export function Timer({ serverTimestamp, durationSec, onExpire, className }: Tim
     initialRemainingRef.current = Math.max(0, Math.min(durationSec,
       Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
     ))
+    firedRef.current = false
     setRemaining(initialRemainingRef.current)
   }, [serverTimestamp, durationSec])
 
@@ -37,7 +41,10 @@ export function Timer({ serverTimestamp, durationSec, onExpire, className }: Tim
       setRemaining(r)
       if (r <= 0) {
         clearInterval(interval)
-        onExpire?.()
+        if (!firedRef.current) {
+          firedRef.current = true
+          onExpire?.()
+        }
       }
     }, 250)
 
