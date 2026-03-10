@@ -91,7 +91,7 @@ export interface PeerAssignedEvent {
 
 export interface FollowUpReadyEvent {
   participant_id: string
-  follow_up: FollowUp
+  prompt: string
 }
 
 // Student auth stored in localStorage

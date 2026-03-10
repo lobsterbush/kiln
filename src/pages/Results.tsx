@@ -96,6 +96,7 @@ export function Results() {
   }
 
   // Group responses by participant, with peer context inline
+  // Filter out participants who never submitted (e.g. joined then left)
   const byParticipant = participants.map((p) => {
     const chain = responses
       .filter((r) => r.participant_id === p.id)
@@ -121,7 +122,7 @@ export function Results() {
     })
 
     return { participant: p, chain: withContext }
-  })
+  }).filter(({ chain }) => chain.length > 0)
 
   return (
     <div className="flex flex-col gap-6">
@@ -144,6 +145,14 @@ export function Results() {
         </button>
       </div>
 
+      {byParticipant.length === 0 && (
+        <p className="text-slate-400 text-sm text-center py-10">No responses were submitted this session.</p>
+      )}
+      {participants.length > byParticipant.length && byParticipant.length > 0 && (
+        <p className="text-xs text-slate-400">
+          {participants.length - byParticipant.length} participant{participants.length - byParticipant.length !== 1 ? 's' : ''} joined but did not submit.
+        </p>
+      )}
       <div className="flex flex-col gap-4 stagger-children">
         {byParticipant.map(({ participant, chain }) => (
           <div key={participant.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">

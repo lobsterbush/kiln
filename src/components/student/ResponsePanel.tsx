@@ -81,7 +81,7 @@ export function ResponsePanel({
 
             <div className="flex items-center justify-between mt-4">
               <span className="text-xs text-slate-400 font-medium">
-                {content.length} characters
+                {content.trim() ? content.trim().split(/\s+/).length : 0} {content.trim().split(/\s+/).length === 1 && content.trim() ? 'word' : 'words'}
               </span>
               <button
                 onClick={handleSubmit}

@@ -6,6 +6,7 @@ interface LiveMonitorProps {
   participants: Participant[]
   responses: Response[]
   currentRound: number
+  roundPrompt?: string
   serverTimestamp: string | null
   durationSec: number
   onAdvanceRound: () => void
@@ -18,6 +19,7 @@ export function LiveMonitor({
   participants,
   responses,
   currentRound,
+  roundPrompt,
   serverTimestamp,
   durationSec,
   onAdvanceRound,
@@ -32,11 +34,14 @@ export function LiveMonitor({
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h2 className="text-xl font-bold text-slate-900">Round {currentRound}</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             <span className="font-semibold text-kiln-600">{submittedCount}</span>/{totalCount} submitted
           </p>
+          {roundPrompt && (
+            <p className="text-xs text-slate-400 mt-1.5 max-w-sm line-clamp-2 italic">{roundPrompt}</p>
+          )}
         </div>
 
         {serverTimestamp && (

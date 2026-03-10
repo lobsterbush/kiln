@@ -56,6 +56,7 @@ export function InstructorDashboard() {
       .from('activities')
       .delete()
       .eq('id', activityId)
+      .eq('instructor_id', user!.id)
     if (error) {
       setSessionError('Could not delete — this activity may have associated sessions.')
       setConfirmDelete(null)

@@ -50,6 +50,10 @@ export function StudentSession() {
           server_timestamp: data.round_started_at,
         })
       }
+      // Show correct waiting message for students who load during a break between rounds
+      if (data.status === 'between_rounds') {
+        setWaitingForNext(true)
+      }
     }
 
     const { data: parts } = await supabase

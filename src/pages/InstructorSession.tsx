@@ -15,6 +15,7 @@ export function InstructorSession() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
+  const [currentPrompt, setCurrentPrompt] = useState('')
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
@@ -31,10 +32,18 @@ export function InstructorSession() {
       .from('sessions')
       .select('*, activity:activities(*)')
       .eq('id', id)
+      .eq('instructor_id', user!.id)
       .single()
-    if (data) {
-      setSession(data)
-      setActivity(data.activity as Activity)
+    if (!data) {
+      navigate('/instructor')
+      return
+    }
+    setSession(data)
+    const act = data.activity as Activity
+    setActivity(act)
+    // Reconstruct prompt for active round 1 on page reload
+    if (data.status === 'active' && data.current_round === 1) {
+      setCurrentPrompt(act.config.initial_prompt)
     }
 
     const { data: parts } = await supabase
@@ -117,13 +126,15 @@ export function InstructorSession() {
       .update({ status: 'active', current_round: 1, round_started_at: now })
       .eq('id', session.id)
 
+    const prompt = customPrompt ?? activity.config.initial_prompt
     setSession((prev) => prev ? { ...prev, status: 'active', current_round: 1, round_started_at: now } : null)
+    setCurrentPrompt(prompt)
 
     await broadcastEvent('session:status', { status: 'active' })
     await broadcastEvent('round:start', {
       round: 1,
       duration_sec: activity.config.round_duration_sec,
-      prompt: customPrompt ?? activity.config.initial_prompt,
+      prompt,
       server_timestamp: now,
     })
   }
@@ -155,20 +166,22 @@ export function InstructorSession() {
     if (activity.type === 'peer_critique') {
       if (nextRound === 2) {
         const prompt = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+        setCurrentPrompt(prompt)
         await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
         await assignPeers(currentResponses, session.current_round)
       } else if (nextRound === 3) {
         const prompt = 'Below is a peer\'s critique of your original argument. Write a rebuttal defending your position.'
+        setCurrentPrompt(prompt)
         await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
         await assignRebuttals(currentResponses, session.current_round)
       } else {
-        // Rounds 4+ should not normally be reached with peer critique;
-        // broadcast a generic independent response round as a safe fallback.
         const prompt = 'Continue developing your argument based on the discussion so far.'
+        setCurrentPrompt(prompt)
         await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
       }
     } else if (activity.type === 'socratic_chain') {
       const prompt = 'Your personalised follow-up question is being generated…'
+      setCurrentPrompt(prompt)
       await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
       await generateFollowUps(currentResponses, session.current_round)
     }
@@ -295,6 +308,7 @@ export function InstructorSession() {
       participants={participants}
       responses={responses}
       currentRound={session.current_round}
+      roundPrompt={currentPrompt}
       serverTimestamp={session.round_started_at}
       durationSec={activity.config.round_duration_sec}
       onAdvanceRound={advanceRound}
