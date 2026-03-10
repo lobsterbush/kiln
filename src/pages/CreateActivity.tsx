@@ -65,6 +65,8 @@ export function CreateActivity() {
   const [rounds, setRounds] = useState(3)
   const [duration, setDuration] = useState(90)
   const [objectives, setObjectives] = useState('')
+  const [critiquePrompt, setCritiquePrompt] = useState('')
+  const [rebuttalPrompt, setRebuttalPrompt] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -90,6 +92,8 @@ export function CreateActivity() {
           .split('\n')
           .map((s) => s.trim())
           .filter(Boolean),
+        ...(type === 'peer_critique' && critiquePrompt.trim() && { critique_prompt: critiquePrompt.trim() }),
+        ...(type === 'peer_critique' && rebuttalPrompt.trim() && { rebuttal_prompt: rebuttalPrompt.trim() }),
       },
     })
 
@@ -222,6 +226,35 @@ export function CreateActivity() {
               className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
             />
           </div>
+        )}
+
+        {type === 'peer_critique' && (
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Critique Prompt{' '}
+                <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+              </label>
+              <textarea
+                value={critiquePrompt}
+                onChange={(e) => setCritiquePrompt(e.target.value)}
+                placeholder="Read the argument below carefully. Identify its weakest assumption or unsupported claim."
+                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Rebuttal Prompt{' '}
+                <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+              </label>
+              <textarea
+                value={rebuttalPrompt}
+                onChange={(e) => setRebuttalPrompt(e.target.value)}
+                placeholder="Below is a peer's critique of your original argument. Write a rebuttal defending your position."
+                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+              />
+            </div>
+          </>
         )}
 
         <div className="grid grid-cols-2 gap-4">

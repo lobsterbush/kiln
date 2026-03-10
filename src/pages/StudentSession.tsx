@@ -108,9 +108,6 @@ export function StudentSession() {
         setWaitingForNext(false)
         setFollowUpLoading(false)
       })
-      .on('broadcast', { event: 'round:end' }, () => {
-        setWaitingForNext(true)
-      })
       .on('broadcast', { event: 'peer:assigned' }, ({ payload }) => {
         if (payload.participant_id === studentToken.participant_id) {
           setPeerResponse({ content: payload.response_content, name: payload.author_name })
@@ -131,8 +128,18 @@ export function StudentSession() {
           setRoundEvent(null)
         }
       })
-      .on('broadcast', { event: 'participant:joined' }, () => {
-        loadSession()
+      .on('broadcast', { event: 'participant:joined' }, ({ payload }) => {
+        setParticipants((prev) => {
+          if (prev.some((p) => p.id === payload.participant_id)) return prev
+          return [...prev, {
+            id: payload.participant_id,
+            display_name: payload.display_name,
+            session_id: id!,
+            token: '',
+            joined_at: new Date().toISOString(),
+            is_active: true,
+          }]
+        })
       })
       .subscribe()
 

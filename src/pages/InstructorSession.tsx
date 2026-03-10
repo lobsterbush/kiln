@@ -6,6 +6,9 @@ import { SessionLobby } from '../components/shared/SessionLobby'
 import { LiveMonitor } from '../components/instructor/LiveMonitor'
 import type { Session, Activity, Participant, Response as KilnResponse } from '../lib/types'
 
+const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
+
 export function InstructorSession() {
   const { id } = useParams<{ id: string }>()
   const { user, loading: authLoading } = useAuth()
@@ -17,6 +20,7 @@ export function InstructorSession() {
   const [responses, setResponses] = useState<KilnResponse[]>([])
   const [currentPrompt, setCurrentPrompt] = useState('')
   const [advancing, setAdvancing] = useState(false)
+  const [peerWarning, setPeerWarning] = useState<string | null>(null)
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
@@ -144,60 +148,60 @@ export function InstructorSession() {
 
   async function advanceRound() {
     if (advancing || !session || !activity) return
+    setPeerWarning(null)
     setAdvancing(true)
     try {
-
-    const nextRound = session.current_round + 1
-    if (nextRound > activity.config.rounds) {
-      await endSession()
-      return
-    }
-
-    // Fetch fresh responses from DB to avoid stale state race condition
-    const { data: freshResponses } = await supabase
-      .from('responses')
-      .select('*')
-      .eq('session_id', session.id)
-      .eq('round', session.current_round)
-    const currentResponses = freshResponses ?? []
-
-    const now = new Date().toISOString()
-    await supabase
-      .from('sessions')
-      .update({ current_round: nextRound, round_started_at: now, status: 'active' })
-      .eq('id', session.id)
-    setSession((prev) => prev ? { ...prev, current_round: nextRound, round_started_at: now, status: 'active' } : null)
-
-    if (activity.type === 'peer_critique') {
-      if (nextRound === 2) {
-        const prompt = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
-        setCurrentPrompt(prompt)
-        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
-        await assignPeers(currentResponses, session.current_round)
-      } else if (nextRound === 3) {
-        const prompt = 'Below is a peer\'s critique of your original argument. Write a rebuttal defending your position.'
-        setCurrentPrompt(prompt)
-        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
-        await assignRebuttals(currentResponses, session.current_round)
-      } else {
-        const prompt = 'Continue developing your argument based on the discussion so far.'
-        setCurrentPrompt(prompt)
-        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+      const nextRound = session.current_round + 1
+      if (nextRound > activity.config.rounds) {
+        await doEndSession()
+        return
       }
-    } else if (activity.type === 'socratic_chain') {
-      const prompt = 'Your personalised follow-up question is being generated…'
-      setCurrentPrompt(prompt)
-      await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
-      await generateFollowUps(currentResponses, session.current_round)
-    }
 
+      // Fetch fresh responses from DB to avoid stale state race condition
+      const { data: freshResponses } = await supabase
+        .from('responses')
+        .select('*')
+        .eq('session_id', session.id)
+        .eq('round', session.current_round)
+      const currentResponses = freshResponses ?? []
+
+      const now = new Date().toISOString()
+      await supabase
+        .from('sessions')
+        .update({ current_round: nextRound, round_started_at: now, status: 'active' })
+        .eq('id', session.id)
+      setSession((prev) => prev ? { ...prev, current_round: nextRound, round_started_at: now, status: 'active' } : null)
+
+      if (activity.type === 'peer_critique') {
+        if (nextRound === 2) {
+          const prompt = activity.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT
+          setCurrentPrompt(prompt)
+          await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+          const ok = await assignPeers(currentResponses, session.current_round)
+          if (!ok) setPeerWarning('Peer assignment skipped — fewer than 2 students submitted. Students will see a waiting screen.')
+        } else if (nextRound === 3) {
+          const prompt = activity.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT
+          setCurrentPrompt(prompt)
+          await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+          await assignRebuttals(currentResponses, session.current_round)
+        } else {
+          const prompt = 'Continue developing your argument based on the discussion so far.'
+          setCurrentPrompt(prompt)
+          await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+        }
+      } else if (activity.type === 'socratic_chain') {
+        const prompt = 'Your personalised follow-up question is being generated…'
+        setCurrentPrompt(prompt)
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+        await generateFollowUps(currentResponses, session.current_round)
+      }
     } finally {
       setAdvancing(false)
     }
   }
 
-  async function assignPeers(currentResponses: KilnResponse[], fromRound: number) {
-    if (!session || currentResponses.length < 2) return
+  async function assignPeers(currentResponses: KilnResponse[], fromRound: number): Promise<boolean> {
+    if (!session || currentResponses.length < 2) return false
     const shuffled = [...currentResponses].sort(() => Math.random() - 0.5)
 
     // Bulk insert all assignments in one round trip
@@ -224,6 +228,7 @@ export function InstructorSession() {
         response_type: 'critique',
       })
     }
+    return true
   }
 
   async function assignRebuttals(critiqueResponses: KilnResponse[], fromRound: number) {
@@ -275,16 +280,25 @@ export function InstructorSession() {
     )
   }
 
-  async function endSession() {
+  async function doEndSession() {
     if (!session) return
-    setAdvancing(true)
     await supabase
       .from('sessions')
       .update({ status: 'completed' })
       .eq('id', session.id)
-
     await broadcastEvent('session:status', { status: 'completed' })
     navigate(`/instructor/results/${session.id}`)
+  }
+
+  async function endSession() {
+    if (advancing || !session) return
+    setAdvancing(true)
+    try {
+      await doEndSession()
+    } finally {
+      // Re-enables button on error; harmless if component navigates away
+      setAdvancing(false)
+    }
   }
 
 
@@ -327,6 +341,8 @@ export function InstructorSession() {
       onRoundExpire={handleRoundExpire}
       sessionStatus={session.status}
       isAdvancing={advancing}
+      peerWarning={peerWarning}
+      onDismissPeerWarning={() => setPeerWarning(null)}
     />
   )
 }

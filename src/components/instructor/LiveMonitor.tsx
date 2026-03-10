@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Timer } from '../shared/Timer'
 import type { Response, Participant } from '../../lib/types'
 import { cn } from '../../lib/utils'
@@ -15,6 +16,8 @@ interface LiveMonitorProps {
   onRoundExpire: () => void
   sessionStatus: string
   isAdvancing?: boolean
+  peerWarning?: string | null
+  onDismissPeerWarning?: () => void
 }
 
 export function LiveMonitor({
@@ -30,7 +33,10 @@ export function LiveMonitor({
   onRoundExpire,
   sessionStatus,
   isAdvancing = false,
+  peerWarning,
+  onDismissPeerWarning,
 }: LiveMonitorProps) {
+  const [confirmingEnd, setConfirmingEnd] = useState(false)
   const roundResponses = responses.filter((r) => r.round === currentRound)
   const submittedCount = roundResponses.length
   const totalCount = participants.length
@@ -75,6 +81,20 @@ export function LiveMonitor({
         </div>
       </div>
 
+      {/* Peer assignment warning */}
+      {peerWarning && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+          <span className="flex-1">{peerWarning}</span>
+          <button
+            onClick={onDismissPeerWarning}
+            className="text-amber-400 hover:text-amber-600 font-bold text-base leading-none"
+            aria-label="Dismiss warning"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Response grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 stagger-children">
         {participants.map((p) => {
@@ -110,14 +130,32 @@ export function LiveMonitor({
       </div>
 
       {/* Controls */}
-      <div className="flex gap-3 justify-end">
-        <button
-          onClick={onEndSession}
-          disabled={isAdvancing}
-          className="px-6 py-2.5 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          End Session
-        </button>
+      <div className="flex gap-3 justify-end items-center">
+        {confirmingEnd ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">End session?</span>
+            <button
+              onClick={() => setConfirmingEnd(false)}
+              className="px-4 py-2 text-sm bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { setConfirmingEnd(false); onEndSession() }}
+              className="px-4 py-2 text-sm bg-red-100 text-red-700 font-medium rounded-xl hover:bg-red-200 transition-colors"
+            >
+              Yes, end
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmingEnd(true)}
+            disabled={isAdvancing}
+            className="px-6 py-2.5 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            End Session
+          </button>
+        )}
         <button
           onClick={onAdvanceRound}
           disabled={isAdvancing}

@@ -15,6 +15,8 @@ export function EditActivity() {
   const [rounds, setRounds] = useState(3)
   const [duration, setDuration] = useState(90)
   const [objectives, setObjectives] = useState('')
+  const [critiquePrompt, setCritiquePrompt] = useState('')
+  const [rebuttalPrompt, setRebuttalPrompt] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -41,6 +43,8 @@ export function EditActivity() {
       setRounds(data.config.rounds)
       setDuration(data.config.round_duration_sec)
       setObjectives(data.config.learning_objectives?.join('\n') ?? '')
+      setCritiquePrompt(data.config.critique_prompt ?? '')
+      setRebuttalPrompt(data.config.rebuttal_prompt ?? '')
     }
   }
 
@@ -55,7 +59,7 @@ export function EditActivity() {
       .update({
         title: title.trim(),
         config: {
-          ...activity.config,
+        ...activity.config,
           initial_prompt: prompt.trim(),
           rounds,
           round_duration_sec: duration,
@@ -63,6 +67,8 @@ export function EditActivity() {
             .split('\n')
             .map((s) => s.trim())
             .filter(Boolean),
+          critique_prompt: critiquePrompt.trim() || null,
+          rebuttal_prompt: rebuttalPrompt.trim() || null,
         },
       })
       .eq('id', id)
@@ -132,6 +138,35 @@ export function EditActivity() {
               className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
             />
           </div>
+        )}
+
+        {activity.type === 'peer_critique' && (
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Critique Prompt{' '}
+                <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+              </label>
+              <textarea
+                value={critiquePrompt}
+                onChange={(e) => setCritiquePrompt(e.target.value)}
+                placeholder="Read the argument below carefully. Identify its weakest assumption or unsupported claim."
+                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Rebuttal Prompt{' '}
+                <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+              </label>
+              <textarea
+                value={rebuttalPrompt}
+                onChange={(e) => setRebuttalPrompt(e.target.value)}
+                placeholder="Below is a peer's critique of your original argument. Write a rebuttal defending your position."
+                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+              />
+            </div>
+          </>
         )}
 
         <div className="grid grid-cols-2 gap-4">

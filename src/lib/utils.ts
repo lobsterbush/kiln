@@ -2,14 +2,13 @@ import type { StudentToken } from './types'
 
 const STUDENT_TOKEN_KEY = 'kiln_student_token'
 
-/** Generate a 6-character uppercase alphanumeric join code */
+/** Generate a 6-character uppercase alphanumeric join code using cryptographic randomness */
 export function generateJoinCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no I, O, 0, 1
-  let code = ''
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return code
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no I, O, 0, 1 — 32 chars
+  const bytes = new Uint8Array(6)
+  crypto.getRandomValues(bytes)
+  // 256 is exactly divisible by 32, so no modulo bias
+  return Array.from(bytes).map((b) => chars[b % chars.length]).join('')
 }
 
 /** Generate a UUID-like token for student auth */
