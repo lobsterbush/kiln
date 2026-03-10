@@ -78,6 +78,14 @@ export function InstructorDashboard() {
     setLoadingActivities(false)
   }
 
+  async function handleGoogleSignIn() {
+    setAuthError(null)
+    const { error } = await signInWithGoogle()
+    if (error) {
+      setAuthError('Google sign-in failed. Make sure Google is enabled in your Supabase project and this site\'s URL is in the allowed redirect list.')
+    }
+  }
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
     setAuthError(null)
@@ -139,7 +147,7 @@ export function InstructorDashboard() {
           ) : (
             <div className="flex flex-col gap-5">
               <button
-                onClick={signInWithGoogle}
+                onClick={handleGoogleSignIn}
                 className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-slate-200 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all font-medium text-slate-700"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

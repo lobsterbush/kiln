@@ -21,6 +21,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // GitHub Pages SPA: restore URL path encoded by 404.html so Supabase OAuth redirects work.
+      // 404.html converts /kiln/instructor?code=x to /kiln/?/instructor&code=x
+      // This script converts it back before the app boots.
+      ;(function () {
+        var q = window.location.search
+        if (q && q[1] === '/') {
+          var parts = q.slice(1).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&')
+          })
+          window.history.replaceState(
+            null, null,
+            window.location.pathname.replace(/\/$/, '') + parts.join('?') + window.location.hash
+          )
+        }
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
