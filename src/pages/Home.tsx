@@ -65,10 +65,11 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col -mt-8">
+    <div className="flex flex-col">
 
       {/* ═══ HERO: full viewport, two-column ═══ */}
-      <section className="min-h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row items-center gap-12 lg:gap-16 px-4 py-16 bg-gradient-to-br from-kiln-50 via-white to-white">
+      <section className="min-h-[calc(100vh-3.5rem)] w-full bg-gradient-to-br from-kiln-50 via-white to-white">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16 h-full flex flex-col lg:flex-row items-center gap-12 lg:gap-16 min-h-[calc(100vh-3.5rem)]">
         {/* Left: copy + CTAs */}
         <div className="flex-1 flex flex-col gap-8 animate-fade-in max-w-xl">
           <div>
@@ -131,11 +132,12 @@ export function Home() {
           </p>
           <LivePreview />
         </div>
+        </div>
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="-mx-4 bg-slate-900 px-4 py-24">
-        <div className="max-w-5xl mx-auto">
+      <section className="w-full bg-slate-900 py-24">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-white mb-3">Up and running in 60 seconds</h2>
             <p className="text-slate-400">No student accounts. No downloads. Nothing to install.</p>
@@ -157,9 +159,9 @@ export function Home() {
         </div>
       </section>
 
-      {/* ═══ WHAT YOU’RE SIGNING UP FOR ═══ */}
-      <section className="px-4 py-24">
-        <div className="max-w-5xl mx-auto">
+      {/* ═══ WHAT YOU'RE SIGNING UP FOR ═══ */}
+      <section className="w-full py-24">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Two activity types. Zero passengers.</h2>
             <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
@@ -235,8 +237,8 @@ export function Home() {
       </section>
 
       {/* ═══ WHY KILN ═══ */}
-      <section className="-mx-4 bg-kiln-50 px-4 py-20">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+      <section className="w-full bg-kiln-50 py-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-10">
           {[
             { icon: BarChart3, title: 'See every mind at work', body: 'Watch responses appear live. Know who’s engaged — and read what they actually think — before class ends.' },
             { icon: Users, title: 'No free riders', body: 'Structured timed rounds mean everyone writes. Peer assignments are random. There’s nowhere to hide.' },
@@ -254,8 +256,8 @@ export function Home() {
       </section>
 
       {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="px-4 py-24">
-        <div className="max-w-3xl mx-auto">
+      <section id="pricing" className="w-full py-24">
+        <div className="max-w-3xl mx-auto px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-slate-900 text-center mb-2">Simple pricing</h2>
           <p className="text-slate-500 text-center mb-12">Free while in beta. No credit card needed.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

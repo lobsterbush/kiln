@@ -1,15 +1,17 @@
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Flame } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { ErrorBoundary } from './ErrorBoundary'
 
 export function Layout() {
   const { user, loading } = useAuth()
+  const location = useLocation()
+  const isHome = location.pathname === '/'
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="p-1.5 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-lg shadow-sm group-hover:shadow-md group-hover:shadow-kiln-200 transition-all">
               <Flame className="w-4 h-4 text-white" />
@@ -34,13 +36,13 @@ export function Layout() {
           </nav>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 py-8 w-full flex-1">
+      <main className={`flex-1 w-full${isHome ? '' : ' max-w-5xl mx-auto px-4 py-8'}`}>
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>
       </main>
       <footer className="border-t border-slate-200/60 py-6">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-400">Kiln — Where thinking hardens</p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
             <a
