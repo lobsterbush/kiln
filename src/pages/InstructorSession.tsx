@@ -28,6 +28,13 @@ export function InstructorSession() {
     loadSession()
   }, [id, user])
 
+  // Navigate to results once session completes (avoids calling navigate() during render)
+  useEffect(() => {
+    if (session?.status === 'completed' && session.id) {
+      navigate(`/instructor/results/${session.id}`)
+    }
+  }, [session?.status, session?.id, navigate])
+
   async function loadSession() {
     const [sessResult, partsResult, respsResult] = await Promise.all([
       supabase.from('sessions').select('*, activity:activities(*)')
@@ -110,25 +117,29 @@ export function InstructorSession() {
   }
 
   async function startSession(customPrompt?: string) {
-    if (!session || !activity) return
+    if (advancing || !session || !activity) return
+    setAdvancing(true)
+    try {
+      const now = new Date().toISOString()
+      await supabase
+        .from('sessions')
+        .update({ status: 'active', current_round: 1, round_started_at: now })
+        .eq('id', session.id)
 
-    const now = new Date().toISOString()
-    await supabase
-      .from('sessions')
-      .update({ status: 'active', current_round: 1, round_started_at: now })
-      .eq('id', session.id)
+      const prompt = customPrompt ?? activity.config.initial_prompt
+      setSession((prev) => prev ? { ...prev, status: 'active', current_round: 1, round_started_at: now } : null)
+      setCurrentPrompt(prompt)
 
-    const prompt = customPrompt ?? activity.config.initial_prompt
-    setSession((prev) => prev ? { ...prev, status: 'active', current_round: 1, round_started_at: now } : null)
-    setCurrentPrompt(prompt)
-
-    await broadcastEvent('session:status', { status: 'active' })
-    await broadcastEvent('round:start', {
-      round: 1,
-      duration_sec: activity.config.round_duration_sec,
-      prompt,
-      server_timestamp: now,
-    })
+      await broadcastEvent('session:status', { status: 'active' })
+      await broadcastEvent('round:start', {
+        round: 1,
+        duration_sec: activity.config.round_duration_sec,
+        prompt,
+        server_timestamp: now,
+      })
+    } finally {
+      setAdvancing(false)
+    }
   }
 
   async function advanceRound() {
@@ -293,13 +304,13 @@ export function InstructorSession() {
         isInstructor={true}
         onStart={startSession}
         initialPrompt={activity.config.initial_prompt}
+        isStarting={advancing}
       />
     )
   }
 
   if (session.status === 'completed') {
-    navigate(`/instructor/results/${session.id}`)
-    return null
+    return null  // useEffect handles the navigate
   }
 
   return (

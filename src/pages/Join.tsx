@@ -29,6 +29,19 @@ export function Join() {
       return
     }
 
+    // Duplicate name check (case-insensitive)
+    const { data: existingParticipants } = await supabase
+      .from('participants')
+      .select('display_name')
+      .eq('session_id', session.id)
+    const nameTaken = existingParticipants?.some(
+      (p) => p.display_name.toLowerCase() === name.trim().toLowerCase()
+    )
+    if (nameTaken) {
+      setError(`"${name.trim()}" is already taken in this session. Please use a different name.`)
+      return
+    }
+
     // Create participant
     const token = generateToken()
     const { data: participant, error: participantError } = await supabase

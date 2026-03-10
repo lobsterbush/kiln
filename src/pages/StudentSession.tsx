@@ -38,7 +38,12 @@ export function StudentSession() {
     if (!id) return
     const stored = sessionStorage.getItem(`kiln_responses_${id}`)
     if (stored) {
-      try { setMyResponses(JSON.parse(stored)) } catch {}
+      try {
+        const saved = JSON.parse(stored) as { round: number; prompt: string; content: string }[]
+        setMyResponses(saved)
+        // Restore last response for Socratic chain follow-up context
+        if (saved.length > 0) setPreviousResponse(saved[saved.length - 1].content)
+      } catch {}
     }
   }, [id])
 

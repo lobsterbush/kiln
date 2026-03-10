@@ -8,9 +8,10 @@ interface SessionLobbyProps {
   isInstructor: boolean
   onStart?: (customPrompt?: string) => void
   initialPrompt?: string
+  isStarting?: boolean
 }
 
-export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt }: SessionLobbyProps) {
+export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt, isStarting = false }: SessionLobbyProps) {
   const [customPrompt, setCustomPrompt] = useState(initialPrompt ?? '')
 
   return (
@@ -67,10 +68,10 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
           )}
           <button
             onClick={() => onStart?.(customPrompt.trim() || undefined)}
-            disabled={participants.length < 1}
+            disabled={participants.length < 1 || isStarting}
             className="px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 hover:shadow-lg hover:shadow-kiln-300 active:scale-95 text-lg"
           >
-            Start Session
+            {isStarting ? 'Starting…' : 'Start Session'}
           </button>
         </>
       )}

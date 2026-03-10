@@ -95,6 +95,13 @@ export function Results() {
     return <div className="flex justify-center py-20 text-slate-500">Loading results...</div>
   }
 
+  const TYPE_LABELS: Record<string, string> = {
+    initial: 'Initial',
+    critique: 'Critique',
+    rebuttal: 'Rebuttal',
+    followup_answer: 'Follow-up',
+  }
+
   // Group responses by participant, with peer context inline
   // Filter out participants who never submitted (e.g. joined then left)
   const byParticipant = participants.map((p) => {
@@ -170,7 +177,7 @@ export function Results() {
                   </div>
                   <div className="flex-1 pb-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-slate-400 capitalize">{r.response_type.replace('_', ' ')}</span>
+                      <span className="text-xs text-slate-400">{TYPE_LABELS[r.response_type] ?? r.response_type}</span>
                       {r.context && (
                         <span className="text-xs text-kiln-500 font-medium">{r.context}</span>
                       )}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -52,8 +52,12 @@ const SOCRATIC_CHAIN_TEMPLATES: Template[] = [
 ]
 
 export function CreateActivity() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate('/instructor')
+  }, [user, authLoading, navigate])
 
   const [type, setType] = useState<ActivityType | null>(null)
   const [title, setTitle] = useState('')
@@ -63,6 +67,10 @@ export function CreateActivity() {
   const [objectives, setObjectives] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+
+  if (authLoading) {
+    return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
