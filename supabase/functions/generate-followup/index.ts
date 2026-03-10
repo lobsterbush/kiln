@@ -30,6 +30,14 @@ Deno.serve(async (req) => {
   try {
     const { response_id, session_id, participant_id, round } = await req.json()
 
+    // Validate required fields
+    if (!response_id || !session_id || !participant_id || round == null) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -96,6 +104,9 @@ Deno.serve(async (req) => {
     })
 
     const claudeData = await claudeResponse.json()
+    if (!claudeResponse.ok) {
+      console.error('Claude API error:', claudeResponse.status, JSON.stringify(claudeData))
+    }
     const followUpPrompt = claudeData.content?.[0]?.text ?? 'Can you elaborate on your reasoning?'
 
     // Save to database

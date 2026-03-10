@@ -16,6 +16,7 @@ export function InstructorSession() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
   const [currentPrompt, setCurrentPrompt] = useState('')
+  const [advancing, setAdvancing] = useState(false)
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
@@ -140,7 +141,9 @@ export function InstructorSession() {
   }
 
   async function advanceRound() {
-    if (!session || !activity) return
+    if (advancing || !session || !activity) return
+    setAdvancing(true)
+    try {
 
     const nextRound = session.current_round + 1
     if (nextRound > activity.config.rounds) {
@@ -184,6 +187,10 @@ export function InstructorSession() {
       setCurrentPrompt(prompt)
       await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
       await generateFollowUps(currentResponses, session.current_round)
+    }
+
+    } finally {
+      setAdvancing(false)
     }
   }
 
@@ -268,6 +275,7 @@ export function InstructorSession() {
 
   async function endSession() {
     if (!session) return
+    setAdvancing(true)
     await supabase
       .from('sessions')
       .update({ status: 'completed' })
@@ -315,6 +323,7 @@ export function InstructorSession() {
       onEndSession={endSession}
       onRoundExpire={handleRoundExpire}
       sessionStatus={session.status}
+      isAdvancing={advancing}
     />
   )
 }

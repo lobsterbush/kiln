@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getStudentToken } from '../lib/utils'
 import { SessionLobby } from '../components/shared/SessionLobby'
@@ -10,7 +10,15 @@ import type { Session, Participant, Activity, RoundStartEvent } from '../lib/typ
 
 export function StudentSession() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const studentToken = getStudentToken()
+
+  // Redirect to join if there is no token or if it belongs to a different session
+  useEffect(() => {
+    if (!studentToken || studentToken.session_id !== id) {
+      navigate('/join', { replace: true })
+    }
+  }, [])
 
   const [session, setSession] = useState<Session | null>(null)
   const [activity, setActivity] = useState<Activity | null>(null)
@@ -50,8 +58,8 @@ export function StudentSession() {
           server_timestamp: data.round_started_at,
         })
       }
-      // Show correct waiting message for students who load during a break between rounds
-      if (data.status === 'between_rounds') {
+      // Show correct waiting message for students who load mid-session (round 2+ or between rounds)
+      if (data.status === 'between_rounds' || (data.status === 'active' && data.current_round > 1)) {
         setWaitingForNext(true)
       }
     }
@@ -139,8 +147,9 @@ export function StudentSession() {
     [studentToken, roundEvent, id, peerResponse, peerResponseType, followUp, activity]
   )
 
-  if (!studentToken) {
-    return <div className="text-center py-20 text-slate-500">Session not found. Please join again.</div>
+  // Blank screen while redirect fires (from the validation useEffect above)
+  if (!studentToken || studentToken.session_id !== id) {
+    return null
   }
 
   if (!session || !activity) {

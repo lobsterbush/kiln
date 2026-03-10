@@ -13,6 +13,7 @@ interface LiveMonitorProps {
   onEndSession: () => void
   onRoundExpire: () => void
   sessionStatus: string
+  isAdvancing?: boolean
 }
 
 export function LiveMonitor({
@@ -26,6 +27,7 @@ export function LiveMonitor({
   onEndSession,
   onRoundExpire,
   sessionStatus,
+  isAdvancing = false,
 }: LiveMonitorProps) {
   const roundResponses = responses.filter((r) => r.round === currentRound)
   const submittedCount = roundResponses.length
@@ -102,20 +104,22 @@ export function LiveMonitor({
       <div className="flex gap-3 justify-end">
         <button
           onClick={onEndSession}
-          className="px-6 py-2.5 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 transition-colors"
+          disabled={isAdvancing}
+          className="px-6 py-2.5 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           End Session
         </button>
         <button
           onClick={onAdvanceRound}
+          disabled={isAdvancing}
           className={cn(
-            'px-6 py-2.5 font-medium rounded-xl transition-all shadow-md active:scale-95',
+            'px-6 py-2.5 font-medium rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
             sessionStatus === 'between_rounds'
               ? 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-kiln-200'
               : 'bg-slate-200 text-slate-500 hover:bg-slate-300 shadow-slate-100'
           )}
         >
-          {sessionStatus === 'between_rounds' ? 'Next Round →' : 'Advance Early →'}
+          {isAdvancing ? 'Working…' : sessionStatus === 'between_rounds' ? 'Next Round →' : 'Advance Early →'}
         </button>
       </div>
     </div>
