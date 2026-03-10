@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Timer } from '../shared/Timer'
 import { cn } from '../../lib/utils'
 
@@ -6,7 +7,7 @@ interface ResponsePanelProps {
   prompt: string
   serverTimestamp: string
   durationSec: number
-  onSubmit: (content: string, timeTakenMs: number) => void
+  onSubmit: (content: string, timeTakenMs: number) => Promise<void>
   disabled?: boolean
 }
 
@@ -20,6 +21,8 @@ export function ResponsePanel({
   const [content, setContent] = useState('')
   const [locked, setLocked] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const startTime = useRef(Date.now())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -28,24 +31,33 @@ export function ResponsePanel({
     setContent('')
     setLocked(false)
     setSubmitted(false)
+    setSubmitting(false)
+    setSubmitError(null)
     textareaRef.current?.focus()
   }, [prompt, serverTimestamp])
 
   function handleExpire() {
     setLocked(true)
-    if (content.trim() && !submitted) {
+    if (content.trim() && !submitted && !submitting) {
       handleSubmit()
     }
   }
 
-  function handleSubmit() {
-    if (!content.trim() || submitted) return
+  async function handleSubmit() {
+    if (!content.trim() || submitted || submitting) return
     const timeTakenMs = Date.now() - startTime.current
-    setSubmitted(true)
-    onSubmit(content.trim(), timeTakenMs)
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      await onSubmit(content.trim(), timeTakenMs)
+      setSubmitted(true)
+    } catch {
+      setSubmitting(false)
+      setSubmitError('Could not save your response. Please try again.')
+    }
   }
 
-  const isDisabled = disabled || locked || submitted
+  const isDisabled = disabled || locked || submitted || submitting
 
   return (
     <div className="flex flex-col gap-4">
@@ -79,6 +91,9 @@ export function ResponsePanel({
               )}
             />
 
+            {submitError && (
+              <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{submitError}</p>
+            )}
             <div className="flex items-center justify-between mt-4">
               <span className="text-xs text-slate-400 font-medium">
                 {content.trim() ? content.trim().split(/\s+/).length : 0} {content.trim().split(/\s+/).length === 1 && content.trim() ? 'word' : 'words'}
@@ -87,13 +102,14 @@ export function ResponsePanel({
                 onClick={handleSubmit}
                 disabled={isDisabled || !content.trim()}
                 className={cn(
-                  'px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95',
+                  'flex items-center gap-2 px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95',
                   submitted
                     ? 'bg-emerald-500 text-white'
                     : 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-md shadow-kiln-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
                 )}
               >
-                {submitted ? '✓ Submitted' : 'Submit'}
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {submitted ? '✓ Submitted' : submitting ? 'Saving…' : 'Submit'}
               </button>
             </div>
           </>

@@ -9,9 +9,10 @@ interface SessionLobbyProps {
   onStart?: (customPrompt?: string) => void
   initialPrompt?: string
   isStarting?: boolean
+  activityTitle?: string
 }
 
-export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt, isStarting = false }: SessionLobbyProps) {
+export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt, isStarting = false, activityTitle }: SessionLobbyProps) {
   const [customPrompt, setCustomPrompt] = useState(initialPrompt ?? '')
 
   return (
@@ -77,9 +78,14 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
       )}
 
       {!isInstructor && (
-        <div className="flex items-center gap-2 text-slate-400">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <p className="text-sm">Waiting for instructor to start...</p>
+        <div className="flex flex-col items-center gap-3">
+          {activityTitle && (
+            <p className="text-base font-semibold text-slate-700">{activityTitle}</p>
+          )}
+          <div className="flex items-center gap-2 text-slate-400">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <p className="text-sm">Waiting for instructor to start...</p>
+          </div>
         </div>
       )}
     </div>

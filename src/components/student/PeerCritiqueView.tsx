@@ -6,7 +6,7 @@ interface PeerCritiqueViewProps {
   critiquePrompt: string
   serverTimestamp: string
   durationSec: number
-  onSubmit: (content: string, timeTakenMs: number) => void
+  onSubmit: (content: string, timeTakenMs: number) => Promise<void>
 }
 
 export function PeerCritiqueView({

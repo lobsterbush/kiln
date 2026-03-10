@@ -155,7 +155,7 @@ export function StudentSession() {
         peerResponse ? peerResponseType :
         'initial'
 
-      await supabase.from('responses').insert({
+      const { error: insertError } = await supabase.from('responses').insert({
         session_id: id,
         participant_id: studentToken.participant_id,
         round: roundEvent.round,
@@ -163,6 +163,8 @@ export function StudentSession() {
         response_type: responseType,
         time_taken_ms: timeTakenMs,
       })
+
+      if (insertError) throw new Error('Failed to save response')
 
       setMyResponses((prev) => [...prev, { round: roundEvent.round, prompt: roundEvent.prompt, content }])
       setPreviousResponse(content)
@@ -191,6 +193,7 @@ export function StudentSession() {
         joinCode={session.join_code}
         participants={participants}
         isInstructor={false}
+        activityTitle={activity.title}
       />
     )
   }

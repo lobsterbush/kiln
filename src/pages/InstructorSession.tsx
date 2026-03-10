@@ -319,6 +319,7 @@ export function InstructorSession() {
         onStart={startSession}
         initialPrompt={activity.config.initial_prompt}
         isStarting={advancing}
+        activityTitle={activity.title}
       />
     )
   }

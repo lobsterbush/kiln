@@ -27,22 +27,24 @@ export function Results() {
 
   async function loadData() {
     const [sessResult, partsResult, respsResult, assignsResult] = await Promise.all([
-      supabase.from('sessions').select('*, activity:activities(*)').eq('id', id!).single(),
+      supabase.from('sessions').select('*, activity:activities(*)').eq('id', id!).eq('instructor_id', user!.id).single(),
       supabase.from('participants').select('*').eq('session_id', id!),
       supabase.from('responses').select('*').eq('session_id', id!)
         .order('round', { ascending: true }).order('submitted_at', { ascending: true }),
       supabase.from('peer_assignments').select('*').eq('session_id', id!),
     ])
 
-    if (sessResult.error || partsResult.error || respsResult.error) {
+    if (!sessResult.data) {
+      setLoadError('Session not found or you do not have permission to view it.')
+      return
+    }
+    if (partsResult.error || respsResult.error) {
       setLoadError('Could not load session data. Please refresh.')
       return
     }
 
-    if (sessResult.data) {
-      setSession(sessResult.data)
-      setActivity(sessResult.data.activity as Activity)
-    }
+    setSession(sessResult.data)
+    setActivity(sessResult.data.activity as Activity)
     if (partsResult.data) setParticipants(partsResult.data)
     if (respsResult.data) setResponses(respsResult.data)
     if (assignsResult.data) setAssignments(assignsResult.data)
@@ -79,7 +81,9 @@ export function Results() {
     const a = document.createElement('a')
     a.href = url
     a.download = `kiln-session-${session?.join_code ?? id}.csv`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
@@ -88,7 +92,12 @@ export function Results() {
   }
 
   if (loadError) {
-    return <div className="flex justify-center py-20 text-red-500">{loadError}</div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <p className="text-red-500">{loadError}</p>
+        <Link to="/instructor" className="text-sm text-kiln-600 hover:underline">Back to dashboard</Link>
+      </div>
+    )
   }
 
   if (!session || !activity) {
@@ -101,6 +110,12 @@ export function Results() {
     rebuttal: 'Rebuttal',
     followup_answer: 'Follow-up',
   }
+
+  // Summary stats
+  const totalResponses = responses.length
+  const avgWords = totalResponses > 0
+    ? Math.round(responses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).length, 0) / totalResponses)
+    : 0
 
   // Group responses by participant, with peer context inline
   // Filter out participants who never submitted (e.g. joined then left)
@@ -151,6 +166,24 @@ export function Results() {
           Export CSV
         </button>
       </div>
+
+      {/* Summary stats */}
+      {(participants.length > 0 || totalResponses > 0) && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900">{byParticipant.length}<span className="text-base font-normal text-slate-400">/{participants.length}</span></p>
+            <p className="text-xs text-slate-500 mt-0.5">Participated</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900">{totalResponses}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Responses</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900">{avgWords}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Avg. words</p>
+          </div>
+        </div>
+      )}
 
       {byParticipant.length === 0 && (
         <p className="text-slate-400 text-sm text-center py-10">No responses were submitted this session.</p>

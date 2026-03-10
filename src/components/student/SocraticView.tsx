@@ -7,7 +7,7 @@ interface SocraticViewProps {
   round: number
   serverTimestamp: string
   durationSec: number
-  onSubmit: (content: string, timeTakenMs: number) => void
+  onSubmit: (content: string, timeTakenMs: number) => Promise<void>
   loading?: boolean
 }
 
