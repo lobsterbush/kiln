@@ -120,9 +120,9 @@ export function Layout() {
           <Outlet />
         </ErrorBoundary>
       </main>
-      <footer className="border-t border-slate-200/60 py-6">
+      <footer className="border-t border-slate-200/60 bg-white py-6">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-slate-400">Kiln — Where thinking hardens</p>
+          <p className="text-xs text-slate-400">© 2025 Kiln · <em>Where thinking hardens</em></p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
             <a
               href="mailto:charles.crabtree@monash.edu?subject=Kiln Support"

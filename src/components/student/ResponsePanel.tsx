@@ -67,9 +67,12 @@ export function ResponsePanel({
         onExpire={handleExpire}
       />
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm animate-slide-up">
-        <p className="text-lg font-semibold text-slate-800 mb-4 leading-relaxed">{prompt}</p>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-slide-up overflow-hidden">
+        <div className="px-5 pt-5 pb-4 border-b border-slate-100 bg-slate-50/60">
+          <p className="text-base sm:text-lg font-semibold text-slate-800 leading-snug">{prompt}</p>
+        </div>
 
+        <div className="p-5">
         {locked && !submitted ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center animate-fade-in">
             <p className="font-semibold text-slate-700">Time's up</p>
@@ -84,7 +87,7 @@ export function ResponsePanel({
               disabled={isDisabled}
               placeholder="Type your response..."
               className={cn(
-                'w-full h-44 p-4 border-2 rounded-xl resize-none text-base leading-relaxed transition-all focus:outline-none',
+                'w-full h-52 sm:h-44 p-4 border-2 rounded-xl resize-none text-base leading-relaxed transition-all focus:outline-none',
                 isDisabled
                   ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed'
                   : 'bg-white text-slate-900 border-slate-200 focus:border-kiln-400'
@@ -95,7 +98,7 @@ export function ResponsePanel({
               <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{submitError}</p>
             )}
             <div className="flex items-center justify-between mt-4">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 font-medium tabular-nums">
                 {content.trim() ? content.trim().split(/\s+/).length : 0} {content.trim().split(/\s+/).length === 1 && content.trim() ? 'word' : 'words'}
               </span>
               <button
@@ -105,7 +108,7 @@ export function ResponsePanel({
                   'flex items-center gap-2 px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95',
                   submitted
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-md shadow-kiln-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
+                    : 'bg-kiln-500 hover:bg-kiln-600 text-white shadow-md shadow-kiln-200/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
                 )}
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -114,6 +117,7 @@ export function ResponsePanel({
             </div>
           </>
         )}
+        </div>
       </div>
     </div>
   )

@@ -94,29 +94,30 @@ export function Home() {
     <div className="flex flex-col">
 
       {/* ═══ HERO: full viewport, two-column ═══ */}
-      <section id="hero" className="w-full bg-kiln-50">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12 sm:py-16 lg:py-0 flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16 lg:min-h-[calc(100vh-3.5rem)]">
+      <section id="hero" className="w-full bg-kiln-50 border-b border-kiln-100">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-14 sm:py-20 lg:py-0 flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-16 lg:min-h-[calc(100vh-3.5rem)]">
 
           {/* Left: copy + CTAs */}
-          <div className="flex-1 flex flex-col gap-6 sm:gap-8 animate-fade-in lg:py-20">
+          <div className="flex-1 flex flex-col gap-7 animate-fade-in lg:py-20">
             <div>
-              <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 sm:mb-6">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-kiln-700 bg-white border border-kiln-200 shadow-sm px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 inline-block"></span>
                 Live formative assessment
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-4 sm:mb-5">
-                Active learning you<br />
-                <span className="text-kiln-500">can see and verify.</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.0] mb-5">
+                Active learning<br />
+                <span className="text-kiln-500 italic">you can see.</span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
                 Timed, reactive in-class activities where every student responds
-                to content unique to them — live, on the spot, while you watch.
+                to content unique to them — on the spot, while you watch.
                 Genuine thinking, not pre-generated answers.
               </p>
             </div>
 
             {/* Student join — primary action */}
-            <div className="flex flex-col gap-3 max-w-lg">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Student? Enter your session code</p>
+            <div className="flex flex-col gap-3 max-w-md">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Student? Enter your session code</p>
               <form onSubmit={handleJoin} className="flex gap-2">
                 <input
                   type="text"
@@ -124,63 +125,56 @@ export function Home() {
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="ABC123"
                   maxLength={6}
-                  className="flex-1 px-5 py-4 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-300 rounded-2xl focus:outline-none focus:border-kiln-400 transition-colors shadow-sm placeholder:text-slate-200 placeholder:tracking-[0.15em] placeholder:font-normal"
+                  className="flex-1 px-5 py-4 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-kiln-400 transition-colors shadow-sm placeholder:text-slate-200 placeholder:tracking-[0.15em] placeholder:font-normal"
                 />
                 <button
                   type="submit"
                   disabled={!code.trim()}
-                  className="px-5 py-4 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white rounded-2xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 transition-all shadow-md shadow-kiln-200 active:scale-95"
+                  className="px-5 py-4 bg-kiln-500 hover:bg-kiln-600 text-white rounded-2xl disabled:opacity-40 transition-all shadow-md shadow-kiln-200/50 active:scale-95"
                 >
                   <ArrowRight className="w-6 h-6" />
                 </button>
               </form>
-              <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 pt-1">
+              <div className="flex items-center justify-between gap-2 pt-1">
                 <p className="text-sm text-slate-400">Code is on the board or screen.</p>
                 <Link
                   to="/instructor"
                   className="flex items-center gap-1.5 text-sm font-semibold text-kiln-600 hover:text-kiln-700 transition-colors whitespace-nowrap"
                 >
-                  Instructor? Sign up free <ArrowRight className="w-3.5 h-3.5" />
+                  Instructor sign up <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Right: live monitor mockup — hidden on small screens, shown below on md */}
+          {/* Right: live monitor mockup — desktop only */}
           <div className="hidden lg:flex flex-1 flex-col w-full max-w-lg animate-slide-up py-20">
-            <p className="text-xs font-bold text-kiln-600 uppercase tracking-wider text-center mb-3">
+            <p className="text-xs font-bold text-kiln-600 uppercase tracking-widest text-center mb-3">
               What you see as the instructor
             </p>
             <LivePreview />
           </div>
         </div>
-
-        {/* Mobile: show mockup below CTAs */}
-        <div className="lg:hidden max-w-lg mx-auto px-6 pb-12 sm:pb-16">
-          <p className="text-xs font-bold text-kiln-600 uppercase tracking-wider text-center mb-3">
-            What you see as the instructor
-          </p>
-          <LivePreview />
-        </div>
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section id="how-it-works" className="w-full bg-slate-900 py-16 sm:py-24">
+      <section id="how-it-works" className="w-full bg-slate-950 py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-white mb-3">Up and running in 60 seconds</h2>
-            <p className="text-slate-400">No student accounts. No downloads. Nothing to install.</p>
+          <div className="mb-14">
+            <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Getting started</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3 leading-tight">Up and running in 60 seconds</h2>
+            <p className="text-slate-400 max-w-sm">No student accounts. No downloads. Nothing to install.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
-{ step: '01', title: 'Create an activity', body: 'Pick one of four activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
+              { step: '01', title: 'Create an activity', body: 'Pick one of four activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
               { step: '02', title: 'Students join with a code', body: 'Share a 6-character code. Students open it on any phone, tablet, or laptop — no account needed.', note: 'Works on any device.' },
               { step: '03', title: 'Watch it happen live', body: 'Responses appear in real time. See who submitted and what they wrote before the class ends.', note: 'Export CSV when done.' },
             ].map((s) => (
-              <div key={s.step} className="flex flex-col gap-4">
-                <span className="text-6xl font-extrabold text-kiln-600/30 leading-none">{s.step}</span>
-                <h3 className="text-lg font-bold text-white">{s.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{s.body}</p>
+              <div key={s.step} className="flex flex-col gap-4 border-t border-slate-800 pt-8">
+                <span className="text-sm font-mono font-bold text-kiln-600 tracking-widest">{s.step}</span>
+                <h3 className="text-xl font-bold text-white">{s.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed flex-1">{s.body}</p>
                 <p className="text-xs text-kiln-500 font-semibold">{s.note}</p>
               </div>
             ))}
@@ -189,28 +183,27 @@ export function Home() {
       </section>
 
       {/* ═══ WHAT YOU'RE SIGNING UP FOR ═══ */}
-      <section id="features" className="w-full py-16 sm:py-24 bg-slate-50">
+      <section id="features" className="w-full py-16 sm:py-24 bg-white">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">Four activity types. Zero passengers.</h2>
-            <p className="text-slate-500 max-w-xl mx-auto leading-relaxed">
-              Every student produces original writing every round. No copy-pasting. No pre-generation.
-              Each type was designed to make honest thinking the path of least resistance.
-            </p>
-            <Link
-              to="/pedagogy"
-              className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-medium mt-4 transition-colors"
-            >
-              Read the evidence base <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+          <div className="mb-12">
+            <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Activity types</p>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Four types.<br className="hidden sm:block" /> Zero passengers.</h2>
+              <Link
+                to="/pedagogy"
+                className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-semibold transition-colors shrink-0"
+              >
+                Evidence base <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Peer Critique */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-blue-100 overflow-hidden">
-              <div className="p-6 pb-5 border-b border-slate-100">
+            <div className="flex flex-col bg-blue-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-blue-100/60">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-50 rounded-xl"><Users className="w-5 h-5 text-blue-600" /></div>
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><Users className="w-5 h-5 text-blue-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Peer Critique</h3>
                     <p className="text-xs text-blue-500 font-medium">2 or 3 rounds</p>
@@ -220,7 +213,7 @@ export function Home() {
                   Students write a claim, critique a peer's argument, then defend their own position under fire — every student as both author and critic.
                 </p>
               </div>
-              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+              <div className="flex flex-col divide-y divide-blue-100/50 flex-1">
                 {[
                   { round: 1, label: 'Make your case',     emoji: '✍️', text: 'Everyone responds to the opening prompt with an original argument. Timed.' },
                   { round: 2, label: 'Find the weakness',  emoji: '🔍', text: 'Each student is assigned a peer\'s argument at random and must identify its weakest assumption.' },
@@ -238,10 +231,10 @@ export function Home() {
             </div>
 
             {/* Socratic Chain */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-purple-100 overflow-hidden">
-              <div className="p-6 pb-5 border-b border-slate-100">
+            <div className="flex flex-col bg-purple-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-purple-100/60">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-purple-50 rounded-xl"><BookOpen className="w-5 h-5 text-purple-600" /></div>
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><BookOpen className="w-5 h-5 text-purple-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Socratic Chain</h3>
                     <p className="text-xs text-purple-500 font-medium">2–5 rounds</p>
@@ -251,7 +244,7 @@ export function Home() {
                   AI reads each student's specific response and generates a personalised follow-up that targets the gap in <em>their</em> reasoning — different for every student.
                 </p>
               </div>
-              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+              <div className="flex flex-col divide-y divide-purple-100/50 flex-1">
                 {[
                   { round: 1, label: 'Initial response',        emoji: '✍️', text: 'Everyone answers the opening question in their own words.' },
                   { round: 2, label: 'Personalised AI follow-up', emoji: '🤖', text: 'Claude reads each student\'s specific answer and generates a follow-up that probes the weakest point in their reasoning. Every student gets a different question.' },
@@ -269,10 +262,10 @@ export function Home() {
             </div>
 
             {/* Peer Clarification */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
-              <div className="p-6 pb-5 border-b border-slate-100">
+            <div className="flex flex-col bg-teal-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-teal-100/60">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-teal-50 rounded-xl"><HelpCircle className="w-5 h-5 text-teal-600" /></div>
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><HelpCircle className="w-5 h-5 text-teal-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Peer Clarification</h3>
                     <p className="text-xs text-teal-500 font-medium">2 rounds</p>
@@ -282,7 +275,7 @@ export function Home() {
                   Students surface their own confusion, then explain a classmate's confusion in plain language. Teaching something is the surest test of understanding it.
                 </p>
               </div>
-              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+              <div className="flex flex-col divide-y divide-teal-100/50 flex-1">
                 {[
                   { round: 1, label: 'Name your confusion', emoji: '🤔', text: 'Each student identifies the single most confusing point from today\'s material and describes it precisely.' },
                   { round: 2, label: 'Explain it to them',  emoji: '💬', text: 'Each student receives a different classmate\'s confusion and must explain it in plain language — no jargon, no looking it up.' },
@@ -299,10 +292,10 @@ export function Home() {
             </div>
 
             {/* Evidence Analysis */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-amber-100 overflow-hidden">
-              <div className="p-6 pb-5 border-b border-slate-100">
+            <div className="flex flex-col bg-amber-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-amber-100/60">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-amber-50 rounded-xl"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Evidence Analysis</h3>
                     <p className="text-xs text-amber-500 font-medium">2 rounds · highest AI resistance</p>
@@ -312,7 +305,7 @@ export function Home() {
                   The instructor reveals a piece of data, quote, or case at session start. Students interpret it, then identify the inferential gap in a peer's reading.
                 </p>
               </div>
-              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+              <div className="flex flex-col divide-y divide-amber-100/50 flex-1">
                 {[
                   { round: 1, label: 'Interpret the evidence', emoji: '🔬', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means for the question at hand.' },
                   { round: 2, label: 'Find the gap',           emoji: '🧩', text: 'Each student receives a peer\'s interpretation and must identify its biggest inferential gap or unsupported leap.' },
@@ -333,10 +326,11 @@ export function Home() {
       </section>
 
       {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="w-full py-16 sm:py-24">
+      <section id="pricing" className="w-full py-16 sm:py-24 bg-slate-50">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Simple pricing</h2>
+          <div className="mb-12">
+            <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Pricing</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2 leading-tight">Simple pricing</h2>
             <p className="text-slate-500">Free to use today. Pro and Department tiers launching later this year.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --color-kiln-50: #fff7ed;
   --color-kiln-100: #ffedd5;
@@ -19,6 +19,25 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tight tracking on headings for a more editorial feel */
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+}
+
+/* Brand selection color */
+::selection {
+  background-color: rgba(249, 115, 22, 0.18);
+  color: inherit;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
 }
 
 /* Pulse animation for the timer when urgent */
