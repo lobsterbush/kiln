@@ -9,6 +9,9 @@ import { PeerCritiqueView } from '../components/student/PeerCritiqueView'
 import { SocraticView } from '../components/student/SocraticView'
 import type { Session, Participant, Activity, RoundStartEvent } from '../lib/types'
 
+const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
+
 export function StudentSession() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -58,9 +61,6 @@ export function StudentSession() {
     if (!id) return
     loadSession()
   }, [id])
-
-  const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
-  const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
 
   async function loadSession() {
     const { data } = await supabase

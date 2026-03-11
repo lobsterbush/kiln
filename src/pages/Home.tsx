@@ -59,13 +59,13 @@ function LivePreview() {
 export function Home() {
   const [code, setCode] = useState('')
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
   // Instructor confirmed email or clicked magic link — Supabase lands them here;
-  // forward immediately to the dashboard.
+  // forward immediately to the dashboard. Wait for auth to resolve first.
   useEffect(() => {
-    if (user) navigate('/instructor', { replace: true })
-  }, [user, navigate])
+    if (!loading && user) navigate('/instructor', { replace: true })
+  }, [user, loading, navigate])
 
   function handleJoin(e: React.FormEvent) {
     e.preventDefault()
