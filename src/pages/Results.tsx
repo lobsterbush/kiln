@@ -294,6 +294,7 @@ export function Results() {
       {/* Cross-session history */}
       {sessionHistory.length > 1 && (() => {
         const thisIndex = sessionHistory.findIndex((s) => s.id === session.id)
+        if (thisIndex === -1) return null // session not yet reflected in history
         const runNumber = sessionHistory.length - thisIndex
         const totalRuns = sessionHistory.length
         const otherSessions = sessionHistory.filter((s) => s.id !== session.id)

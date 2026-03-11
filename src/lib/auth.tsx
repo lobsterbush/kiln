@@ -42,9 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}instructor`,
+      },
+    })
     if (error) return { error: error as Error | null }
-    // If identities is empty the email already exists
+    // needsConfirmation = no session yet (email confirm required)
     const needsConfirmation = !data.session
     return { error: null, needsConfirmation }
   }

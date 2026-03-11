@@ -101,9 +101,12 @@ export function InstructorDashboard() {
     setAuthError(null)
     const { error } = await signIn(email, password)
     if (error) {
-      setAuthError(error.message === 'Invalid login credentials'
-        ? 'Incorrect email or password.'
-        : error.message)
+      const msg = error.message
+      setAuthError(
+        msg === 'Invalid login credentials'
+          ? 'Incorrect email or password. If you previously used a magic link, use "Use magic link instead" below.'
+          : msg
+      )
     }
   }
 
