@@ -6,8 +6,10 @@ import { getStudentToken } from '../lib/utils'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { ResponsePanel } from '../components/student/ResponsePanel'
 import { PeerCritiqueView } from '../components/student/PeerCritiqueView'
+import { PeerClarificationView } from '../components/student/PeerClarificationView'
+import { EvidenceAnalysisView } from '../components/student/EvidenceAnalysisView'
 import { SocraticView } from '../components/student/SocraticView'
-import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, FOLLOW_UP_TIMEOUT_MS } from '../lib/constants'
+import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT, FOLLOW_UP_TIMEOUT_MS } from '../lib/constants'
 import type { Session, Participant, Activity, RoundStartEvent } from '../lib/types'
 
 export function StudentSession() {
@@ -28,7 +30,7 @@ export function StudentSession() {
   const [roundEvent, setRoundEvent] = useState<RoundStartEvent | null>(null)
   const [peerResponse, setPeerResponse] = useState<{ content: string; name: string } | null>(null)
   const [followUp, setFollowUp] = useState<string | null>(null)
-  const [peerResponseType, setPeerResponseType] = useState<'critique' | 'rebuttal'>('critique')
+  const [peerResponseType, setPeerResponseType] = useState<'critique' | 'rebuttal' | 'clarification' | 'evidence_gap'>('critique')
   const [myResponses, setMyResponses] = useState<{ round: number; prompt: string; content: string }[]>([])
   const [previousResponse, setPreviousResponse] = useState('')
   const [waitingForNext, setWaitingForNext] = useState(false)
@@ -119,9 +121,11 @@ export function StudentSession() {
         } else if (ctx.already_submitted) {
           setWaitingForNext(true)
         } else if (ctx.peer_response_content) {
-          const prompt = ctx.peer_response_type === 'rebuttal'
-            ? (act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT)
-            : (act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT)
+          const prompt =
+            ctx.peer_response_type === 'rebuttal' ? (act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT) :
+            ctx.peer_response_type === 'clarification' ? (act.config.explain_prompt ?? DEFAULT_EXPLAIN_PROMPT) :
+            ctx.peer_response_type === 'evidence_gap' ? (act.config.gap_prompt ?? DEFAULT_GAP_PROMPT) :
+            (act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT)
           setRoundEvent({
             round: data.current_round,
             duration_sec: act.config.round_duration_sec,
@@ -129,7 +133,7 @@ export function StudentSession() {
             server_timestamp: data.round_started_at,
           })
           setPeerResponse({ content: ctx.peer_response_content, name: ctx.peer_name })
-          setPeerResponseType(ctx.peer_response_type as 'critique' | 'rebuttal')
+          setPeerResponseType(ctx.peer_response_type as 'critique' | 'rebuttal' | 'clarification' | 'evidence_gap')
         } else if (ctx.follow_up_prompt) {
           setRoundEvent({
             round: data.current_round,
@@ -175,7 +179,7 @@ export function StudentSession() {
       .on('broadcast', { event: 'peer:assigned' }, ({ payload }) => {
         if (payload.participant_id === studentToken.participant_id) {
           setPeerResponse({ content: payload.response_content, name: payload.author_name })
-          setPeerResponseType(payload.response_type === 'rebuttal' ? 'rebuttal' : 'critique')
+          setPeerResponseType(payload.response_type as 'critique' | 'rebuttal' | 'clarification' | 'evidence_gap')
           setWaitingForNext(false)
         }
       })
@@ -329,12 +333,15 @@ export function StudentSession() {
 
   // Active round
   if (roundEvent) {
-    // Peer critique round 2+: waiting for the peer:assigned broadcast to arrive
-    if (activity.type === 'peer_critique' && roundEvent.round > 1 && !peerResponse) {
+    // Peer-assignment types: waiting for the peer:assigned broadcast to arrive
+    const isPeerAssignmentType = activity.type === 'peer_critique' || activity.type === 'peer_clarification' || activity.type === 'evidence_analysis'
+    if (isPeerAssignmentType && roundEvent.round > 1 && !peerResponse) {
+      const spinColor = activity.type === 'peer_clarification' ? 'bg-teal-50' : activity.type === 'evidence_analysis' ? 'bg-amber-50' : 'bg-blue-50'
+      const iconColor = activity.type === 'peer_clarification' ? 'text-teal-500' : activity.type === 'evidence_analysis' ? 'text-amber-500' : 'text-blue-500'
       return (
         <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">
-          <div className="p-4 bg-blue-50 rounded-2xl">
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <div className={`p-4 ${spinColor} rounded-2xl`}>
+            <Loader2 className={`w-8 h-8 ${iconColor} animate-spin`} />
           </div>
           <p className="text-sm text-slate-500 font-medium">Receiving your peer assignment…</p>
         </div>
@@ -348,6 +355,34 @@ export function StudentSession() {
           peerResponse={peerResponse.content}
           peerName={peerResponse.name}
           critiquePrompt={roundEvent.prompt}
+          serverTimestamp={roundEvent.server_timestamp}
+          durationSec={roundEvent.duration_sec}
+          onSubmit={handleSubmitResponse}
+        />
+      )
+    }
+
+    // Peer clarification: show peer's confusion
+    if (peerResponse && activity.type === 'peer_clarification') {
+      return (
+        <PeerClarificationView
+          peerResponse={peerResponse.content}
+          peerName={peerResponse.name}
+          explainPrompt={roundEvent.prompt}
+          serverTimestamp={roundEvent.server_timestamp}
+          durationSec={roundEvent.duration_sec}
+          onSubmit={handleSubmitResponse}
+        />
+      )
+    }
+
+    // Evidence analysis: show peer's interpretation
+    if (peerResponse && activity.type === 'evidence_analysis') {
+      return (
+        <EvidenceAnalysisView
+          peerResponse={peerResponse.content}
+          peerName={peerResponse.name}
+          gapPrompt={roundEvent.prompt}
           serverTimestamp={roundEvent.server_timestamp}
           durationSec={roundEvent.duration_sec}
           onSubmit={handleSubmitResponse}

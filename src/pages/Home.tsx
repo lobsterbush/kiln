@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, Check, Mail } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 
 // ─── Fake live-session mockup shown in the hero ───────────────────────────────
@@ -174,35 +174,42 @@ export function Home() {
       <section id="features" className="w-full py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">Two activity types. Zero passengers.</h2>
-            <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
-              Every student produces original writing every round. No copy-pasting. No waiting.
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Four activity types. Zero passengers.</h2>
+            <p className="text-slate-500 max-w-xl mx-auto leading-relaxed">
+              Every student produces original writing every round. No copy-pasting. No pre-generation.
+              Each type was designed to make honest thinking the path of least resistance.
             </p>
+            <Link
+              to="/pedagogy"
+              className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-medium mt-4 transition-colors"
+            >
+              Read the evidence base <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Peer Critique */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-slate-200 overflow-hidden">
+            <div className="flex flex-col bg-white rounded-2xl border-2 border-blue-100 overflow-hidden">
               <div className="p-6 pb-5 border-b border-slate-100">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-kiln-50 rounded-xl"><Users className="w-5 h-5 text-kiln-600" /></div>
+                  <div className="p-2 bg-blue-50 rounded-xl"><Users className="w-5 h-5 text-blue-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Peer Critique</h3>
-                    <p className="text-xs text-slate-400 font-medium">2 or 3 rounds</p>
+                    <p className="text-xs text-blue-500 font-medium">2 or 3 rounds</p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Students write a claim, critique a peer’s argument, then defend their own position under fire — every student as both author and critic.
+                  Students write a claim, critique a peer's argument, then defend their own position under fire — every student as both author and critic.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-slate-100 flex-1">
                 {[
                   { round: 1, label: 'Make your case',     emoji: '✍️', text: 'Everyone responds to the opening prompt with an original argument. Timed.' },
-                  { round: 2, label: 'Find the weakness',  emoji: '🔍', text: 'Each student is assigned a peer’s argument at random and must identify its weakest assumption.' },
+                  { round: 2, label: 'Find the weakness',  emoji: '🔍', text: 'Each student is assigned a peer\'s argument at random and must identify its weakest assumption.' },
                   { round: 3, label: 'Defend your position', emoji: '⚔️', text: 'Students receive the critique of their own work and write a rebuttal. No hiding.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
-                    <span className="text-xs font-mono font-bold text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <span className="text-xs font-mono font-bold text-blue-400 bg-blue-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
                       <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
@@ -213,27 +220,87 @@ export function Home() {
             </div>
 
             {/* Socratic Chain */}
-            <div className="flex flex-col bg-white rounded-2xl border-2 border-slate-200 overflow-hidden">
+            <div className="flex flex-col bg-white rounded-2xl border-2 border-purple-100 overflow-hidden">
               <div className="p-6 pb-5 border-b border-slate-100">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-kiln-50 rounded-xl"><BookOpen className="w-5 h-5 text-kiln-600" /></div>
+                  <div className="p-2 bg-purple-50 rounded-xl"><BookOpen className="w-5 h-5 text-purple-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Socratic Chain</h3>
-                    <p className="text-xs text-slate-400 font-medium">2–5 rounds</p>
+                    <p className="text-xs text-purple-500 font-medium">2–5 rounds</p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  AI reads each student’s specific response and generates a personalised follow-up that targets the gap in <em>their</em> reasoning — different for every student.
+                  AI reads each student's specific response and generates a personalised follow-up that targets the gap in <em>their</em> reasoning — different for every student.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-slate-100 flex-1">
                 {[
                   { round: 1, label: 'Initial response',        emoji: '✍️', text: 'Everyone answers the opening question in their own words.' },
-                  { round: 2, label: 'Personalised AI follow-up', emoji: '🤖', text: 'Claude reads each student’s specific answer and generates a follow-up that probes the weakest point in their reasoning. Every student gets a different question.' },
+                  { round: 2, label: 'Personalised AI follow-up', emoji: '🤖', text: 'Claude reads each student\'s specific answer and generates a follow-up that probes the weakest point in their reasoning. Every student gets a different question.' },
                   { round: 3, label: 'Deepen the argument',     emoji: '💡', text: 'Students respond to their personal challenge. Each one confronts exactly what their argument left unanswered.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
-                    <span className="text-xs font-mono font-bold text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <span className="text-xs font-mono font-bold text-purple-400 bg-purple-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Peer Clarification */}
+            <div className="flex flex-col bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
+              <div className="p-6 pb-5 border-b border-slate-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-teal-50 rounded-xl"><HelpCircle className="w-5 h-5 text-teal-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Peer Clarification</h3>
+                    <p className="text-xs text-teal-500 font-medium">2 rounds</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Students surface their own confusion, then explain a classmate's confusion in plain language. Teaching something is the surest test of understanding it.
+                </p>
+              </div>
+              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+                {[
+                  { round: 1, label: 'Name your confusion', emoji: '🤔', text: 'Each student identifies the single most confusing point from today\'s material and describes it precisely.' },
+                  { round: 2, label: 'Explain it to them',  emoji: '💬', text: 'Each student receives a different classmate\'s confusion and must explain it in plain language — no jargon, no looking it up.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-teal-400 bg-teal-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Evidence Analysis */}
+            <div className="flex flex-col bg-white rounded-2xl border-2 border-amber-100 overflow-hidden">
+              <div className="p-6 pb-5 border-b border-slate-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-amber-50 rounded-xl"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Evidence Analysis</h3>
+                    <p className="text-xs text-amber-500 font-medium">2 rounds · highest AI resistance</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  The instructor reveals a piece of data, quote, or case at session start. Students interpret it, then identify the inferential gap in a peer's reading.
+                </p>
+              </div>
+              <div className="flex flex-col divide-y divide-slate-100 flex-1">
+                {[
+                  { round: 1, label: 'Interpret the evidence', emoji: '🔬', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means for the question at hand.' },
+                  { round: 2, label: 'Find the gap',           emoji: '🧩', text: 'Each student receives a peer\'s interpretation and must identify its biggest inferential gap or unsupported leap.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-amber-500 bg-amber-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
                       <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
@@ -260,7 +327,7 @@ export function Home() {
                 <span className="text-slate-500 ml-1">/ semester</span>
               </div>
               <ul className="flex flex-col gap-3 mb-8 flex-1">
-                {['Unlimited activities', 'Large class support', 'Peer Critique & Socratic Chain', 'Live monitor dashboard', 'Session history & CSV export'].map((f) => (
+                {['Unlimited activities', 'Large class support', 'All four activity types', 'Live monitor dashboard', 'Session history & CSV export'].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
                     <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />{f}
                   </li>

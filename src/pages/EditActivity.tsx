@@ -98,8 +98,16 @@ export function EditActivity() {
           ← Back to dashboard
         </Link>
         <h1 className="text-2xl font-bold text-slate-900 mt-3 mb-1">Edit Activity</h1>
-        <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">
-          {activity.type === 'peer_critique' ? 'Peer Critique' : 'Socratic Chain'}
+        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+          activity.type === 'peer_critique' ? 'bg-blue-100 text-blue-700' :
+          activity.type === 'socratic_chain' ? 'bg-purple-100 text-purple-700' :
+          activity.type === 'peer_clarification' ? 'bg-teal-100 text-teal-700' :
+          'bg-amber-100 text-amber-700'
+        }`}>
+          {activity.type === 'peer_critique' ? 'Peer Critique' :
+           activity.type === 'socratic_chain' ? 'Socratic Chain' :
+           activity.type === 'peer_clarification' ? 'Peer Clarification' :
+           'Evidence Analysis'}
         </span>
       </div>
 
@@ -118,7 +126,10 @@ export function EditActivity() {
 
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-            {activity.type === 'peer_critique' ? 'Opening Prompt' : 'Initial Question'}
+            {activity.type === 'peer_critique' ? 'Opening Prompt' :
+             activity.type === 'peer_clarification' ? 'Confusion Prompt' :
+             activity.type === 'evidence_analysis' ? 'Evidence & Interpretation Prompt' :
+             'Initial Question'}
           </label>
           <textarea
             value={prompt}
@@ -167,6 +178,36 @@ export function EditActivity() {
               />
             </div>
           </>
+        )}
+
+        {activity.type === 'peer_clarification' && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              Explanation Prompt{' '}
+              <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+            </label>
+            <textarea
+              value={critiquePrompt}
+              onChange={(e) => setCritiquePrompt(e.target.value)}
+              placeholder="A classmate shared their confusion below. Explain this concept to them in plain language."
+              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+            />
+          </div>
+        )}
+
+        {activity.type === 'evidence_analysis' && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              Gap Identification Prompt{' '}
+              <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+            </label>
+            <textarea
+              value={rebuttalPrompt}
+              onChange={(e) => setRebuttalPrompt(e.target.value)}
+              placeholder="Read your classmate's interpretation below. What is the biggest inferential gap in their reasoning?"
+              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+            />
+          </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">

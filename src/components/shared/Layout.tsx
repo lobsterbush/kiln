@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, NavLink } from 'react-router-dom'
 import { Flame } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -37,6 +37,16 @@ export function Layout() {
             >
               Pricing
             </a>
+            <NavLink
+              to="/pedagogy"
+              className={({ isActive }) =>
+                `text-sm transition-colors hidden sm:block ${
+                  isActive ? 'text-kiln-600 font-medium' : 'text-slate-500 hover:text-slate-800'
+                }`
+              }
+            >
+              Pedagogy
+            </NavLink>
             {!loading && (
               <Link
                 to="/instructor"
@@ -63,6 +73,12 @@ export function Layout() {
             >
               Support
             </a>
+            <Link
+              to="/pedagogy"
+              className="hover:text-kiln-600 transition-colors hidden sm:block"
+            >
+              Pedagogy
+            </Link>
             <a
               href={`${import.meta.env.BASE_URL}#pricing`}
               className="hover:text-kiln-600 transition-colors hidden sm:block"

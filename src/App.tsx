@@ -9,6 +9,7 @@ import { CreateActivity } from './pages/CreateActivity'
 import { InstructorSession } from './pages/InstructorSession'
 import { Results } from './pages/Results'
 import { EditActivity } from './pages/EditActivity'
+import { Pedagogy } from './pages/Pedagogy'
 
 function NotFound() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/instructor/session/:id" element={<InstructorSession />} />
             <Route path="/instructor/results/:id" element={<Results />} />
             <Route path="/instructor/edit/:id" element={<EditActivity />} />
+            <Route path="/pedagogy" element={<Pedagogy />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

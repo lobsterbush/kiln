@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { shuffleArray } from '../lib/utils'
-import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT } from '../lib/constants'
+import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT } from '../lib/constants'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { LiveMonitor } from '../components/instructor/LiveMonitor'
 import type { Session, Activity, Participant, Response as KilnResponse } from '../lib/types'
@@ -193,6 +193,20 @@ export function InstructorSession() {
           setCurrentPrompt(prompt)
           await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
         }
+      } else if (activity.type === 'peer_clarification') {
+        // Round 2: each student receives a peer's confusion to explain
+        const prompt = activity.config.explain_prompt ?? DEFAULT_EXPLAIN_PROMPT
+        setCurrentPrompt(prompt)
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+        const ok = await assignPeers(currentResponses, session.current_round, 'clarification')
+        if (!ok) setPeerWarning('Peer assignment skipped — fewer than 2 students submitted.')
+      } else if (activity.type === 'evidence_analysis') {
+        // Round 2: each student receives a peer's interpretation to critique
+        const prompt = activity.config.gap_prompt ?? DEFAULT_GAP_PROMPT
+        setCurrentPrompt(prompt)
+        await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
+        const ok = await assignPeers(currentResponses, session.current_round, 'evidence_gap')
+        if (!ok) setPeerWarning('Peer assignment skipped — fewer than 2 students submitted.')
       } else if (activity.type === 'socratic_chain') {
         const prompt = 'Your personalised follow-up question is being generated…'
         setCurrentPrompt(prompt)
@@ -205,7 +219,7 @@ export function InstructorSession() {
     }
   }
 
-  async function assignPeers(currentResponses: KilnResponse[], fromRound: number): Promise<boolean> {
+  async function assignPeers(currentResponses: KilnResponse[], fromRound: number, responseType: 'critique' | 'clarification' | 'evidence_gap' = 'critique'): Promise<boolean> {
     if (!session || currentResponses.length < 2) return false
     const shuffled = shuffleArray(currentResponses)
 
@@ -230,7 +244,7 @@ export function InstructorSession() {
         participant_id: row.reviewer_id,
         response_content: authorResponse?.content ?? '',
         author_name: authorParticipant?.display_name ?? 'A classmate',
-        response_type: 'critique',
+        response_type: responseType,
       })
     }
     return true

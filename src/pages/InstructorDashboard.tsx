@@ -298,8 +298,16 @@ export function InstructorDashboard() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-slate-900">{a.title}</h3>
-                  <span className="inline-block mt-1 text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">
-                    {a.type === 'peer_critique' ? 'Peer Critique' : 'Socratic Chain'}
+                  <span className={`inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                    a.type === 'peer_critique' ? 'bg-blue-100 text-blue-700' :
+                    a.type === 'socratic_chain' ? 'bg-purple-100 text-purple-700' :
+                    a.type === 'peer_clarification' ? 'bg-teal-100 text-teal-700' :
+                    'bg-amber-100 text-amber-700'
+                  }`}>
+                    {a.type === 'peer_critique' ? 'Peer Critique' :
+                     a.type === 'socratic_chain' ? 'Socratic Chain' :
+                     a.type === 'peer_clarification' ? 'Peer Clarification' :
+                     'Evidence Analysis'}
                   </span>
                 </div>
                 {confirmDelete === a.id ? (
@@ -350,9 +358,13 @@ export function InstructorDashboard() {
               <p className="text-xs text-slate-400 mt-3 font-medium">
                 {a.type === 'peer_critique'
                   ? a.config.rounds === 2
-                    ? `Claim → Critique · ${a.config.round_duration_sec}s`
-                    : `Claim → Critique → Rebuttal · ${a.config.round_duration_sec}s`
-                  : `${a.config.rounds} rounds · ${a.config.round_duration_sec}s each`
+                    ? `Claim \u2192 Critique \u00b7 ${a.config.round_duration_sec}s`
+                    : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${a.config.round_duration_sec}s`
+                  : a.type === 'peer_clarification'
+                  ? `Confusion \u2192 Explanation \u00b7 ${a.config.round_duration_sec}s`
+                  : a.type === 'evidence_analysis'
+                  ? `Interpretation \u2192 Gap Analysis \u00b7 ${a.config.round_duration_sec}s`
+                  : `${a.config.rounds} rounds \u00b7 ${a.config.round_duration_sec}s each`
                 }
               </p>
             </div>

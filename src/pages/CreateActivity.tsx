@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import type { ActivityType } from '../lib/types'
-import { Users, BookOpen, Zap } from 'lucide-react'
+import { Users, BookOpen, HelpCircle, BarChart2, Zap } from 'lucide-react'
 
 interface Template {
   label: string
@@ -51,6 +51,32 @@ const SOCRATIC_CHAIN_TEMPLATES: Template[] = [
   },
 ]
 
+const PEER_CLARIFICATION_TEMPLATES: Template[] = [
+  {
+    label: 'Muddy point',
+    title: 'Muddy Point',
+    prompt: 'What is the single most confusing point from today\'s material? Describe your confusion precisely — what exactly are you unsure about?',
+  },
+  {
+    label: 'Lecture gap',
+    title: 'Lecture Gap',
+    prompt: 'Identify a concept from today\'s lecture that you don\'t yet understand well enough to explain to someone else. What specifically is unclear?',
+  },
+]
+
+const EVIDENCE_ANALYSIS_TEMPLATES: Template[] = [
+  {
+    label: 'Interpret a statistic',
+    title: 'Data Interpretation',
+    prompt: '(Paste your data or statistic here before starting the session.) What does this figure tell us? What does it not tell us?',
+  },
+  {
+    label: 'Analyse a quote',
+    title: 'Source Analysis',
+    prompt: '(Paste your quote or excerpt here before starting the session.) What is the author claiming? What evidence supports or undermines this claim?',
+  },
+]
+
 export function CreateActivity() {
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
@@ -67,6 +93,8 @@ export function CreateActivity() {
   const [objectives, setObjectives] = useState('')
   const [critiquePrompt, setCritiquePrompt] = useState('')
   const [rebuttalPrompt, setRebuttalPrompt] = useState('')
+  const [explainPrompt, setExplainPrompt] = useState('')
+  const [gapPrompt, setGapPrompt] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -94,6 +122,8 @@ export function CreateActivity() {
           .filter(Boolean),
         ...(type === 'peer_critique' && critiquePrompt.trim() && { critique_prompt: critiquePrompt.trim() }),
         ...(type === 'peer_critique' && rebuttalPrompt.trim() && { rebuttal_prompt: rebuttalPrompt.trim() }),
+        ...(type === 'peer_clarification' && explainPrompt.trim() && { explain_prompt: explainPrompt.trim() }),
+        ...(type === 'evidence_analysis' && gapPrompt.trim() && { gap_prompt: gapPrompt.trim() }),
       },
     })
 
@@ -114,11 +144,11 @@ export function CreateActivity() {
         <p className="text-sm text-slate-500 mb-8">Choose an activity type to get started.</p>
         <div className="flex flex-col gap-4 stagger-children">
           <button
-            onClick={() => setType('peer_critique')}
-            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-kiln-400 hover:shadow-md transition-all duration-200 text-left"
+            onClick={() => { setType('peer_critique'); setRounds(3) }}
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-400 hover:shadow-md transition-all duration-200 text-left"
           >
-            <div className="p-3 bg-kiln-50 rounded-xl group-hover:bg-kiln-100 transition-colors shrink-0">
-              <Users className="w-7 h-7 text-kiln-600" />
+            <div className="p-3 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors shrink-0">
+              <Users className="w-7 h-7 text-blue-600" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900">Peer Critique</h3>
@@ -128,11 +158,11 @@ export function CreateActivity() {
             </div>
           </button>
           <button
-            onClick={() => setType('socratic_chain')}
-            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-kiln-400 hover:shadow-md transition-all duration-200 text-left"
+            onClick={() => { setType('socratic_chain'); setRounds(3) }}
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-purple-400 hover:shadow-md transition-all duration-200 text-left"
           >
-            <div className="p-3 bg-kiln-50 rounded-xl group-hover:bg-kiln-100 transition-colors shrink-0">
-              <BookOpen className="w-7 h-7 text-kiln-600" />
+            <div className="p-3 bg-purple-50 rounded-xl group-hover:bg-purple-100 transition-colors shrink-0">
+              <BookOpen className="w-7 h-7 text-purple-600" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900">Socratic Chain</h3>
@@ -141,12 +171,44 @@ export function CreateActivity() {
               </p>
             </div>
           </button>
+          <button
+            onClick={() => { setType('peer_clarification'); setRounds(2) }}
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-md transition-all duration-200 text-left"
+          >
+            <div className="p-3 bg-teal-50 rounded-xl group-hover:bg-teal-100 transition-colors shrink-0">
+              <HelpCircle className="w-7 h-7 text-teal-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900">Peer Clarification</h3>
+              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                Students surface their own confusion; then explain a classmate's confusion in plain language.
+              </p>
+            </div>
+          </button>
+          <button
+            onClick={() => { setType('evidence_analysis'); setRounds(2) }}
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-400 hover:shadow-md transition-all duration-200 text-left"
+          >
+            <div className="p-3 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors shrink-0">
+              <BarChart2 className="w-7 h-7 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900">Evidence Analysis</h3>
+              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                Students interpret a piece of evidence revealed live; then find the inferential gap in a peer's reading.
+              </p>
+            </div>
+          </button>
         </div>
       </div>
     )
   }
 
-  const templates = type === 'peer_critique' ? PEER_CRITIQUE_TEMPLATES : SOCRATIC_CHAIN_TEMPLATES
+  const templates =
+    type === 'peer_critique' ? PEER_CRITIQUE_TEMPLATES :
+    type === 'socratic_chain' ? SOCRATIC_CHAIN_TEMPLATES :
+    type === 'peer_clarification' ? PEER_CLARIFICATION_TEMPLATES :
+    EVIDENCE_ANALYSIS_TEMPLATES
 
   function applyTemplate(t: Template) {
     setTitle(t.title)
@@ -158,7 +220,10 @@ export function CreateActivity() {
   return (
     <div className="max-w-lg mx-auto animate-fade-in">
       <h1 className="text-2xl font-bold text-slate-900 mb-1">
-        {type === 'peer_critique' ? 'Peer Critique' : 'Socratic Chain'}
+        {type === 'peer_critique' ? 'Peer Critique' :
+         type === 'socratic_chain' ? 'Socratic Chain' :
+         type === 'peer_clarification' ? 'Peer Clarification' :
+         'Evidence Analysis'}
       </h1>
       <button
         onClick={() => setType(null)}
@@ -200,7 +265,10 @@ export function CreateActivity() {
 
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-            {type === 'peer_critique' ? 'Opening Prompt' : 'Initial Question'}
+            {type === 'peer_critique' ? 'Opening Prompt' :
+             type === 'peer_clarification' ? 'Confusion Prompt' :
+             type === 'evidence_analysis' ? 'Evidence & Interpretation Prompt' :
+             'Initial Question'}
           </label>
           <textarea
             value={prompt}
@@ -257,22 +325,58 @@ export function CreateActivity() {
           </>
         )}
 
+        {type === 'peer_clarification' && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              Explanation Prompt{' '}
+              <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+            </label>
+            <textarea
+              value={explainPrompt}
+              onChange={(e) => setExplainPrompt(e.target.value)}
+              placeholder="A classmate shared their confusion below. Explain this concept to them in plain language."
+              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+            />
+          </div>
+        )}
+
+        {type === 'evidence_analysis' && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              Gap Identification Prompt{' '}
+              <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
+            </label>
+            <textarea
+              value={gapPrompt}
+              onChange={(e) => setGapPrompt(e.target.value)}
+              placeholder="Read your classmate's interpretation below. What is the biggest inferential gap in their reasoning?"
+              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rounds</label>
-            <select
-              value={rounds}
-              onChange={(e) => setRounds(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
-            >
-              {(type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
-                <option key={n} value={n}>
-                  {n === 2 && type === 'peer_critique' ? '2 — Claim + Critique'
-                    : n === 3 && type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
-                    : `${n} rounds`}
-                </option>
-              ))}
-            </select>
+            {(type === 'peer_clarification' || type === 'evidence_analysis') ? (
+              <div className="px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm text-slate-500">
+                2 rounds (fixed)
+              </div>
+            ) : (
+              <select
+                value={rounds}
+                onChange={(e) => setRounds(Number(e.target.value))}
+                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
+              >
+                {(type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
+                  <option key={n} value={n}>
+                    {n === 2 && type === 'peer_critique' ? '2 — Claim + Critique'
+                      : n === 3 && type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
+                      : `${n} rounds`}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Time per Round</label>

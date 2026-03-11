@@ -12,3 +12,11 @@ export const FALLBACK_FOLLOW_UP_PROMPT =
 
 /** How long (ms) to wait for AI follow-up generation before showing the fallback prompt */
 export const FOLLOW_UP_TIMEOUT_MS = 30_000
+
+/** Default prompt shown to students explaining a peer's confusion (Peer Clarification round 2) */
+export const DEFAULT_EXPLAIN_PROMPT =
+  "A classmate shared their confusion below. Explain this concept to them in plain language, as if teaching a fellow student."
+
+/** Default prompt shown to students identifying the inferential gap in a peer's interpretation (Evidence Analysis round 2) */
+export const DEFAULT_GAP_PROMPT =
+  "Read your classmate's interpretation below. What is the biggest inferential gap or unsupported leap in their reasoning?"

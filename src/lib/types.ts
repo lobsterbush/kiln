@@ -1,8 +1,8 @@
-export type ActivityType = 'peer_critique' | 'socratic_chain'
+export type ActivityType = 'peer_critique' | 'socratic_chain' | 'peer_clarification' | 'evidence_analysis'
 
 export type SessionStatus = 'lobby' | 'active' | 'between_rounds' | 'completed'
 
-export type ResponseType = 'initial' | 'critique' | 'rebuttal' | 'followup_answer'
+export type ResponseType = 'initial' | 'critique' | 'rebuttal' | 'followup_answer' | 'clarification' | 'evidence_gap'
 
 export interface ActivityConfig {
   rounds: number
@@ -12,6 +12,8 @@ export interface ActivityConfig {
   material_ids?: string[]
   critique_prompt?: string | null
   rebuttal_prompt?: string | null
+  explain_prompt?: string | null
+  gap_prompt?: string | null
 }
 
 export interface Activity {
@@ -88,7 +90,7 @@ export interface PeerAssignedEvent {
   participant_id: string
   response_content: string
   author_name: string
-  response_type: 'critique' | 'rebuttal'
+  response_type: 'critique' | 'rebuttal' | 'clarification' | 'evidence_gap'
 }
 
 export interface FollowUpReadyEvent {
