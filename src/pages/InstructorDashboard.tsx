@@ -41,6 +41,17 @@ export function InstructorDashboard() {
     if (data) setActiveSessions(data as typeof activeSessions)
   }
 
+  async function handleDiscardSession(sessionId: string) {
+    const { error } = await supabase
+      .from('sessions')
+      .update({ status: 'completed' })
+      .eq('id', sessionId)
+      .eq('instructor_id', user!.id)
+    if (!error) {
+      setActiveSessions((prev) => prev.filter((s) => s.id !== sessionId))
+    }
+  }
+
   async function loadPastSessions(all = false) {
     const query = supabase
       .from('sessions')
@@ -212,13 +223,22 @@ export function InstructorDashboard() {
                     {s.status === 'between_rounds' ? 'paused' : s.status}
                   </span>
                 </div>
-                <button
-                  onClick={() => navigate(`/instructor/session/${s.id}`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
-                >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  Resume
-                </button>
+              <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDiscardSession(s.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Discard session"
+                  >
+                    ×
+                  </button>
+                  <button
+                    onClick={() => navigate(`/instructor/session/${s.id}`)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    Resume
+                  </button>
+                </div>
               </div>
             ))}
           </div>

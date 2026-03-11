@@ -2,12 +2,11 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import { shuffleArray } from '../lib/utils'
+import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT } from '../lib/constants'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { LiveMonitor } from '../components/instructor/LiveMonitor'
 import type { Session, Activity, Participant, Response as KilnResponse } from '../lib/types'
-
-const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
-const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
 
 export function InstructorSession() {
   const { id } = useParams<{ id: string }>()
@@ -22,6 +21,8 @@ export function InstructorSession() {
   const [advancing, setAdvancing] = useState(false)
   const [peerWarning, setPeerWarning] = useState<string | null>(null)
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  // useRef guard prevents double-fire if two clicks land before setAdvancing batches
+  const advancingRef = useRef(false)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -121,7 +122,8 @@ export function InstructorSession() {
   }
 
   async function startSession(customPrompt?: string) {
-    if (advancing || !session || !activity) return
+    if (advancingRef.current || !session || !activity) return
+    advancingRef.current = true
     setAdvancing(true)
     try {
       const now = new Date().toISOString()
@@ -142,13 +144,15 @@ export function InstructorSession() {
         server_timestamp: now,
       })
     } finally {
+      advancingRef.current = false
       setAdvancing(false)
     }
   }
 
   async function advanceRound() {
-    if (advancing || !session || !activity) return
+    if (advancingRef.current || !session || !activity) return
     setPeerWarning(null)
+    advancingRef.current = true
     setAdvancing(true)
     try {
       const nextRound = session.current_round + 1
@@ -196,13 +200,14 @@ export function InstructorSession() {
         await generateFollowUps(currentResponses, session.current_round)
       }
     } finally {
+      advancingRef.current = false
       setAdvancing(false)
     }
   }
 
   async function assignPeers(currentResponses: KilnResponse[], fromRound: number): Promise<boolean> {
     if (!session || currentResponses.length < 2) return false
-    const shuffled = [...currentResponses].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(currentResponses)
 
     // Bulk insert all assignments in one round trip
     const insertRows = shuffled.map((reviewer, i) => {
@@ -291,12 +296,13 @@ export function InstructorSession() {
   }
 
   async function endSession() {
-    if (advancing || !session) return
+    if (advancingRef.current || !session) return
+    advancingRef.current = true
     setAdvancing(true)
     try {
       await doEndSession()
     } finally {
-      // Re-enables button on error; harmless if component navigates away
+      advancingRef.current = false
       setAdvancing(false)
     }
   }

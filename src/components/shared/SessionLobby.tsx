@@ -41,7 +41,7 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
               </span>
             ))}
           </div>
-          <p className="text-sm text-slate-400 mt-3">Or go to <span className="font-mono text-slate-600">lobsterbush.github.io/kiln</span></p>
+          <p className="text-sm text-slate-400 mt-3">Or go to <span className="font-mono text-slate-600">{window.location.host}{import.meta.env.BASE_URL.replace(/\/$/, '')}</span></p>
         </div>
       </div>
 

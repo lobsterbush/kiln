@@ -28,6 +28,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify the caller is an authenticated instructor
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const { response_id, session_id, participant_id, round } = await req.json()
 
     // Validate required fields
@@ -42,6 +51,29 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
+
+    // Verify the JWT belongs to a real user
+    const jwt = authHeader.slice(7)
+    const { data: { user } } = await supabase.auth.getUser(jwt)
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Verify the caller owns the session (prevents instructors targeting each other's sessions)
+    const { data: sessionOwner } = await supabase
+      .from('sessions')
+      .select('instructor_id')
+      .eq('id', session_id)
+      .single()
+    if (!sessionOwner || sessionOwner.instructor_id !== user.id) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
     // Validate: verify the response belongs to the claimed session and participant
     const { data: response } = await supabase

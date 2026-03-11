@@ -38,7 +38,7 @@ export function Results() {
       setLoadError('Session not found or you do not have permission to view it.')
       return
     }
-    if (partsResult.error || respsResult.error) {
+    if (partsResult.error || respsResult.error || assignsResult.error) {
       setLoadError('Could not load session data. Please refresh.')
       return
     }

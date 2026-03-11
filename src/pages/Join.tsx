@@ -12,6 +12,11 @@ export function Join() {
   async function handleJoin(code: string, name: string) {
     setError(null)
 
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters.')
+      return
+    }
+
     // Find session by join code
     const { data: session, error: sessionError } = await supabase
       .from('sessions')

@@ -1,16 +1,14 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { Loader2, WifiOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getStudentToken } from '../lib/utils'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { ResponsePanel } from '../components/student/ResponsePanel'
 import { PeerCritiqueView } from '../components/student/PeerCritiqueView'
 import { SocraticView } from '../components/student/SocraticView'
+import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, FOLLOW_UP_TIMEOUT_MS } from '../lib/constants'
 import type { Session, Participant, Activity, RoundStartEvent } from '../lib/types'
-
-const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
-const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
 
 export function StudentSession() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +33,10 @@ export function StudentSession() {
   const [previousResponse, setPreviousResponse] = useState('')
   const [waitingForNext, setWaitingForNext] = useState(false)
   const [followUpLoading, setFollowUpLoading] = useState(false)
+  const [followUpTimedOut, setFollowUpTimedOut] = useState(false)
+  const [disconnected, setDisconnected] = useState(false)
+  const followUpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const subscribedOnceRef = useRef(false)
 
   // Restore response history from sessionStorage on mount (survives page refresh)
   useEffect(() => {
@@ -56,6 +58,24 @@ export function StudentSession() {
     sessionStorage.setItem(`kiln_responses_${id}`, JSON.stringify(myResponses))
   }, [myResponses, id])
 
+  // Follow-up timeout: if Claude doesn't respond within FOLLOW_UP_TIMEOUT_MS, show fallback
+  useEffect(() => {
+    if (followUpLoading) {
+      followUpTimeoutRef.current = setTimeout(() => {
+        setFollowUpLoading(false)
+        setFollowUpTimedOut(true)
+      }, FOLLOW_UP_TIMEOUT_MS)
+    } else {
+      if (followUpTimeoutRef.current) {
+        clearTimeout(followUpTimeoutRef.current)
+        followUpTimeoutRef.current = null
+      }
+    }
+    return () => {
+      if (followUpTimeoutRef.current) clearTimeout(followUpTimeoutRef.current)
+    }
+  }, [followUpLoading])
+
   // Load session data
   useEffect(() => {
     if (!id) return
@@ -68,105 +88,64 @@ export function StudentSession() {
       .select('*, activity:activities(*)')
       .eq('id', id)
       .single()
-    if (data) {
-      setSession(data)
-      const act = data.activity as Activity
-      setActivity(act)
 
-      if (data.status === 'active' && data.round_started_at) {
-        if (data.current_round === 1) {
-          // Late-joiner on round 1 — synthesise event directly
+    if (!data) return
+
+    setSession(data)
+    const act = data.activity as Activity
+    setActivity(act)
+
+    if (data.status === 'active' && data.round_started_at) {
+      if (data.current_round === 1) {
+        // Late-joiner on round 1 — synthesise event directly
+        setRoundEvent({
+          round: 1,
+          duration_sec: act.config.round_duration_sec,
+          prompt: act.config.initial_prompt,
+          server_timestamp: data.round_started_at,
+        })
+      } else {
+        // Round 2+: use the secure RPC for recovery (validates token server-side)
+        const { data: ctx, error } = await supabase.rpc('get_student_round_context', {
+          p_participant_id: studentToken!.participant_id,
+          p_token: studentToken!.token,
+          p_session_id: id!,
+          p_round: data.current_round,
+          p_activity_type: act.type,
+        })
+
+        if (error || !ctx) {
+          setWaitingForNext(true)
+        } else if (ctx.already_submitted) {
+          setWaitingForNext(true)
+        } else if (ctx.peer_response_content) {
+          const prompt = ctx.peer_response_type === 'rebuttal'
+            ? (act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT)
+            : (act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT)
           setRoundEvent({
-            round: 1,
+            round: data.current_round,
             duration_sec: act.config.round_duration_sec,
-            prompt: act.config.initial_prompt,
+            prompt,
             server_timestamp: data.round_started_at,
           })
+          setPeerResponse({ content: ctx.peer_response_content, name: ctx.peer_name })
+          setPeerResponseType(ctx.peer_response_type as 'critique' | 'rebuttal')
+        } else if (ctx.follow_up_prompt) {
+          setRoundEvent({
+            round: data.current_round,
+            duration_sec: act.config.round_duration_sec,
+            prompt: ctx.follow_up_prompt,
+            server_timestamp: data.round_started_at,
+          })
+          setFollowUp(ctx.follow_up_prompt)
         } else {
-          // Round 2+: check whether this student already submitted this round
-          const { data: myRoundResponses } = await supabase
-            .from('responses')
-            .select('id')
-            .eq('session_id', id!)
-            .eq('participant_id', studentToken!.participant_id)
-            .eq('round', data.current_round)
-          if (myRoundResponses && myRoundResponses.length > 0) {
-            // Already submitted — just wait for next round
-            setWaitingForNext(true)
-          } else if (act.type === 'peer_critique' && data.current_round === 2) {
-            // Recover: fetch the peer assignment this student needs to critique
-            const { data: assignment } = await supabase
-              .from('peer_assignments')
-              .select('response_id, author_id')
-              .eq('session_id', id!)
-              .eq('reviewer_id', studentToken!.participant_id)
-              .eq('round', 1)
-              .single()
-            if (assignment) {
-              const [responseResult, authorResult] = await Promise.all([
-                supabase.from('responses').select('content').eq('id', assignment.response_id).single(),
-                supabase.from('participants').select('display_name').eq('id', assignment.author_id).single(),
-              ])
-              if (responseResult.data) {
-                const prompt = act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT
-                setRoundEvent({ round: 2, duration_sec: act.config.round_duration_sec, prompt, server_timestamp: data.round_started_at })
-                setPeerResponse({ content: responseResult.data.content, name: authorResult.data?.display_name ?? 'A classmate' })
-                setPeerResponseType('critique')
-              } else {
-                setWaitingForNext(true)
-              }
-            } else {
-              setWaitingForNext(true)
-            }
-          } else if (act.type === 'peer_critique' && data.current_round === 3) {
-            // Recover: fetch the critique this student received (so they can rebut it)
-            const { data: assignment } = await supabase
-              .from('peer_assignments')
-              .select('reviewer_id')
-              .eq('session_id', id!)
-              .eq('author_id', studentToken!.participant_id)
-              .eq('round', 1)
-              .single()
-            if (assignment) {
-              const [critiqueResult, reviewerResult] = await Promise.all([
-                supabase.from('responses').select('content').eq('session_id', id!).eq('participant_id', assignment.reviewer_id).eq('round', 2).single(),
-                supabase.from('participants').select('display_name').eq('id', assignment.reviewer_id).single(),
-              ])
-              if (critiqueResult.data) {
-                const prompt = act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT
-                setRoundEvent({ round: 3, duration_sec: act.config.round_duration_sec, prompt, server_timestamp: data.round_started_at })
-                setPeerResponse({ content: critiqueResult.data.content, name: reviewerResult.data?.display_name ?? 'Peer critique' })
-                setPeerResponseType('rebuttal')
-              } else {
-                setWaitingForNext(true)
-              }
-            } else {
-              setWaitingForNext(true)
-            }
-          } else if (act.type === 'socratic_chain' && data.current_round > 1) {
-            // Recover: fetch the stored follow-up from DB
-            const { data: followUpData } = await supabase
-              .from('follow_ups')
-              .select('prompt')
-              .eq('session_id', id!)
-              .eq('participant_id', studentToken!.participant_id)
-              .eq('round', data.current_round - 1)
-              .single()
-            if (followUpData?.prompt) {
-              setRoundEvent({ round: data.current_round, duration_sec: act.config.round_duration_sec, prompt: followUpData.prompt, server_timestamp: data.round_started_at })
-              setFollowUp(followUpData.prompt)
-            } else {
-              setWaitingForNext(true)
-            }
-          } else {
-            setWaitingForNext(true)
-          }
+          setWaitingForNext(true)
         }
       }
+    }
 
-      if (data.status === 'between_rounds') {
-        setWaitingForNext(true)
-      }
+    if (data.status === 'between_rounds') {
+      setWaitingForNext(true)
     }
 
     const { data: parts } = await supabase
@@ -185,6 +164,7 @@ export function StudentSession() {
 
     channel
       .on('broadcast', { event: 'round:start' }, ({ payload }) => {
+        setDisconnected(false)
         const event = payload as RoundStartEvent
         setRoundEvent(event)
         setPeerResponse(null)
@@ -225,9 +205,23 @@ export function StudentSession() {
           }]
         })
       })
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setDisconnected(false)
+          // After the first subscription, subsequent SUBSCRIBED events are reconnects
+          if (subscribedOnceRef.current) {
+            loadSession()
+          }
+          subscribedOnceRef.current = true
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setDisconnected(true)
+        }
+      })
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      subscribedOnceRef.current = false
+      supabase.removeChannel(channel)
+    }
   }, [id, studentToken?.participant_id])
 
   const handleSubmitResponse = useCallback(
@@ -235,30 +229,33 @@ export function StudentSession() {
       if (!studentToken || !roundEvent || !id) return
 
       const responseType =
-        followUp ? 'followup_answer' :
+        followUp || followUpTimedOut ? 'followup_answer' :
         peerResponse ? peerResponseType :
         'initial'
 
-      const { error: insertError } = await supabase.from('responses').insert({
-        session_id: id,
-        participant_id: studentToken.participant_id,
-        round: roundEvent.round,
-        content,
-        response_type: responseType,
-        time_taken_ms: timeTakenMs,
+      // Use the token-validated RPC instead of a direct insert
+      const { error: rpcError } = await supabase.rpc('submit_response', {
+        p_token: studentToken.token,
+        p_session_id: id,
+        p_participant_id: studentToken.participant_id,
+        p_round: roundEvent.round,
+        p_content: content,
+        p_response_type: responseType,
+        p_time_taken_ms: timeTakenMs,
       })
 
-      if (insertError) throw new Error('Failed to save response')
+      if (rpcError) throw new Error('Failed to save response')
 
       setMyResponses((prev) => [...prev, { round: roundEvent.round, prompt: roundEvent.prompt, content }])
       setPreviousResponse(content)
+      setFollowUpTimedOut(false)
       setWaitingForNext(true)
 
       if (activity?.type === 'socratic_chain') {
         setFollowUpLoading(true)
       }
     },
-    [studentToken, roundEvent, id, peerResponse, peerResponseType, followUp, activity]
+    [studentToken, roundEvent, id, peerResponse, peerResponseType, followUp, followUpTimedOut, activity]
   )
 
   // Blank screen while redirect fires (from the validation useEffect above)
@@ -270,15 +267,26 @@ export function StudentSession() {
     return <div className="flex justify-center py-20 text-slate-500">Loading session...</div>
   }
 
+  // Disconnected banner (shown inline, doesn't block the UI)
+  const disconnectedBanner = disconnected && (
+    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 mb-4">
+      <WifiOff className="w-4 h-4 shrink-0" />
+      <span>Connection lost — reconnecting...</span>
+    </div>
+  )
+
   // Lobby
   if (session.status === 'lobby') {
     return (
+      <>
+        {disconnectedBanner}
       <SessionLobby
         joinCode={session.join_code}
         participants={participants}
         isInstructor={false}
         activityTitle={activity.title}
       />
+      </>
     )
   }
 
@@ -311,7 +319,7 @@ export function StudentSession() {
   }
 
   // Waiting between rounds
-  if (waitingForNext && !peerResponse && !followUp && !followUpLoading) {
+  if (waitingForNext && !peerResponse && !followUp && !followUpLoading && !followUpTimedOut) {
     return (
       <div className="text-center py-20">
         <p className="text-slate-500 animate-pulse text-lg">Waiting for next round...</p>
@@ -347,8 +355,8 @@ export function StudentSession() {
       )
     }
 
-    // Socratic chain: show AI follow-up
-    if ((followUp || followUpLoading) && activity.type === 'socratic_chain') {
+    // Socratic chain: show AI follow-up (or fallback if timed out)
+    if ((followUp || followUpLoading || followUpTimedOut) && activity.type === 'socratic_chain') {
       return (
         <SocraticView
           followUpPrompt={followUp}
@@ -358,18 +366,22 @@ export function StudentSession() {
           durationSec={roundEvent.duration_sec}
           onSubmit={handleSubmitResponse}
           loading={followUpLoading}
+          timedOut={followUpTimedOut}
         />
       )
     }
 
     // Default: initial response
     return (
-      <ResponsePanel
-        prompt={roundEvent.prompt}
-        serverTimestamp={roundEvent.server_timestamp}
-        durationSec={roundEvent.duration_sec}
-        onSubmit={handleSubmitResponse}
-      />
+      <>
+        {disconnectedBanner}
+        <ResponsePanel
+          prompt={roundEvent.prompt}
+          serverTimestamp={roundEvent.server_timestamp}
+          durationSec={roundEvent.duration_sec}
+          onSubmit={handleSubmitResponse}
+        />
+      </>
     )
   }
 
