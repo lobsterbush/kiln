@@ -15,6 +15,7 @@ export function ProjectorView() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
   const [featured, setFeatured] = useState<string | null>(null)
+  const [remoteFeatured, setRemoteFeatured] = useState<{ id: string; content: string; name: string } | null>(null)
   const [showNames, setShowNames] = useState(true)
 
   useEffect(() => {
@@ -62,9 +63,14 @@ export function ProjectorView() {
           prev ? { ...prev, current_round: payload.round, status: 'active', round_started_at: payload.server_timestamp } : null
         )
         setFeatured(null)
+        setRemoteFeatured(null)
       })
       .on('broadcast', { event: 'session:status' }, ({ payload }) => {
         setSession((prev) => prev ? { ...prev, status: payload.status } : null)
+      })
+      .on('broadcast', { event: 'response:featured' }, ({ payload }) => {
+        setRemoteFeatured({ id: payload.response_id as string, content: payload.content as string, name: payload.participant_name as string })
+        setFeatured(null)
       })
       .subscribe()
 
@@ -75,7 +81,7 @@ export function ProjectorView() {
   }, [id])
 
   const handleKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') setFeatured(null)
+    if (e.key === 'Escape') { setFeatured(null); setRemoteFeatured(null) }
   }, [])
 
   useEffect(() => {
@@ -99,6 +105,9 @@ export function ProjectorView() {
   const featuredParticipant = featuredResponse
     ? participants.find((p) => p.id === featuredResponse.participant_id)
     : null
+
+  // Remote featured (sent from instructor's LiveMonitor) takes priority over local click
+  const activeFeatured = remoteFeatured ?? (featuredResponse ? { id: featuredResponse.id, content: featuredResponse.content, name: featuredParticipant?.display_name ?? '' } : null)
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col select-none">
@@ -140,23 +149,26 @@ export function ProjectorView() {
         </div>
       </div>
 
-      {/* Featured response overlay */}
-      {featuredResponse && (
+      {/* Featured response overlay — triggered by local click or remote instructor broadcast */}
+      {activeFeatured && (
         <div
           className="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-12"
-          onClick={() => setFeatured(null)}
+          onClick={() => { setFeatured(null); setRemoteFeatured(null) }}
         >
           <div
             className="max-w-3xl w-full bg-slate-800 rounded-3xl p-10 shadow-2xl border border-slate-700"
             onClick={(e) => e.stopPropagation()}
           >
-            {showNames && featuredParticipant && (
+            {remoteFeatured && (
+              <p className="text-xs text-kiln-500 font-semibold uppercase tracking-wider mb-3">Shared by instructor</p>
+            )}
+            {showNames && activeFeatured.name && (
               <p className="text-sm font-bold text-kiln-400 mb-6 uppercase tracking-wider">
-                {featuredParticipant.display_name}
+                {activeFeatured.name}
               </p>
             )}
             <p className="text-2xl text-slate-100 leading-relaxed font-light">
-              {featuredResponse.content}
+              {activeFeatured.content}
             </p>
             <p className="mt-8 text-xs text-slate-600">
               Press <kbd className="bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded text-xs">Esc</kbd> or click outside to close

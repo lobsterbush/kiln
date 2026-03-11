@@ -80,6 +80,12 @@ h1, h2, h3 {
 .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
 .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
 .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 340ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 380ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 420ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 460ms; }
+.stagger-children > *:nth-child(11) { animation-delay: 500ms; }
+.stagger-children > *:nth-child(12) { animation-delay: 540ms; }
 
 /* Textarea focus glow */
 textarea:focus {

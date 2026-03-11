@@ -304,6 +304,10 @@ export function InstructorSession() {
     )
   }
 
+  async function featureResponse(responseId: string, participantName: string, content: string) {
+    await broadcastEvent('response:featured', { response_id: responseId, participant_name: participantName, content })
+  }
+
   async function doEndSession() {
     if (!session) return
     await supabase
@@ -370,6 +374,7 @@ export function InstructorSession() {
       peerWarning={peerWarning}
       onDismissPeerWarning={() => setPeerWarning(null)}
       sessionId={id}
+      onFeatureResponse={featureResponse}
     />
   )
 }

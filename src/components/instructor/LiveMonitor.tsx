@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Timer } from '../shared/Timer'
-import { Monitor, X } from 'lucide-react'
+import { Monitor, X, Cast, Check } from 'lucide-react'
 import type { Response, Participant } from '../../lib/types'
 import { cn } from '../../lib/utils'
 
@@ -20,9 +20,11 @@ interface LiveMonitorProps {
   peerWarning?: string | null
   onDismissPeerWarning?: () => void
   sessionId?: string
+  onFeatureResponse?: (responseId: string, participantName: string, content: string) => void
 }
 
 interface ExpandedResponse {
+  responseId: string
   name: string
   content: string
   timeTakenMs: number | null
@@ -44,9 +46,11 @@ export function LiveMonitor({
   peerWarning,
   onDismissPeerWarning,
   sessionId,
+  onFeatureResponse,
 }: LiveMonitorProps) {
   const [confirmingEnd, setConfirmingEnd] = useState(false)
   const [expanded, setExpanded] = useState<ExpandedResponse | null>(null)
+  const [projectorSent, setProjectorSent] = useState<string | null>(null) // response id last sent
   const roundResponses = responses.filter((r) => r.round === currentRound)
   const submittedCount = roundResponses.length
   const totalCount = participants.length
@@ -82,6 +86,25 @@ export function LiveMonitor({
               <span className="text-xs text-slate-400">
                 {(expanded.timeTakenMs / 1000).toFixed(1)}s to submit
               </span>
+            )}
+            {onFeatureResponse && expanded.responseId && (
+              <button
+                onClick={() => {
+                  onFeatureResponse(expanded.responseId!, expanded.name, expanded.content)
+                  setProjectorSent(expanded.responseId!)
+                  setTimeout(() => setProjectorSent(null), 2500)
+                }}
+                className={cn(
+                  'ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  projectorSent === expanded.responseId
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                )}
+              >
+                {projectorSent === expanded.responseId
+                  ? <><Check className="w-3 h-3" /> Sent to projector</>
+                  : <><Cast className="w-3 h-3" /> Show on projector</>}
+              </button>
             )}
           </div>
         </div>
@@ -152,7 +175,7 @@ export function LiveMonitor({
           return (
             <div
               key={p.id}
-              onClick={() => response && setExpanded({ name: p.display_name, content: response.content, timeTakenMs: response.time_taken_ms })}
+              onClick={() => response && setExpanded({ responseId: response.id, name: p.display_name, content: response.content, timeTakenMs: response.time_taken_ms })}
               className={cn(
                 'rounded-2xl border p-4 transition-all duration-200',
                 response

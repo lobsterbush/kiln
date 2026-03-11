@@ -6,8 +6,9 @@ interface AuthState {
   user: User | null
   session: Session | null
   loading: boolean
-  signIn: (email: string) => Promise<{ error: Error | null }>
-  signInWithGoogle: () => Promise<{ error: Error | null }>
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
+  signUp: (email: string, password: string) => Promise<{ error: Error | null; needsConfirmation?: boolean }>
+  sendMagicLink: (email: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
 }
 
@@ -35,17 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}instructor`,
-      },
-    })
+  async function signIn(email: string, password: string) {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     return { error: error as Error | null }
   }
 
-  async function signIn(email: string) {
+  async function signUp(email: string, password: string) {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) return { error: error as Error | null }
+    // If identities is empty the email already exists
+    const needsConfirmation = !data.session
+    return { error: null, needsConfirmation }
+  }
+
+  async function sendMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -62,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, sendMagicLink, signOut }}>
       {children}
     </AuthContext.Provider>
   )

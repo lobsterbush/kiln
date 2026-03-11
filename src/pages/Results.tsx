@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
-import { Download, ArrowLeft, Sparkles, Loader2, Play } from 'lucide-react'
+import { Download, ArrowLeft, Sparkles, Loader2, Play, MessageSquare, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { generateJoinCode } from '../lib/utils'
 
 export function Results() {
@@ -23,6 +23,14 @@ export function Results() {
   const [debriefLoading, setDebriefLoading] = useState(false)
   const [debriefError, setDebriefError] = useState<string | null>(null)
   const [runningAgain, setRunningAgain] = useState(false)
+  const [sessionHistory, setSessionHistory] = useState<{
+    id: string; created_at: string; join_code: string
+    participants: { count: number }[]
+    responses: { count: number }[]
+  }[]>([])
+  const [feedback, setFeedback] = useState<{ participant_id: string; name: string; text: string }[] | null>(null)
+  const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const [feedbackError, setFeedbackError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -58,6 +66,20 @@ export function Results() {
     if (respsResult.data) setResponses(respsResult.data)
     if (assignsResult.data) setAssignments(assignsResult.data)
     if (followUpsResult.data) setFollowUps(followUpsResult.data as FollowUp[])
+
+    // Load cross-session history (non-blocking)
+    const activityId = (sessResult.data.activity as Activity).id
+    supabase
+      .from('sessions')
+      .select('id, created_at, join_code, participants:participants(count), responses:responses(count)')
+      .eq('activity_id', activityId)
+      .eq('instructor_id', user!.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) setSessionHistory(data as typeof sessionHistory)
+      })
   }
 
   async function runAgain() {
@@ -73,6 +95,23 @@ export function Results() {
       navigate(`/instructor/session/${newSession.id}`)
     } else {
       setRunningAgain(false)
+    }
+  }
+
+  async function generateFeedback() {
+    if (!session) return
+    setFeedbackLoading(true)
+    setFeedbackError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-feedback', {
+        body: { session_id: session.id },
+      })
+      if (error || !data) throw new Error(error?.message ?? 'No data returned')
+      setFeedback(data.feedback)
+    } catch {
+      setFeedbackError('Could not generate feedback. Please try again.')
+    } finally {
+      setFeedbackLoading(false)
     }
   }
 
@@ -227,6 +266,14 @@ export function Results() {
             Run again
           </button>
           <button
+            onClick={generateFeedback}
+            disabled={feedbackLoading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border-2 border-blue-200 text-blue-700 font-medium rounded-xl hover:border-blue-300 hover:bg-blue-100 disabled:opacity-40 transition-all"
+          >
+            {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
+            {feedbackLoading ? 'Generating…' : 'Student Feedback'}
+          </button>
+          <button
             onClick={generateDebrief}
             disabled={debriefLoading}
             className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border-2 border-purple-200 text-purple-700 font-medium rounded-xl hover:border-purple-300 hover:bg-purple-100 disabled:opacity-40 transition-all"
@@ -243,6 +290,46 @@ export function Results() {
           </button>
         </div>
       </div>
+
+      {/* Cross-session history */}
+      {sessionHistory.length > 1 && (() => {
+        const thisIndex = sessionHistory.findIndex((s) => s.id === session.id)
+        const runNumber = sessionHistory.length - thisIndex
+        const totalRuns = sessionHistory.length
+        const otherSessions = sessionHistory.filter((s) => s.id !== session.id)
+        const avgEngagement = otherSessions.length > 0
+          ? otherSessions.reduce((sum, s) => {
+              const p = s.participants[0]?.count ?? 0
+              const r = s.responses[0]?.count ?? 0
+              return sum + (p > 0 ? r / p : 0)
+            }, 0) / otherSessions.length
+          : null
+        const thisEngagement = participants.length > 0 ? totalResponses / participants.length : 0
+        const delta = avgEngagement != null ? thisEngagement - avgEngagement : null
+        const trendColor = delta == null ? 'text-slate-400' : delta > 0.05 ? 'text-emerald-600' : delta < -0.05 ? 'text-red-500' : 'text-slate-500'
+        const TrendIcon = delta == null ? Minus : delta > 0.05 ? TrendingUp : delta < -0.05 ? TrendingDown : Minus
+        return (
+          <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm flex-wrap">
+            <span className="text-slate-500 font-medium">Run #{runNumber} of {totalRuns}</span>
+            {avgEngagement != null && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="flex items-center gap-1.5 text-slate-500">
+                  Avg engagement: <span className="font-semibold text-slate-700">{Math.round(avgEngagement * 100)}%</span>
+                  <span className="text-slate-300">vs</span>
+                  <span className={`font-semibold ${trendColor}`}>{Math.round(thisEngagement * 100)}% this run</span>
+                  <TrendIcon className={`w-3.5 h-3.5 ${trendColor}`} />
+                </span>
+              </>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* Feedback / debrief errors */}
+      {feedbackError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{feedbackError}</p>
+      )}
 
       {/* AI Debrief panel */}
       {debriefError && (
@@ -327,6 +414,15 @@ export function Results() {
         {byParticipant.map(({ participant, chain }) => (
           <div key={participant.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
             <h3 className="font-semibold text-slate-900 mb-4">{participant.display_name}</h3>
+            {feedback && (() => {
+              const fb = feedback.find((f) => f.participant_id === participant.id)
+              return fb ? (
+                <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex gap-3 animate-fade-in">
+                  <MessageSquare className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-blue-900 leading-relaxed">{fb.text}</p>
+                </div>
+              ) : null
+            })()}
             <div className="flex flex-col gap-3">
 {chain.map((r) => {
                 // For Socratic Chain: show the AI follow-up question between rounds
