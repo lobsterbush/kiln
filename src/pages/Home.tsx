@@ -83,16 +83,16 @@ export function Home() {
           <div className="flex-1 flex flex-col gap-8 animate-fade-in lg:py-20">
             <div>
               <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-6">
-                AI-resistant active learning
+                Live formative assessment
               </span>
               <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-5">
-                Designed so AI shortcuts<br />
-                <span className="text-kiln-500">create more work, not less.</span>
+                Active learning you<br />
+                <span className="text-kiln-500">can see and verify.</span>
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg">
-                Timed, personalised, reactive activities that make it harder to
-                use AI than to just think. Every student responds on the spot
-                to content unique to them.
+                Timed, reactive in-class activities where every student responds
+                to content unique to them — live, on the spot, while you watch.
+                Genuine thinking, not pre-generated answers.
               </p>
             </div>
 
@@ -316,45 +316,97 @@ export function Home() {
 
       {/* ═══ PRICING ═══ */}
       <section id="pricing" className="w-full py-24">
-        <div className="max-w-3xl mx-auto px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-2">Simple pricing</h2>
-          <p className="text-slate-500 text-center mb-12">Free while in beta. No credit card needed.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col p-8 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
-              <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Free beta</span>
-              <div className="mb-6">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Simple pricing</h2>
+            <p className="text-slate-500">Free to use today. Pro and Department tiers launching later this year.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            {/* Free */}
+            <div className="flex flex-col p-7 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
+              <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Free</span>
+              <div className="mb-5">
                 <span className="text-4xl font-extrabold text-slate-900">$0</span>
-                <span className="text-slate-500 ml-1">/ semester</span>
+                <span className="text-slate-400 ml-1 text-sm">/month</span>
               </div>
-              <ul className="flex flex-col gap-3 mb-8 flex-1">
-                {['Unlimited activities', 'Large class support', 'All four activity types', 'Live monitor dashboard', 'Session history & CSV export'].map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
+              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
+                {[
+                  '10 sessions per month',
+                  'Peer Critique + Socratic Chain',
+                  'Up to 40 students per session',
+                  'Live monitor & CSV export',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
                     <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />{f}
                   </li>
                 ))}
               </ul>
-              <Link to="/instructor" className="block text-center px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95">
+              <Link to="/instructor" className="block text-center px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95 text-sm">
                 Get started free
               </Link>
             </div>
-            <div className="flex flex-col p-8 bg-slate-50 rounded-2xl border-2 border-slate-200">
-              <span className="inline-block text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Institution</span>
-              <div className="mb-6">
-                <span className="text-4xl font-extrabold text-slate-400">—</span>
-                <span className="inline-block ml-3 text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">Coming soon</span>
+
+            {/* Pro */}
+            <div className="flex flex-col p-7 bg-slate-900 rounded-2xl border-2 border-slate-700">
+              <span className="inline-block text-xs font-bold text-kiln-400 bg-kiln-900 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Pro</span>
+              <div className="mb-5">
+                <span className="text-4xl font-extrabold text-white">$99</span>
+                <span className="text-slate-400 ml-1 text-sm">/year</span>
               </div>
-              <ul className="flex flex-col gap-3 mb-8 flex-1">
-                {['Everything in Free', 'Canvas & Moodle LMS integration', 'Advanced analytics & exports', 'SSO / institutional login', 'Priority support'].map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-slate-500">
+              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
+                {[
+                  'Unlimited sessions',
+                  'All four activity types',
+                  'Projector view for class display',
+                  'Async / take-home mode',
+                  'Session analytics',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-kiln-400 shrink-0 mt-0.5" />{f}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Pro%20Waitlist"
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-kiln-600 hover:bg-kiln-500 text-white font-semibold rounded-xl transition-colors text-sm"
+              >
+                <Mail className="w-4 h-4" /> Join Pro waitlist
+              </a>
+            </div>
+
+            {/* Department */}
+            <div className="flex flex-col p-7 bg-slate-50 rounded-2xl border-2 border-slate-200">
+              <span className="inline-block text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Department</span>
+              <div className="mb-5">
+                <span className="text-4xl font-extrabold text-slate-400">$1,200</span>
+                <span className="text-slate-400 ml-1 text-sm">/year</span>
+              </div>
+              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
+                {[
+                  'Everything in Pro',
+                  'Unlimited instructors in dept.',
+                  'Canvas & Moodle LMS integration',
+                  'SSO / institutional login',
+                  'Priority support & onboarding',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-slate-500">
                     <Check className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />{f}
                   </li>
                 ))}
               </ul>
-              <a href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Institution%20Waitlist" className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-300 transition-colors">
-                <Mail className="w-4 h-4" />Join waitlist
+              <a
+                href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Department%20Enquiry"
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-300 transition-colors text-sm"
+              >
+                <Mail className="w-4 h-4" /> Contact us
               </a>
             </div>
+
           </div>
+          <p className="text-center text-xs text-slate-400 mt-8">
+            All tiers are free during the current beta. Billing begins when Pro and Department tiers launch.
+          </p>
         </div>
       </section>
 

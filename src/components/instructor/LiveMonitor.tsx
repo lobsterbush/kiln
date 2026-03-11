@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Timer } from '../shared/Timer'
+import { Monitor } from 'lucide-react'
 import type { Response, Participant } from '../../lib/types'
 import { cn } from '../../lib/utils'
 
@@ -18,6 +19,7 @@ interface LiveMonitorProps {
   isAdvancing?: boolean
   peerWarning?: string | null
   onDismissPeerWarning?: () => void
+  sessionId?: string
 }
 
 export function LiveMonitor({
@@ -35,6 +37,7 @@ export function LiveMonitor({
   isAdvancing = false,
   peerWarning,
   onDismissPeerWarning,
+  sessionId,
 }: LiveMonitorProps) {
   const [confirmingEnd, setConfirmingEnd] = useState(false)
   const roundResponses = responses.filter((r) => r.round === currentRound)
@@ -130,7 +133,17 @@ export function LiveMonitor({
       </div>
 
       {/* Controls */}
-      <div className="flex gap-3 justify-end items-center">
+      <div className="flex gap-3 justify-end items-center flex-wrap">
+        {sessionId && (
+          <a
+            href={`${window.location.origin}${import.meta.env.BASE_URL}instructor/session/${sessionId}/display`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 text-slate-300 text-sm font-medium rounded-xl hover:bg-slate-700 hover:text-white transition-colors"
+          >
+            <Monitor className="w-4 h-4" /> Projector View
+          </a>
+        )}
         {confirmingEnd ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600">End session?</span>

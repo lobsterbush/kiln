@@ -361,9 +361,10 @@ export function InstructorSession() {
       onEndSession={endSession}
       onRoundExpire={handleRoundExpire}
       sessionStatus={session.status}
-      isAdvancing={advancing}
+    isAdvancing={advancing}
       peerWarning={peerWarning}
       onDismissPeerWarning={() => setPeerWarning(null)}
+      sessionId={id}
     />
   )
 }

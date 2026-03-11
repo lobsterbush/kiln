@@ -10,6 +10,7 @@ import { InstructorSession } from './pages/InstructorSession'
 import { Results } from './pages/Results'
 import { EditActivity } from './pages/EditActivity'
 import { Pedagogy } from './pages/Pedagogy'
+import { ProjectorView } from './pages/ProjectorView'
 
 function NotFound() {
   return (
@@ -38,6 +39,8 @@ export default function App() {
             <Route path="/pedagogy" element={<Pedagogy />} />
             <Route path="*" element={<NotFound />} />
           </Route>
+          {/* Full-screen projector view — no Layout wrapper */}
+          <Route path="/instructor/session/:id/display" element={<ProjectorView />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

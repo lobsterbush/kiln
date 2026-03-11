@@ -256,8 +256,18 @@ export function EditActivity() {
               onChange={(e) => setDuration(Number(e.target.value))}
               className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             >
-              {[30, 45, 60, 90, 120].map((s) => (
-                <option key={s} value={s}>{s === 30 ? '30 seconds (very short)' : `${s} seconds`}</option>
+              {[
+                [30, '30 sec'],
+                [60, '1 min'],
+                [90, '90 sec'],
+                [120, '2 min'],
+                [300, '5 min'],
+                [600, '10 min'],
+                [900, '15 min'],
+                [1800, '30 min — take-home'],
+                [3600, '60 min — async'],
+              ].map(([s, label]) => (
+                <option key={s} value={s}>{label}</option>
               ))}
             </select>
           </div>
