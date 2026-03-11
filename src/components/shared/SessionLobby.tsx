@@ -39,11 +39,11 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
         {/* Code tiles */}
         <div className="text-center">
           <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Session Code</p>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2">
             {joinCode.split('').map((char, i) => (
               <span
                 key={i}
-                className="w-14 h-16 flex items-center justify-center text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
+                className="w-10 h-12 sm:w-14 sm:h-16 flex items-center justify-center text-2xl sm:text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
               >
                 {char}
               </span>

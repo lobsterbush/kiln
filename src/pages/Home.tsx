@@ -95,19 +95,19 @@ export function Home() {
 
       {/* ═══ HERO: full viewport, two-column ═══ */}
       <section id="hero" className="w-full bg-kiln-50">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-20 lg:py-0 flex flex-col lg:flex-row lg:items-center gap-14 lg:gap-16 lg:min-h-[calc(100vh-3.5rem)]">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12 sm:py-16 lg:py-0 flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16 lg:min-h-[calc(100vh-3.5rem)]">
 
           {/* Left: copy + CTAs */}
-          <div className="flex-1 flex flex-col gap-8 animate-fade-in lg:py-20">
+          <div className="flex-1 flex flex-col gap-6 sm:gap-8 animate-fade-in lg:py-20">
             <div>
-              <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-6">
+              <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 sm:mb-6">
                 Live formative assessment
               </span>
-              <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-5">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-4 sm:mb-5">
                 Active learning you<br />
                 <span className="text-kiln-500">can see and verify.</span>
               </h1>
-              <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed max-w-lg">
                 Timed, reactive in-class activities where every student responds
                 to content unique to them — live, on the spot, while you watch.
                 Genuine thinking, not pre-generated answers.
@@ -134,13 +134,13 @@ export function Home() {
                   <ArrowRight className="w-6 h-6" />
                 </button>
               </form>
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 pt-1">
                 <p className="text-sm text-slate-400">Code is on the board or screen.</p>
                 <Link
                   to="/instructor"
-                  className="flex items-center gap-1.5 text-sm font-semibold text-kiln-600 hover:text-kiln-700 transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-kiln-600 hover:text-kiln-700 transition-colors whitespace-nowrap"
                 >
-                  Instructor? Get started free <ArrowRight className="w-3.5 h-3.5" />
+                  Instructor? Sign up free <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function Home() {
         </div>
 
         {/* Mobile: show mockup below CTAs */}
-        <div className="lg:hidden max-w-lg mx-auto px-6 pb-16">
+        <div className="lg:hidden max-w-lg mx-auto px-6 pb-12 sm:pb-16">
           <p className="text-xs font-bold text-kiln-600 uppercase tracking-wider text-center mb-3">
             What you see as the instructor
           </p>
@@ -165,7 +165,7 @@ export function Home() {
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section id="how-it-works" className="w-full bg-slate-900 py-24">
+      <section id="how-it-works" className="w-full bg-slate-900 py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-white mb-3">Up and running in 60 seconds</h2>
@@ -189,7 +189,7 @@ export function Home() {
       </section>
 
       {/* ═══ WHAT YOU'RE SIGNING UP FOR ═══ */}
-      <section id="features" className="w-full py-24 bg-slate-50">
+      <section id="features" className="w-full py-16 sm:py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Four activity types. Zero passengers.</h2>
@@ -333,7 +333,7 @@ export function Home() {
       </section>
 
       {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="w-full py-24">
+      <section id="pricing" className="w-full py-16 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-2">Simple pricing</h2>
@@ -342,7 +342,7 @@ export function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {/* Free */}
-            <div className="flex flex-col p-7 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
+            <div className="flex flex-col p-5 sm:p-7 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
               <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Free</span>
               <div className="mb-5">
                 <span className="text-4xl font-extrabold text-slate-900">$0</span>
@@ -366,7 +366,7 @@ export function Home() {
             </div>
 
             {/* Pro */}
-            <div className="flex flex-col p-7 bg-slate-900 rounded-2xl border-2 border-slate-700">
+            <div className="flex flex-col p-5 sm:p-7 bg-slate-900 rounded-2xl border-2 border-slate-700">
               <span className="inline-block text-xs font-bold text-kiln-400 bg-kiln-900 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Pro</span>
               <div className="mb-5">
                 <span className="text-4xl font-extrabold text-white">$99</span>
@@ -411,7 +411,7 @@ export function Home() {
             </div>
 
             {/* Department */}
-            <div className="flex flex-col p-7 bg-slate-50 rounded-2xl border-2 border-slate-200">
+            <div className="flex flex-col p-5 sm:p-7 bg-slate-50 rounded-2xl border-2 border-slate-200">
               <span className="inline-block text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Department</span>
               <div className="mb-5">
                 <span className="text-4xl font-extrabold text-slate-400">$1,200</span>

@@ -229,17 +229,17 @@ export function InstructorDashboard() {
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Resume Session</p>
           <div className="flex flex-col gap-2">
             {activeSessions.map((s) => (
-              <div key={s.id} className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-slate-800 text-sm">{s.activity?.[0]?.title ?? 'Untitled'}</span>
-                  <span className="font-mono text-xs text-slate-500">{s.join_code}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              <div key={s.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 gap-2">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className="font-semibold text-slate-800 text-sm truncate">{s.activity?.[0]?.title ?? 'Untitled'}</span>
+                  <span className="font-mono text-xs text-slate-500 shrink-0">{s.join_code}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
                     s.status === 'lobby' ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {s.status === 'between_rounds' ? 'paused' : s.status}
                   </span>
                 </div>
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => handleDiscardSession(s.id)}
                     className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -412,17 +412,17 @@ export function InstructorDashboard() {
           </div>
           <div className="flex flex-col gap-1.5">
             {pastSessions.map((s) => (
-              <div key={s.id} className="flex items-center justify-between px-4 py-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-700">{s.activity?.[0]?.title ?? 'Untitled'}</span>
-                  <span className="font-mono text-xs text-slate-400">{s.join_code}</span>
-                  <span className="text-xs text-slate-400">
+              <div key={s.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className="text-sm font-medium text-slate-700 truncate">{s.activity?.[0]?.title ?? 'Untitled'}</span>
+                  <span className="font-mono text-xs text-slate-400 shrink-0">{s.join_code}</span>
+                  <span className="text-xs text-slate-400 shrink-0">
                     {new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
                 <Link
                   to={`/instructor/results/${s.id}`}
-                  className="text-xs font-medium text-kiln-600 hover:text-kiln-700 transition-colors"
+                  className="text-xs font-medium text-kiln-600 hover:text-kiln-700 transition-colors shrink-0"
                 >
                   View results →
                 </Link>
