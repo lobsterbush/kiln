@@ -78,12 +78,12 @@ export function Home() {
                 AI-resistant active learning
               </span>
               <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-5">
-                No free riders.<br />
-                <span className="text-kiln-500">Every student writes.</span>
+                AI can write the essay.<br />
+                <span className="text-kiln-500">It can't think live.</span>
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg">
-                Run peer critique and Socratic AI sessions where every student argues,
-                defends, and deepens their thinking — in real time, in your classroom.
+                Real-time, timed activities where students must argue, critique, and
+                defend their reasoning on the spot — no copy-pasting possible.
               </p>
             </div>
 
