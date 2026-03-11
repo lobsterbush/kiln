@@ -102,16 +102,16 @@ export function Home() {
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-kiln-700 bg-white border border-kiln-200 shadow-sm px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 inline-block"></span>
-                Live formative assessment
+                Evidence-based formative assessment
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.0] mb-5">
                 Active learning<br />
                 <span className="text-kiln-500 italic">you can see.</span>
               </h1>
               <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
-                Timed, reactive in-class activities where every student responds
-                to content unique to them — on the spot, while you watch.
-                Genuine thinking, not pre-generated answers.
+                Timed writing activities grounded in retrieval practice, peer
+                assessment, and Socratic questioning. Every student responds to
+                content unique to them — on the spot, in class, while you watch.
               </p>
             </div>
 
@@ -188,7 +188,7 @@ export function Home() {
           <div className="mb-12">
             <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Activity types</p>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Four types.<br className="hidden sm:block" /> Zero passengers.</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Each activity targets<br className="hidden sm:block" /> a different cognitive mechanism.</h2>
               <Link
                 to="/pedagogy"
                 className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-semibold transition-colors shrink-0"
@@ -210,14 +210,14 @@ export function Home() {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Students write a claim, critique a peer's argument, then defend their own position under fire — every student as both author and critic.
+                  Argumentation has three moves: construct a claim, locate the weakness in opposing reasoning, defend under scrutiny. This activity sequences all three in a single session.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-blue-100/50 flex-1">
                 {[
-                  { round: 1, label: 'Make your case',     emoji: '✍️', text: 'Everyone responds to the opening prompt with an original argument. Timed.' },
-                  { round: 2, label: 'Find the weakness',  emoji: '🔍', text: 'Each student is assigned a peer\'s argument at random and must identify its weakest assumption.' },
-                  { round: 3, label: 'Defend your position', emoji: '⚔️', text: 'Students receive the critique of their own work and write a rebuttal. No hiding.' },
+                  { round: 1, label: 'Construct a claim', emoji: '✍️', text: 'State a position and the evidence for it. Every student writes to the same prompt; every argument is their own.' },
+                  { round: 2, label: 'Locate the weakest assumption', emoji: '🔍', text: 'Each student receives a peer\'s argument and must identify what it takes for granted — the move from evidence to conclusion it never justifies.' },
+                  { round: 3, label: 'Respond to the critique', emoji: '⚔️', text: 'Students receive a critique of their own argument and write a rebuttal. Every student has been both author and critic.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
                     <span className="text-xs font-mono font-bold text-blue-400 bg-blue-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
@@ -241,14 +241,14 @@ export function Home() {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  AI reads each student's specific response and generates a personalised follow-up that targets the gap in <em>their</em> reasoning — different for every student.
+                  The Socratic method at scale. Claude reads each student's response and generates a follow-up that targets the specific gap in <em>their</em> reasoning — not a generic prompt, but the question their own argument provoked.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-purple-100/50 flex-1">
                 {[
-                  { round: 1, label: 'Initial response',        emoji: '✍️', text: 'Everyone answers the opening question in their own words.' },
-                  { round: 2, label: 'Personalised AI follow-up', emoji: '🤖', text: 'Claude reads each student\'s specific answer and generates a follow-up that probes the weakest point in their reasoning. Every student gets a different question.' },
-                  { round: 3, label: 'Deepen the argument',     emoji: '💡', text: 'Students respond to their personal challenge. Each one confronts exactly what their argument left unanswered.' },
+                  { round: 1, label: 'State your position', emoji: '✍️', text: 'Everyone answers the same opening question. From here, every student\'s path diverges.' },
+                  { round: 2, label: 'The question your argument provoked', emoji: '🤖', text: 'Claude reads your response and generates a follow-up aimed at the weakest point in your reasoning. Every student receives a different question.' },
+                  { round: 3, label: 'Pursue the question', emoji: '💡', text: 'Each student responds to their personal challenge — the gap their own argument created, now confronted directly.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
                     <span className="text-xs font-mono font-bold text-purple-400 bg-purple-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
@@ -272,13 +272,13 @@ export function Home() {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Students surface their own confusion, then explain a classmate's confusion in plain language. Teaching something is the surest test of understanding it.
+                  Metacognitive awareness and peer-mediated explanation in one activity. Students first articulate what they don't understand — harder than it looks — then explain a different classmate's confusion in plain terms. Teaching something reorganises what the teacher knows.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-teal-100/50 flex-1">
                 {[
-                  { round: 1, label: 'Name your confusion', emoji: '🤔', text: 'Each student identifies the single most confusing point from today\'s material and describes it precisely.' },
-                  { round: 2, label: 'Explain it to them',  emoji: '💬', text: 'Each student receives a different classmate\'s confusion and must explain it in plain language — no jargon, no looking it up.' },
+                  { round: 1, label: 'Name your confusion', emoji: '🤔', text: 'Identify what you don\'t yet understand well enough to explain. Describe precisely what\'s unclear — not just that it\'s unclear.' },
+                  { round: 2, label: 'Explain it back', emoji: '💬', text: 'Receive a classmate\'s confusion and explain it in plain language — no jargon, no looking it up. Teaching is the test.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
                     <span className="text-xs font-mono font-bold text-teal-400 bg-teal-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
@@ -302,13 +302,13 @@ export function Home() {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  The instructor reveals a piece of data, quote, or case at session start. Students interpret it, then identify the inferential gap in a peer's reading.
+                  Reveal a dataset, quotation, or case the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading. The highest AI-resistance activity: the evidence doesn't exist until the moment it appears.
                 </p>
               </div>
               <div className="flex flex-col divide-y divide-amber-100/50 flex-1">
                 {[
-                  { round: 1, label: 'Interpret the evidence', emoji: '🔬', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means for the question at hand.' },
-                  { round: 2, label: 'Find the gap',           emoji: '🧩', text: 'Each student receives a peer\'s interpretation and must identify its biggest inferential gap or unsupported leap.' },
+                  { round: 1, label: 'Interpret the evidence', emoji: '🔬', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means, drawing on their own reasoning rather than pre-prepared material.' },
+                  { round: 2, label: 'Identify the inferential gap', emoji: '🧩', text: 'Each student receives a peer\'s interpretation and must locate the biggest unsupported leap — the move from evidence to conclusion that doesn\'t hold.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
                     <span className="text-xs font-mono font-bold text-amber-500 bg-amber-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
