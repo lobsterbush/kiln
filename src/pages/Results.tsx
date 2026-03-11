@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment } from '../lib/types'
-import { Download, ArrowLeft } from 'lucide-react'
+import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
+import { Download, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
 
 export function Results() {
   const { id } = useParams<{ id: string }>()
@@ -14,7 +14,13 @@ export function Results() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [responses, setResponses] = useState<KilnResponse[]>([])
   const [assignments, setAssignments] = useState<PeerAssignment[]>([])
+  const [followUps, setFollowUps] = useState<FollowUp[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [debrief, setDebrief] = useState<{
+    themes: string[]; gaps: string[]; notable: { quote: string; why: string }[]; suggestion: string
+  } | null>(null)
+  const [debriefLoading, setDebriefLoading] = useState(false)
+  const [debriefError, setDebriefError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -26,12 +32,13 @@ export function Results() {
   }, [id, user])
 
   async function loadData() {
-    const [sessResult, partsResult, respsResult, assignsResult] = await Promise.all([
+    const [sessResult, partsResult, respsResult, assignsResult, followUpsResult] = await Promise.all([
       supabase.from('sessions').select('*, activity:activities(*)').eq('id', id!).eq('instructor_id', user!.id).single(),
       supabase.from('participants').select('*').eq('session_id', id!),
       supabase.from('responses').select('*').eq('session_id', id!)
         .order('round', { ascending: true }).order('submitted_at', { ascending: true }),
       supabase.from('peer_assignments').select('*').eq('session_id', id!),
+      supabase.from('follow_ups').select('*').eq('session_id', id!),
     ])
 
     if (!sessResult.data) {
@@ -48,6 +55,24 @@ export function Results() {
     if (partsResult.data) setParticipants(partsResult.data)
     if (respsResult.data) setResponses(respsResult.data)
     if (assignsResult.data) setAssignments(assignsResult.data)
+    if (followUpsResult.data) setFollowUps(followUpsResult.data as FollowUp[])
+  }
+
+  async function generateDebrief() {
+    if (!session) return
+    setDebriefLoading(true)
+    setDebriefError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-debrief', {
+        body: { session_id: session.id },
+      })
+      if (error || !data) throw new Error(error?.message ?? 'No data returned')
+      setDebrief(data)
+    } catch (err) {
+      setDebriefError('Could not generate debrief. Please try again.')
+    } finally {
+      setDebriefLoading(false)
+    }
   }
 
   function exportCSV() {
@@ -152,8 +177,15 @@ export function Results() {
       return { ...r, context }
     })
 
-    return { participant: p, chain: withContext }
-  }).filter(({ chain }) => chain.length > 0)
+      return { participant: p, chain: withContext }
+    }).filter(({ chain }) => chain.length > 0)
+
+  // For Socratic Chain: build a map of follow-up prompts per participant per round
+  // follow_ups.round = the round whose response triggered the follow-up
+  const followUpMap = new Map<string, string>() // key: `${participant_id}:${round}`
+  for (const fu of followUps) {
+    followUpMap.set(`${fu.participant_id}:${fu.round}`, fu.prompt)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -167,14 +199,77 @@ export function Results() {
             Session <span className="font-mono font-semibold">{session.join_code}</span> · {participants.length} participants · {activity.config.rounds} rounds
           </p>
         </div>
-        <button
-          onClick={exportCSV}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
-        >
-          <Download className="w-4 h-4" />
-          Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={generateDebrief}
+            disabled={debriefLoading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border-2 border-purple-200 text-purple-700 font-medium rounded-xl hover:border-purple-300 hover:bg-purple-100 disabled:opacity-40 transition-all"
+          >
+            {debriefLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {debriefLoading ? 'Analysing…' : 'AI Debrief'}
+          </button>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        </div>
       </div>
+
+      {/* AI Debrief panel */}
+      {debriefError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{debriefError}</p>
+      )}
+      {debrief && (
+        <div className="bg-white rounded-2xl border-2 border-purple-100 p-6 flex flex-col gap-5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-500" />
+            <h3 className="font-bold text-slate-900">AI Session Debrief</h3>
+            <button onClick={() => setDebrief(null)} className="ml-auto text-slate-300 hover:text-slate-500 text-lg leading-none">×</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-2">Main themes</p>
+              <ul className="flex flex-col gap-1.5">
+                {debrief.themes.map((t, i) => (
+                  <li key={i} className="text-sm text-slate-700 flex gap-2">
+                    <span className="text-purple-400 shrink-0">•</span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">Gaps & misconceptions</p>
+              <ul className="flex flex-col gap-1.5">
+                {debrief.gaps.map((g, i) => (
+                  <li key={i} className="text-sm text-slate-700 flex gap-2">
+                    <span className="text-amber-400 shrink-0">•</span>{g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {debrief.notable?.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Worth discussing in class</p>
+              <div className="flex flex-col gap-3">
+                {debrief.notable.map((n, i) => (
+                  <div key={i} className="bg-slate-50 rounded-xl px-4 py-3">
+                    <p className="text-sm text-slate-800 italic mb-1">“{n.quote}”</p>
+                    <p className="text-xs text-slate-500">{n.why}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="bg-kiln-50 border border-kiln-200 rounded-xl px-4 py-3">
+            <p className="text-xs font-bold text-kiln-700 uppercase tracking-wider mb-1">Teaching suggestion</p>
+            <p className="text-sm text-kiln-800">{debrief.suggestion}</p>
+          </div>
+        </div>
+      )}
 
       {/* Summary stats */}
       {(participants.length > 0 || totalResponses > 0) && (
@@ -207,30 +302,54 @@ export function Results() {
           <div key={participant.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
             <h3 className="font-semibold text-slate-900 mb-4">{participant.display_name}</h3>
             <div className="flex flex-col gap-3">
-              {chain.map((r) => (
-                <div key={r.id} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
-                      {r.round}
-                    </span>
-                    {r.round < activity.config.rounds && (
-                      <div className="w-px flex-1 bg-slate-200 mt-1" />
+{chain.map((r) => {
+                // For Socratic Chain: show the AI follow-up question between rounds
+                const followUpQuestion = activity.type === 'socratic_chain' && r.response_type !== 'followup_answer'
+                  ? followUpMap.get(`${participant.id}:${r.round}`)
+                  : undefined
+                return (
+                  <div key={r.id}>
+                    <div className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                          {r.round}
+                        </span>
+                        {(r.round < activity.config.rounds || followUpQuestion) && (
+                          <div className="w-px flex-1 bg-slate-200 mt-1" />
+                        )}
+                      </div>
+                      <div className="flex-1 pb-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-slate-400">{TYPE_LABELS[r.response_type] ?? r.response_type}</span>
+                          {r.context && (
+                            <span className="text-xs text-kiln-500 font-medium">{r.context}</span>
+                          )}
+                          {r.time_taken_ms != null && (
+                            <span className="text-xs text-slate-300">{(r.time_taken_ms / 1000).toFixed(1)}s</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-700 mt-0.5 leading-relaxed">{r.content}</p>
+                      </div>
+                    </div>
+                    {/* AI follow-up question shown between rounds for Socratic Chain */}
+                    {followUpQuestion && (
+                      <div className="flex gap-3 ml-0 mb-1">
+                        <div className="flex flex-col items-center">
+                          <div className="w-px h-2 bg-slate-200" />
+                          <span className="w-6 h-6 flex items-center justify-center shrink-0">
+                            <Sparkles className="w-3 h-3 text-purple-400" />
+                          </span>
+                          <div className="w-px flex-1 bg-slate-200" />
+                        </div>
+                        <div className="flex-1 py-2">
+                          <p className="text-xs text-purple-500 font-medium mb-0.5">AI follow-up</p>
+                          <p className="text-xs text-slate-500 italic leading-relaxed">{followUpQuestion}</p>
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <div className="flex-1 pb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-slate-400">{TYPE_LABELS[r.response_type] ?? r.response_type}</span>
-                      {r.context && (
-                        <span className="text-xs text-kiln-500 font-medium">{r.context}</span>
-                      )}
-                      {r.time_taken_ms != null && (
-                        <span className="text-xs text-slate-300">{(r.time_taken_ms / 1000).toFixed(1)}s</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-700 mt-0.5 leading-relaxed">{r.content}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ))}

@@ -296,27 +296,39 @@ export function StudentSession() {
 
   // Completed
   if (session.status === 'completed') {
+    const totalWords = myResponses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).filter(Boolean).length, 0)
     return (
-      <div className="flex flex-col items-center gap-8 py-16 animate-fade-in">
+      <div className="flex flex-col items-center gap-8 py-12 animate-fade-in">
         <div className="text-center">
+          <div className="text-4xl mb-4">🔥</div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Session Complete</h2>
-          <p className="text-slate-500">Here's what you wrote this session.</p>
+          {myResponses.length > 0 ? (
+            <p className="text-slate-500">
+              You wrote <span className="font-semibold text-kiln-600">{totalWords} words</span> across {myResponses.length} round{myResponses.length !== 1 ? 's' : ''}.
+            </p>
+          ) : (
+            <p className="text-slate-500">Session ended.</p>
+          )}
         </div>
-        {myResponses.length > 0 ? (
+        {myResponses.length > 0 && (
           <div className="w-full max-w-lg flex flex-col gap-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Your responses this session</p>
             {myResponses.map((r, i) => (
               <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-mono bg-slate-100 text-slate-500 w-6 h-6 rounded-full flex items-center justify-center">{r.round}</span>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Round {r.round}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono bg-slate-100 text-slate-500 w-6 h-6 rounded-full flex items-center justify-center">{r.round}</span>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Round {r.round}</p>
+                  </div>
+                  <span className="text-xs text-slate-300">
+                    {r.content.trim().split(/\s+/).filter(Boolean).length} words
+                  </span>
                 </div>
-                <p className="text-xs text-slate-400 mb-2 italic line-clamp-2">{r.prompt}</p>
+                <p className="text-xs text-slate-400 mb-2 italic">{r.prompt}</p>
                 <p className="text-sm text-slate-700 leading-relaxed">{r.content}</p>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-slate-400 text-sm">No responses recorded this session.</p>
         )}
       </div>
     )
@@ -324,9 +336,72 @@ export function StudentSession() {
 
   // Waiting between rounds
   if (waitingForNext && !peerResponse && !followUp && !followUpLoading && !followUpTimedOut) {
+    const lastResponse = myResponses.length > 0 ? myResponses[myResponses.length - 1] : null
+    const completedRound = lastResponse?.round ?? (roundEvent?.round ?? 0)
+    const totalRounds = activity.config.rounds
+    const isLastRound = completedRound >= totalRounds
+
+    const nextHint = isLastRound ? null :
+      activity.type === 'peer_critique' && completedRound === 1
+        ? "Next, you'll receive a classmate's argument to critique."
+        : activity.type === 'peer_critique' && completedRound === 2
+        ? "Next, you'll see a critique of your argument and write a rebuttal."
+        : activity.type === 'peer_clarification' && completedRound === 1
+        ? "Next, you'll receive a classmate's confusion to explain in plain language."
+        : activity.type === 'evidence_analysis' && completedRound === 1
+        ? "Next, you'll identify the inferential gap in a classmate's interpretation."
+        : activity.type === 'socratic_chain'
+        ? "Your personalised follow-up question is being prepared…"
+        : "The next round is coming up."
+
     return (
-      <div className="text-center py-20">
-        <p className="text-slate-500 animate-pulse text-lg">Waiting for next round...</p>
+      <div className="flex flex-col gap-6 animate-fade-in">
+        {/* Submitted confirmation */}
+        <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-2xl">
+          <span className="text-emerald-500 text-lg">✓</span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-emerald-800">
+              {isLastRound ? 'All done — waiting for the session to wrap up.' : 'Submitted!'}
+            </p>
+            {!isLastRound && (
+              <p className="text-xs text-emerald-600 mt-0.5">
+                Round {completedRound} of {totalRounds} complete
+              </p>
+            )}
+          </div>
+          {/* Round progress dots */}
+          <div className="flex gap-1 shrink-0">
+            {Array.from({ length: totalRounds }, (_, i) => (
+              <span
+                key={i}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  i < completedRound ? 'bg-emerald-400' : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* What they wrote */}
+        {lastResponse && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Your Round {completedRound} response</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{lastResponse.content}</p>
+            <p className="text-xs text-slate-300 mt-2">
+              {lastResponse.content.trim().split(/\s+/).filter(Boolean).length} words
+            </p>
+          </div>
+        )}
+
+        {/* What's coming */}
+        {nextHint && (
+          <div className="flex items-start gap-3 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+            <span className="text-slate-400 text-base mt-0.5">→</span>
+            <p className="text-sm text-slate-600">{nextHint}</p>
+          </div>
+        )}
+
+        <p className="text-xs text-center text-slate-400 animate-pulse">Waiting for instructor…</p>
       </div>
     )
   }
