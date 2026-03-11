@@ -46,7 +46,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
               placeholder="ABCDEF"
               maxLength={6}
               className="w-full px-4 py-3.5 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
-              autoFocus
+              autoFocus={!initialCode}
             />
           </div>
 
@@ -61,6 +61,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               maxLength={50}
+              autoFocus={!!initialCode}
               className="w-full px-4 py-3.5 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
             />
           </div>

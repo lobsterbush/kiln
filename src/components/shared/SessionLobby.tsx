@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, Loader2, Copy, Check } from 'lucide-react'
+import { Users, Loader2, Copy, Check, Link as LinkIcon } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import type { Participant } from '../../lib/types'
 
@@ -16,12 +16,20 @@ interface SessionLobbyProps {
 export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt, isStarting = false, activityTitle }: SessionLobbyProps) {
   const [customPrompt, setCustomPrompt] = useState(initialPrompt ?? '')
   const [codeCopied, setCodeCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}join?code=${joinCode}`
 
   function copyCode() {
     navigator.clipboard.writeText(joinCode).then(() => {
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
+    })
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(joinUrl).then(() => {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
     })
   }
 
@@ -49,14 +57,25 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
               </span>
             ))}
           </div>
-          <button
-            onClick={copyCode}
-            className="mt-3 flex items-center gap-1.5 mx-auto text-xs font-medium text-slate-500 hover:text-kiln-600 transition-colors"
-          >
-            {codeCopied
-              ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Copied!</span></>
-              : <><Copy className="w-3.5 h-3.5" /> Copy code</>}
-          </button>
+          <div className="mt-3 flex items-center justify-center gap-4">
+            <button
+              onClick={copyCode}
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-kiln-600 transition-colors"
+            >
+              {codeCopied
+                ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Copied!</span></>
+                : <><Copy className="w-3.5 h-3.5" /> Copy code</>}
+            </button>
+            <span className="text-slate-200">|</span>
+            <button
+              onClick={copyLink}
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-kiln-600 transition-colors"
+            >
+              {linkCopied
+                ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Link copied!</span></>
+                : <><LinkIcon className="w-3.5 h-3.5" /> Copy link</>}
+            </button>
+          </div>
           <p className="text-sm text-slate-400 mt-2">Or go to <span className="font-mono text-slate-600">{window.location.host}{import.meta.env.BASE_URL.replace(/\/$/, '')}</span></p>
         </div>
       </div>

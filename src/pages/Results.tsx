@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
-import { Download, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
+import { Download, ArrowLeft, Sparkles, Loader2, Play } from 'lucide-react'
+import { generateJoinCode } from '../lib/utils'
 
 export function Results() {
   const { id } = useParams<{ id: string }>()
@@ -21,6 +22,7 @@ export function Results() {
   } | null>(null)
   const [debriefLoading, setDebriefLoading] = useState(false)
   const [debriefError, setDebriefError] = useState<string | null>(null)
+  const [runningAgain, setRunningAgain] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -56,6 +58,22 @@ export function Results() {
     if (respsResult.data) setResponses(respsResult.data)
     if (assignsResult.data) setAssignments(assignsResult.data)
     if (followUpsResult.data) setFollowUps(followUpsResult.data as FollowUp[])
+  }
+
+  async function runAgain() {
+    if (!activity || !user || runningAgain) return
+    setRunningAgain(true)
+    const joinCode = generateJoinCode()
+    const { data: newSession, error } = await supabase
+      .from('sessions')
+      .insert({ activity_id: activity.id, instructor_id: user.id, join_code: joinCode })
+      .select()
+      .single()
+    if (!error && newSession) {
+      navigate(`/instructor/session/${newSession.id}`)
+    } else {
+      setRunningAgain(false)
+    }
   }
 
   async function generateDebrief() {
@@ -199,7 +217,15 @@ export function Results() {
             Session <span className="font-mono font-semibold">{session.join_code}</span> · {participants.length} participants · {activity.config.rounds} rounds
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
+          <button
+            onClick={runAgain}
+            disabled={runningAgain}
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 font-medium rounded-xl hover:border-emerald-300 hover:bg-emerald-100 disabled:opacity-40 transition-all"
+          >
+            {runningAgain ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            Run again
+          </button>
           <button
             onClick={generateDebrief}
             disabled={debriefLoading}

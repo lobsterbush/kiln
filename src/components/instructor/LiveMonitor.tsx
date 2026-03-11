@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Timer } from '../shared/Timer'
-import { Monitor } from 'lucide-react'
+import { Monitor, X } from 'lucide-react'
 import type { Response, Participant } from '../../lib/types'
 import { cn } from '../../lib/utils'
 
@@ -22,6 +22,12 @@ interface LiveMonitorProps {
   sessionId?: string
 }
 
+interface ExpandedResponse {
+  name: string
+  content: string
+  timeTakenMs: number | null
+}
+
 export function LiveMonitor({
   participants,
   responses,
@@ -40,11 +46,47 @@ export function LiveMonitor({
   sessionId,
 }: LiveMonitorProps) {
   const [confirmingEnd, setConfirmingEnd] = useState(false)
+  const [expanded, setExpanded] = useState<ExpandedResponse | null>(null)
   const roundResponses = responses.filter((r) => r.round === currentRound)
   const submittedCount = roundResponses.length
   const totalCount = participants.length
 
   return (
+    <>
+    {/* Full-text response overlay */}
+    {expanded && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+        onClick={() => setExpanded(null)}
+      >
+        <div
+          className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 flex flex-col gap-4 max-h-[80vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-slate-900">{expanded.name}</h3>
+            <button
+              onClick={() => setExpanded(null)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{expanded.content}</p>
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <span className="text-xs text-slate-400">
+              {expanded.content.trim().split(/\s+/).filter(Boolean).length} words
+            </span>
+            {expanded.timeTakenMs != null && (
+              <span className="text-xs text-slate-400">
+                {(expanded.timeTakenMs / 1000).toFixed(1)}s to submit
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-center justify-between">
       <div>
@@ -53,6 +95,11 @@ export function LiveMonitor({
             {joinCode && (
               <span className="font-mono text-xs font-bold tracking-widest text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">
                 {joinCode}
+              </span>
+            )}
+            {sessionStatus === 'between_rounds' && (
+              <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg animate-pulse">
+                ⏸ Paused
               </span>
             )}
           </div>
@@ -98,17 +145,18 @@ export function LiveMonitor({
         </div>
       )}
 
-      {/* Response grid */}
+      {/* Response grid — click any submitted card to read full text */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 stagger-children">
         {participants.map((p) => {
           const response = roundResponses.find((r) => r.participant_id === p.id)
           return (
             <div
               key={p.id}
+              onClick={() => response && setExpanded({ name: p.display_name, content: response.content, timeTakenMs: response.time_taken_ms })}
               className={cn(
                 'rounded-2xl border p-4 transition-all duration-200',
                 response
-                  ? 'bg-white border-emerald-200 shadow-sm'
+                  ? 'bg-white border-emerald-200 shadow-sm cursor-pointer hover:border-emerald-300 hover:shadow-md'
                   : 'bg-slate-50 border-slate-200'
               )}
             >
@@ -127,8 +175,10 @@ export function LiveMonitor({
               {response && (
                 <>
                   <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">{response.content}</p>
-                  <p className="text-xs text-slate-400 mt-1.5">
-                    {response.content.trim().split(/\s+/).length} words
+                  <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-2">
+                    <span>{response.content.trim().split(/\s+/).filter(Boolean).length} words</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-kiln-500 font-medium">Click to read</span>
                   </p>
                 </>
               )}
@@ -188,5 +238,6 @@ export function LiveMonitor({
         </button>
       </div>
     </div>
+    </>
   )
 }

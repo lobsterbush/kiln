@@ -426,6 +426,19 @@ export function CreateActivity() {
           </div>
         </div>
 
+        {/* Estimated total time */}
+        {(() => {
+          const totalSec = rounds * duration
+          const totalMin = Math.round(totalSec / 60)
+          const display = totalMin < 1 ? `${totalSec}s` : totalMin < 60 ? `~${totalMin} min` : `~${(totalMin / 60).toFixed(1)} hr`
+          return (
+            <p className="text-xs text-slate-400">
+              Estimated class time: <span className="font-semibold text-slate-500">{display}</span>
+              <span className="text-slate-300 ml-1">({rounds} round{rounds !== 1 ? 's' : ''} × {duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}min`})</span>
+            </p>
+          )
+        })()}
+
         {/* Auto-advance toggle */}
         <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200">
           <div>
