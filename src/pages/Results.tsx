@@ -55,8 +55,8 @@ export function Results() {
     const rows = responses.map((r) => {
       const p = participants.find((p) => p.id === r.participant_id)
       // Peer context: who did this participant respond to?
-      const asReviewer = assignments.find((a) => a.reviewer_id === r.participant_id && a.round === r.round)
-      const asAuthor = assignments.find((a) => a.author_id === r.participant_id && a.round === r.round - 1)
+      const asReviewer = assignments.find((a) => a.reviewer_id === r.participant_id && a.round === r.round - 1)
+      const asAuthor = assignments.find((a) => a.author_id === r.participant_id && a.round === r.round - 2)
       let respondingTo = ''
       if (asReviewer) {
         const author = participants.find((q) => q.id === asReviewer.author_id)
@@ -128,10 +128,10 @@ export function Results() {
 
     // For each response, find what the student was responding TO
     const withContext = chain.map((r) => {
-      // Was this participant a reviewer in this round? If so, show whose work they critiqued.
-      const asReviewer = assignments.find((a) => a.reviewer_id === p.id && a.round === r.round)
-      // Was this participant the author being critiqued in this round? Show who critiqued them.
-      const asAuthor = assignments.find((a) => a.author_id === p.id && a.round === r.round - 1)
+      // assignments are stored at the round whose responses were collected (always round N-1)
+      const asReviewer = assignments.find((a) => a.reviewer_id === p.id && a.round === r.round - 1)
+      // For rebuttal (round 3): original author is in round 1 assignment
+      const asAuthor = assignments.find((a) => a.author_id === p.id && a.round === r.round - 2)
 
       let context: string | null = null
       if (asReviewer) {

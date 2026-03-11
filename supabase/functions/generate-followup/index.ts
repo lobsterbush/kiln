@@ -5,6 +5,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const ALLOWED_ORIGINS = [
+  'https://usekiln.org',
+  'https://www.usekiln.org',
   'https://lobsterbush.github.io',
   'http://localhost:5173',
   'http://localhost:4173',
@@ -105,6 +107,7 @@ Deno.serve(async (req) => {
 
     const config = (session?.activity as any)?.config ?? {}
     const objectives = config.learning_objectives?.join('; ') ?? ''
+    const originalPrompt = config.initial_prompt ?? ''
 
     // Call Claude API
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
@@ -125,7 +128,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 200,
-        system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
+        system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
         messages: [
           {
             role: 'user',
