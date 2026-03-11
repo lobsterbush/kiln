@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowRight, Users, BookOpen, Check, Mail } from 'lucide-react'
+import { useAuth } from '../lib/auth'
 
 // ─── Fake live-session mockup shown in the hero ───────────────────────────────
 function LivePreview() {
@@ -58,6 +59,13 @@ function LivePreview() {
 export function Home() {
   const [code, setCode] = useState('')
   const navigate = useNavigate()
+  const { user } = useAuth()
+
+  // Instructor confirmed email or clicked magic link — Supabase lands them here;
+  // forward immediately to the dashboard.
+  useEffect(() => {
+    if (user) navigate('/instructor', { replace: true })
+  }, [user, navigate])
 
   function handleJoin(e: React.FormEvent) {
     e.preventDefault()
