@@ -18,8 +18,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',
-        scope: '/kiln/',
-        start_url: '/kiln/',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
             src: 'icons/icon-192.png',
@@ -44,7 +44,7 @@ export default defineConfig({
         // Cache the app shell (HTML, JS, CSS) and icons
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         // Don't cache Supabase API calls — they must always go to the network
-        navigateFallbackDenylist: [/^\/kiln\/404\.html/],
+        navigateFallbackDenylist: [/^\/404\.html/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\//,
@@ -54,5 +54,5 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/kiln/',
+  base: '/',
 })
