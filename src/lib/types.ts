@@ -10,6 +10,7 @@ export interface ActivityConfig {
   initial_prompt: string
   learning_objectives: string[]
   material_ids?: string[]
+  source_material?: string
   critique_prompt?: string | null
   rebuttal_prompt?: string | null
   explain_prompt?: string | null

@@ -108,6 +108,9 @@ Deno.serve(async (req) => {
     const config = (session?.activity as any)?.config ?? {}
     const objectives = config.learning_objectives?.join('; ') ?? ''
     const originalPrompt = config.initial_prompt ?? ''
+    // Trim source material to avoid excessive token usage
+    const rawMaterial: string = config.source_material ?? ''
+    const sourceMaterial = rawMaterial.length > 3000 ? rawMaterial.slice(0, 3000) + '…' : rawMaterial
 
     // Call Claude API
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
@@ -128,7 +131,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 200,
-        system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
+        system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${sourceMaterial ? `\n\nSource material for this activity (use this to ground follow-up questions in the specific readings or lecture content):\n${sourceMaterial}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
         messages: [
           {
             role: 'user',

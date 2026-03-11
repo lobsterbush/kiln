@@ -91,6 +91,7 @@ export function CreateActivity() {
   const [rounds, setRounds] = useState(3)
   const [duration, setDuration] = useState(90)
   const [objectives, setObjectives] = useState('')
+  const [sourceMaterial, setSourceMaterial] = useState('')
   const [critiquePrompt, setCritiquePrompt] = useState('')
   const [rebuttalPrompt, setRebuttalPrompt] = useState('')
   const [explainPrompt, setExplainPrompt] = useState('')
@@ -121,6 +122,7 @@ export function CreateActivity() {
           .split('\n')
           .map((s) => s.trim())
           .filter(Boolean),
+        ...(type === 'socratic_chain' && sourceMaterial.trim() && { source_material: sourceMaterial.trim() }),
         ...(type === 'peer_critique' && critiquePrompt.trim() && { critique_prompt: critiquePrompt.trim() }),
         ...(type === 'peer_critique' && rebuttalPrompt.trim() && { rebuttal_prompt: rebuttalPrompt.trim() }),
         ...(type === 'peer_clarification' && explainPrompt.trim() && { explain_prompt: explainPrompt.trim() }),
@@ -285,17 +287,37 @@ export function CreateActivity() {
         </div>
 
         {type === 'socratic_chain' && (
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Learning Objectives (one per line)
-            </label>
-            <textarea
-              value={objectives}
-              onChange={(e) => setObjectives(e.target.value)}
-              placeholder="Evaluate institutional vs cultural explanations&#10;Identify necessary vs sufficient conditions"
-              className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
-            />
-          </div>
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Learning Objectives (one per line)
+              </label>
+              <textarea
+                value={objectives}
+                onChange={(e) => setObjectives(e.target.value)}
+                placeholder="Evaluate institutional vs cultural explanations&#10;Identify necessary vs sufficient conditions"
+                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Source Material{' '}
+                <span className="normal-case font-normal text-slate-400">(optional — paste readings, lecture notes, or key excerpts)</span>
+              </label>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Claude will use this to generate follow-up questions grounded in your specific material. Paste the most relevant 1–3 paragraphs for best results.
+              </p>
+              <textarea
+                value={sourceMaterial}
+                onChange={(e) => setSourceMaterial(e.target.value)}
+                placeholder="Paste a reading excerpt, key argument, lecture notes, or any text you want follow-up questions to engage with..."
+                className="w-full h-40 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed text-sm"
+              />
+              {sourceMaterial.length > 3000 && (
+                <p className="text-xs text-amber-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
+              )}
+            </div>
+          </>
         )}
 
         {type === 'peer_critique' && (
