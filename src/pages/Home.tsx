@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, BarChart3, Check, Zap, Mail } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, Check, Mail } from 'lucide-react'
 
 // ─── Fake live-session mockup shown in the hero ───────────────────────────────
 function LivePreview() {
@@ -68,75 +68,84 @@ export function Home() {
     <div className="flex flex-col">
 
       {/* ═══ HERO: full viewport, two-column ═══ */}
-      <section className="min-h-[calc(100vh-3.5rem)] w-full bg-gradient-to-br from-kiln-50 via-white to-white">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16 h-full flex flex-col lg:flex-row items-center gap-12 lg:gap-16 min-h-[calc(100vh-3.5rem)]">
-        {/* Left: copy + CTAs */}
-        <div className="flex-1 flex flex-col gap-8 animate-fade-in max-w-xl">
-          <div>
-            <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-5">
-              AI-resistant active learning
-            </span>
-            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1] mb-5">
-              Where every<br />student thinks<span className="text-kiln-500">.</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-slate-500 leading-relaxed">
-              Real-time peer critique and AI Socratic sessions that make every
-              student write, argue, and defend their reasoning — while you watch
-              it happen live.
-            </p>
+      <section id="hero" className="w-full bg-kiln-50">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-20 lg:py-0 flex flex-col lg:flex-row lg:items-center gap-14 lg:gap-16 lg:min-h-[calc(100vh-3.5rem)]">
+
+          {/* Left: copy + CTAs */}
+          <div className="flex-1 flex flex-col gap-8 animate-fade-in lg:py-20">
+            <div>
+              <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-6">
+                AI-resistant active learning
+              </span>
+              <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-5">
+                No free riders.<br />
+                <span className="text-kiln-500">Every student writes.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg">
+                Run peer critique and Socratic AI sessions where every student argues,
+                defends, and deepens their thinking — in real time, in your classroom.
+              </p>
+            </div>
+
+            {/* Two-card CTAs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
+              {/* Student */}
+              <div className="flex flex-col gap-3 p-5 bg-white rounded-2xl border-2 border-kiln-200 shadow-sm">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">I’m a student</p>
+                <form onSubmit={handleJoin} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="flex-1 px-3 py-2.5 text-center text-lg font-mono font-bold tracking-[0.25em] bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors placeholder:text-slate-300 placeholder:tracking-[0.1em] placeholder:font-normal"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!code.trim()}
+                    className="px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 transition-all shadow-md shadow-kiln-200 active:scale-95"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </form>
+                <p className="text-xs text-slate-400">Enter the code from your instructor</p>
+              </div>
+
+              {/* Instructor */}
+              <div className="flex flex-col gap-3 p-5 bg-gradient-to-br from-kiln-500 to-kiln-600 rounded-2xl text-white shadow-lg shadow-kiln-200">
+                <p className="text-xs font-bold text-kiln-100 uppercase tracking-wider">I’m an instructor</p>
+                <Link
+                  to="/instructor"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-kiln-700 font-bold rounded-xl hover:bg-kiln-50 transition-colors shadow-sm"
+                >
+                  Get started free <ArrowRight className="w-4 h-4" />
+                </Link>
+                <p className="text-xs text-kiln-100">No credit card. Up in 60 seconds.</p>
+              </div>
+            </div>
           </div>
 
-          {/* Two-card CTAs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Student */}
-            <div className="flex flex-col gap-3 p-5 bg-white rounded-2xl border-2 border-slate-200 shadow-sm">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">I’m a student</p>
-              <form onSubmit={handleJoin} className="flex gap-2">
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="ABC123"
-                  maxLength={6}
-                  className="flex-1 px-3 py-2.5 text-center text-lg font-mono font-bold tracking-[0.25em] bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors placeholder:text-slate-300 placeholder:tracking-[0.1em] placeholder:font-normal"
-                />
-                <button
-                  type="submit"
-                  disabled={!code.trim()}
-                  className="px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 transition-all shadow-md shadow-kiln-200 active:scale-95"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </form>
-              <p className="text-xs text-slate-400">Enter the code from your instructor</p>
-            </div>
-
-            {/* Instructor */}
-            <div className="flex flex-col gap-3 p-5 bg-gradient-to-br from-kiln-500 to-kiln-600 rounded-2xl text-white shadow-lg shadow-kiln-200">
-              <p className="text-xs font-bold text-kiln-100 uppercase tracking-wider">I’m an instructor</p>
-              <Link
-                to="/instructor"
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-kiln-700 font-bold rounded-xl hover:bg-kiln-50 transition-colors shadow-sm"
-              >
-                Get started free <ArrowRight className="w-4 h-4" />
-              </Link>
-              <p className="text-xs text-kiln-100">No credit card. Up in 60 seconds.</p>
-            </div>
+          {/* Right: live monitor mockup — hidden on small screens, shown below on md */}
+          <div className="hidden lg:flex flex-1 flex-col w-full max-w-lg animate-slide-up py-20">
+            <p className="text-xs font-bold text-kiln-600 uppercase tracking-wider text-center mb-3">
+              What you see as the instructor
+            </p>
+            <LivePreview />
           </div>
         </div>
 
-        {/* Right: live monitor mockup */}
-        <div className="flex-1 w-full max-w-lg animate-slide-up">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center mb-3">
+        {/* Mobile: show mockup below CTAs */}
+        <div className="lg:hidden max-w-lg mx-auto px-6 pb-16">
+          <p className="text-xs font-bold text-kiln-600 uppercase tracking-wider text-center mb-3">
             What you see as the instructor
           </p>
           <LivePreview />
         </div>
-        </div>
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="w-full bg-slate-900 py-24">
+      <section id="how-it-works" className="w-full bg-slate-900 py-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-white mb-3">Up and running in 60 seconds</h2>
@@ -160,7 +169,7 @@ export function Home() {
       </section>
 
       {/* ═══ WHAT YOU'RE SIGNING UP FOR ═══ */}
-      <section className="w-full py-24">
+      <section id="features" className="w-full py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Two activity types. Zero passengers.</h2>
@@ -236,25 +245,6 @@ export function Home() {
         </div>
       </section>
 
-      {/* ═══ WHY KILN ═══ */}
-      <section className="w-full bg-kiln-50 py-20">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[
-            { icon: BarChart3, title: 'See every mind at work', body: 'Watch responses appear live. Know who’s engaged — and read what they actually think — before class ends.' },
-            { icon: Users, title: 'No free riders', body: 'Structured timed rounds mean everyone writes. Peer assignments are random. There’s nowhere to hide.' },
-            { icon: Zap, title: 'AI that teaches, not cheats', body: 'Socratic follow-ups probe reasoning rather than produce answers. Students can’t copy-paste their way through.' },
-          ].map(({ icon: Icon, title, body }) => (
-            <div key={title} className="flex flex-col gap-3">
-              <div className="p-2.5 bg-white rounded-xl w-fit shadow-sm border border-kiln-100">
-                <Icon className="w-5 h-5 text-kiln-600" />
-              </div>
-              <h3 className="font-bold text-slate-900">{title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ═══ PRICING ═══ */}
       <section id="pricing" className="w-full py-24">
         <div className="max-w-3xl mx-auto px-6 lg:px-8">
@@ -268,7 +258,7 @@ export function Home() {
                 <span className="text-slate-500 ml-1">/ semester</span>
               </div>
               <ul className="flex flex-col gap-3 mb-8 flex-1">
-                {['Unlimited activities', 'Up to 50 students per session', 'Peer Critique & Socratic Chain', 'Live monitor dashboard', 'Session history & CSV export'].map((f) => (
+                {['Unlimited activities', 'Large class support', 'Peer Critique & Socratic Chain', 'Live monitor dashboard', 'Session history & CSV export'].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
                     <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />{f}
                   </li>

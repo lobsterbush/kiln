@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Users, Loader2 } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import type { Participant } from '../../lib/types'
 
 interface SessionLobbyProps {
@@ -14,22 +15,34 @@ interface SessionLobbyProps {
 
 export function SessionLobby({ joinCode, participants, isInstructor, onStart, initialPrompt, isStarting = false, activityTitle }: SessionLobbyProps) {
   const [customPrompt, setCustomPrompt] = useState(initialPrompt ?? '')
+  const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}join?code=${joinCode}`
 
   return (
     <div className="flex flex-col items-center gap-10 py-16 animate-fade-in">
-      <div className="text-center">
-        <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Session Code</p>
-        <div className="flex items-center justify-center gap-2">
-          {joinCode.split('').map((char, i) => (
-            <span
-              key={i}
-              className="w-14 h-16 flex items-center justify-center text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
-            >
-              {char}
-            </span>
-          ))}
+      <div className="flex flex-col sm:flex-row items-center gap-8">
+        {/* QR code */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-sm">
+            <QRCodeSVG value={joinUrl} size={140} fgColor="#0f172a" bgColor="#ffffff" />
+          </div>
+          <p className="text-xs text-slate-400">Scan to join</p>
         </div>
-        <p className="text-sm text-slate-400 mt-3">Share this code with your students</p>
+
+        {/* Code tiles */}
+        <div className="text-center">
+          <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Session Code</p>
+          <div className="flex items-center justify-center gap-2">
+            {joinCode.split('').map((char, i) => (
+              <span
+                key={i}
+                className="w-14 h-16 flex items-center justify-center text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
+              >
+                {char}
+              </span>
+            ))}
+          </div>
+          <p className="text-sm text-slate-400 mt-3">Or go to <span className="font-mono text-slate-600">lobsterbush.github.io/kiln</span></p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2.5 px-4 py-2 bg-kiln-50 rounded-full">

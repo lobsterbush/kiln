@@ -20,6 +20,7 @@ export function InstructorDashboard() {
   const [activeSessions, setActiveSessions] = useState<{ id: string; join_code: string; status: string; activity: { title: string }[] | null }[]>([])
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [pastSessions, setPastSessions] = useState<{ id: string; join_code: string; created_at: string; activity: { title: string }[] | null }[]>([])
+  const [showAllPast, setShowAllPast] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -40,14 +41,14 @@ export function InstructorDashboard() {
     if (data) setActiveSessions(data as typeof activeSessions)
   }
 
-  async function loadPastSessions() {
-    const { data } = await supabase
+  async function loadPastSessions(all = false) {
+    const query = supabase
       .from('sessions')
       .select('id, join_code, created_at, activity:activities(title)')
       .eq('instructor_id', user!.id)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
-      .limit(8)
+    const { data } = all ? await query : await query.limit(5)
     if (data) setPastSessions(data as typeof pastSessions)
   }
 
@@ -142,6 +143,9 @@ export function InstructorDashboard() {
               <p className="text-slate-700 font-medium">Check your email for a magic link.</p>
               <p className="text-sm text-slate-500 mt-2">
                 Click the link to sign in — no password needed.
+              </p>
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mt-4">
+                Open the link on <strong>this device and browser</strong> — it won't work if you switch devices.
               </p>
             </div>
           ) : (
@@ -324,7 +328,12 @@ export function InstructorDashboard() {
                 {a.config.initial_prompt}
               </p>
               <p className="text-xs text-slate-400 mt-3 font-medium">
-                {a.config.rounds} rounds · {a.config.round_duration_sec}s each
+                {a.type === 'peer_critique'
+                  ? a.config.rounds === 2
+                    ? `Claim → Critique · ${a.config.round_duration_sec}s`
+                    : `Claim → Critique → Rebuttal · ${a.config.round_duration_sec}s`
+                  : `${a.config.rounds} rounds · ${a.config.round_duration_sec}s each`
+                }
               </p>
             </div>
           ))}
@@ -332,9 +341,19 @@ export function InstructorDashboard() {
       )}
       {pastSessions.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Past Sessions</p>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-slate-400" />
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Past Sessions</p>
+            </div>
+            {!showAllPast && pastSessions.length === 5 && (
+              <button
+                onClick={() => { setShowAllPast(true); loadPastSessions(true) }}
+                className="text-xs text-kiln-600 hover:text-kiln-700 font-medium transition-colors"
+              >
+                Show all
+              </button>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             {pastSessions.map((s) => (

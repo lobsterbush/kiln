@@ -59,6 +59,9 @@ export function StudentSession() {
     loadSession()
   }, [id])
 
+  const DEFAULT_CRITIQUE_PROMPT = 'Read the argument below carefully. Identify its weakest assumption or unsupported claim.'
+  const DEFAULT_REBUTTAL_PROMPT = "Below is a peer's critique of your original argument. Write a rebuttal defending your position."
+
   async function loadSession() {
     const { data } = await supabase
       .from('sessions')
@@ -69,18 +72,99 @@ export function StudentSession() {
       setSession(data)
       const act = data.activity as Activity
       setActivity(act)
-      // Only synthesise a round event for late-joiners on round 1.
-      // Rounds 2+ require peer assignments that have already been sent — show waiting.
-      if (data.status === 'active' && data.round_started_at && data.current_round === 1) {
-        setRoundEvent({
-          round: 1,
-          duration_sec: act.config.round_duration_sec,
-          prompt: act.config.initial_prompt,
-          server_timestamp: data.round_started_at,
-        })
+
+      if (data.status === 'active' && data.round_started_at) {
+        if (data.current_round === 1) {
+          // Late-joiner on round 1 — synthesise event directly
+          setRoundEvent({
+            round: 1,
+            duration_sec: act.config.round_duration_sec,
+            prompt: act.config.initial_prompt,
+            server_timestamp: data.round_started_at,
+          })
+        } else {
+          // Round 2+: check whether this student already submitted this round
+          const { data: myRoundResponses } = await supabase
+            .from('responses')
+            .select('id')
+            .eq('session_id', id!)
+            .eq('participant_id', studentToken!.participant_id)
+            .eq('round', data.current_round)
+          if (myRoundResponses && myRoundResponses.length > 0) {
+            // Already submitted — just wait for next round
+            setWaitingForNext(true)
+          } else if (act.type === 'peer_critique' && data.current_round === 2) {
+            // Recover: fetch the peer assignment this student needs to critique
+            const { data: assignment } = await supabase
+              .from('peer_assignments')
+              .select('response_id, author_id')
+              .eq('session_id', id!)
+              .eq('reviewer_id', studentToken!.participant_id)
+              .eq('round', 1)
+              .single()
+            if (assignment) {
+              const [responseResult, authorResult] = await Promise.all([
+                supabase.from('responses').select('content').eq('id', assignment.response_id).single(),
+                supabase.from('participants').select('display_name').eq('id', assignment.author_id).single(),
+              ])
+              if (responseResult.data) {
+                const prompt = act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT
+                setRoundEvent({ round: 2, duration_sec: act.config.round_duration_sec, prompt, server_timestamp: data.round_started_at })
+                setPeerResponse({ content: responseResult.data.content, name: authorResult.data?.display_name ?? 'A classmate' })
+                setPeerResponseType('critique')
+              } else {
+                setWaitingForNext(true)
+              }
+            } else {
+              setWaitingForNext(true)
+            }
+          } else if (act.type === 'peer_critique' && data.current_round === 3) {
+            // Recover: fetch the critique this student received (so they can rebut it)
+            const { data: assignment } = await supabase
+              .from('peer_assignments')
+              .select('reviewer_id')
+              .eq('session_id', id!)
+              .eq('author_id', studentToken!.participant_id)
+              .eq('round', 1)
+              .single()
+            if (assignment) {
+              const [critiqueResult, reviewerResult] = await Promise.all([
+                supabase.from('responses').select('content').eq('session_id', id!).eq('participant_id', assignment.reviewer_id).eq('round', 2).single(),
+                supabase.from('participants').select('display_name').eq('id', assignment.reviewer_id).single(),
+              ])
+              if (critiqueResult.data) {
+                const prompt = act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT
+                setRoundEvent({ round: 3, duration_sec: act.config.round_duration_sec, prompt, server_timestamp: data.round_started_at })
+                setPeerResponse({ content: critiqueResult.data.content, name: reviewerResult.data?.display_name ?? 'Peer critique' })
+                setPeerResponseType('rebuttal')
+              } else {
+                setWaitingForNext(true)
+              }
+            } else {
+              setWaitingForNext(true)
+            }
+          } else if (act.type === 'socratic_chain' && data.current_round > 1) {
+            // Recover: fetch the stored follow-up from DB
+            const { data: followUpData } = await supabase
+              .from('follow_ups')
+              .select('prompt')
+              .eq('session_id', id!)
+              .eq('participant_id', studentToken!.participant_id)
+              .eq('round', data.current_round - 1)
+              .single()
+            if (followUpData?.prompt) {
+              setRoundEvent({ round: data.current_round, duration_sec: act.config.round_duration_sec, prompt: followUpData.prompt, server_timestamp: data.round_started_at })
+              setFollowUp(followUpData.prompt)
+            } else {
+              setWaitingForNext(true)
+            }
+          } else {
+            setWaitingForNext(true)
+          }
+        }
       }
-      // Show correct waiting message for students who load mid-session (round 2+ or between rounds)
-      if (data.status === 'between_rounds' || (data.status === 'active' && data.current_round > 1)) {
+
+      if (data.status === 'between_rounds') {
         setWaitingForNext(true)
       }
     }

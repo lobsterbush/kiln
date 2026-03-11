@@ -20,6 +20,18 @@ export function Layout() {
           </Link>
           <nav className="flex items-center gap-5">
             <a
+              href={`${import.meta.env.BASE_URL}#how-it-works`}
+              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
+            >
+              How it works
+            </a>
+            <a
+              href={`${import.meta.env.BASE_URL}#features`}
+              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
+            >
+              Features
+            </a>
+            <a
               href={`${import.meta.env.BASE_URL}#pricing`}
               className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
             >
