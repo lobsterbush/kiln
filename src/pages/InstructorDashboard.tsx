@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { generateJoinCode } from '../lib/utils'
+import { generateJoinCode, formatDuration } from '../lib/utils'
 import type { Activity } from '../lib/types'
-import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock } from 'lucide-react'
+import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus } from 'lucide-react'
 
 export function InstructorDashboard() {
   const { user, loading, signIn, signInWithGoogle, signOut } = useAuth()
@@ -106,6 +106,22 @@ export function InstructorDashboard() {
       setAuthError(error.message)
     } else {
       setEmailSent(true)
+    }
+  }
+
+  async function handleDuplicate(activity: Activity) {
+    const { data, error } = await supabase
+      .from('activities')
+      .insert({
+        instructor_id: user!.id,
+        title: `Copy of ${activity.title}`,
+        type: activity.type,
+        config: activity.config,
+      })
+      .select()
+      .single()
+    if (!error && data) {
+      setActivities((prev) => [data as Activity, ...prev])
     }
   }
 
@@ -335,6 +351,13 @@ export function InstructorDashboard() {
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      onClick={() => handleDuplicate(a)}
+                      className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Duplicate"
+                    >
+                      <CopyPlus className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => setConfirmDelete(a.id)}
                       className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete"
@@ -358,13 +381,13 @@ export function InstructorDashboard() {
               <p className="text-xs text-slate-400 mt-3 font-medium">
                 {a.type === 'peer_critique'
                   ? a.config.rounds === 2
-                    ? `Claim \u2192 Critique \u00b7 ${a.config.round_duration_sec}s`
-                    : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${a.config.round_duration_sec}s`
+                    ? `Claim \u2192 Critique \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                    : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${formatDuration(a.config.round_duration_sec)}`
                   : a.type === 'peer_clarification'
-                  ? `Confusion \u2192 Explanation \u00b7 ${a.config.round_duration_sec}s`
+                  ? `Confusion \u2192 Explanation \u00b7 ${formatDuration(a.config.round_duration_sec)}`
                   : a.type === 'evidence_analysis'
-                  ? `Interpretation \u2192 Gap Analysis \u00b7 ${a.config.round_duration_sec}s`
-                  : `${a.config.rounds} rounds \u00b7 ${a.config.round_duration_sec}s each`
+                  ? `Interpretation \u2192 Gap Analysis \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                  : `${a.config.rounds} rounds \u00b7 ${formatDuration(a.config.round_duration_sec)} each`
                 }
               </p>
             </div>

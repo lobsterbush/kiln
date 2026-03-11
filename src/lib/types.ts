@@ -14,6 +14,7 @@ export interface ActivityConfig {
   rebuttal_prompt?: string | null
   explain_prompt?: string | null
   gap_prompt?: string | null
+  auto_advance?: boolean
 }
 
 export interface Activity {

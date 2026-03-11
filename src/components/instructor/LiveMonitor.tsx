@@ -125,7 +125,12 @@ export function LiveMonitor({
                 )}
               </div>
               {response && (
-                <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">{response.content}</p>
+                <>
+                  <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">{response.content}</p>
+                  <p className="text-xs text-slate-400 mt-1.5">
+                    {response.content.trim().split(/\s+/).length} words
+                  </p>
+                </>
               )}
             </div>
           )

@@ -95,6 +95,7 @@ export function CreateActivity() {
   const [rebuttalPrompt, setRebuttalPrompt] = useState('')
   const [explainPrompt, setExplainPrompt] = useState('')
   const [gapPrompt, setGapPrompt] = useState('')
+  const [autoAdvance, setAutoAdvance] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -124,6 +125,7 @@ export function CreateActivity() {
         ...(type === 'peer_critique' && rebuttalPrompt.trim() && { rebuttal_prompt: rebuttalPrompt.trim() }),
         ...(type === 'peer_clarification' && explainPrompt.trim() && { explain_prompt: explainPrompt.trim() }),
         ...(type === 'evidence_analysis' && gapPrompt.trim() && { gap_prompt: gapPrompt.trim() }),
+        ...(autoAdvance && { auto_advance: true }),
       },
     })
 
@@ -400,6 +402,26 @@ export function CreateActivity() {
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Auto-advance toggle */}
+        <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <p className="text-sm font-medium text-slate-700">Auto-advance rounds</p>
+            <p className="text-xs text-slate-400 mt-0.5">Move to the next round automatically when the timer expires</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAutoAdvance((v) => !v)}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
+              autoAdvance ? 'bg-kiln-500' : 'bg-slate-300'
+            }`}
+            aria-label="Toggle auto-advance"
+          >
+            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+              autoAdvance ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </button>
         </div>
 
         {saveError && (

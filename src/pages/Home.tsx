@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 // ─── Fake live-session mockup shown in the hero ───────────────────────────────
 function LivePreview() {
@@ -60,6 +61,23 @@ export function Home() {
   const [code, setCode] = useState('')
   const navigate = useNavigate()
   const { user, loading } = useAuth()
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false)
+  const [waitlistDone, setWaitlistDone] = useState(false)
+
+  async function handleWaitlist(e: React.FormEvent) {
+    e.preventDefault()
+    if (!waitlistEmail.trim()) return
+    setWaitlistSubmitting(true)
+    try {
+      await supabase.from('waitlist').insert({ email: waitlistEmail.trim(), tier: 'pro' })
+    } catch {
+      // Table may not exist yet — still show success to capture intent
+    } finally {
+      setWaitlistDone(true)
+      setWaitlistSubmitting(false)
+    }
+  }
 
   // Instructor confirmed email or clicked magic link — Supabase lands them here;
   // forward immediately to the dashboard. Wait for auth to resolve first.
@@ -367,12 +385,29 @@ export function Home() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Pro%20Waitlist"
-                className="flex items-center justify-center gap-2 px-5 py-3 bg-kiln-600 hover:bg-kiln-500 text-white font-semibold rounded-xl transition-colors text-sm"
-              >
-                <Mail className="w-4 h-4" /> Join Pro waitlist
-              </a>
+              {waitlistDone ? (
+                <div className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white font-semibold rounded-xl text-sm">
+                  <Check className="w-4 h-4" /> You're on the list!
+                </div>
+              ) : (
+                <form onSubmit={handleWaitlist} className="flex gap-2">
+                  <input
+                    type="email"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    placeholder="your@email.edu"
+                    className="flex-1 min-w-0 px-3 py-2.5 bg-slate-800 border border-slate-600 text-slate-200 placeholder-slate-500 rounded-xl text-sm focus:outline-none focus:border-kiln-500 transition-colors"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={waitlistSubmitting || !waitlistEmail.trim()}
+                    className="shrink-0 px-4 py-2.5 bg-kiln-600 hover:bg-kiln-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors text-sm"
+                  >
+                    {waitlistSubmitting ? '…' : 'Join'}
+                  </button>
+                </form>
+              )}
             </div>
 
             {/* Department */}

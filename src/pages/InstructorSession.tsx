@@ -113,12 +113,17 @@ export function InstructorSession() {
   )
 
   async function handleRoundExpire() {
-    if (!session) return
-    await supabase
-      .from('sessions')
-      .update({ status: 'between_rounds' })
-      .eq('id', session.id)
-    setSession((prev) => prev ? { ...prev, status: 'between_rounds' } : null)
+    if (!session || !activity) return
+    if (activity.config.auto_advance) {
+      // Auto-advance: go straight to the next round (or end session)
+      await advanceRound()
+    } else {
+      await supabase
+        .from('sessions')
+        .update({ status: 'between_rounds' })
+        .eq('id', session.id)
+      setSession((prev) => prev ? { ...prev, status: 'between_rounds' } : null)
+    }
   }
 
   async function startSession(customPrompt?: string) {

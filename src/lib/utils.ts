@@ -37,6 +37,17 @@ export function clearStudentToken(): void {
   localStorage.removeItem(STUDENT_TOKEN_KEY)
 }
 
+/** Format a duration in seconds into a human-readable label */
+export function formatDuration(sec: number): string {
+  if (sec < 60) return `${sec} sec`
+  if (sec < 3600) {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return s === 0 ? `${m} min` : `${m} min ${s} sec`
+  }
+  return `${Math.round(sec / 3600)} hr`
+}
+
 /** Format seconds as MM:SS */
 export function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)

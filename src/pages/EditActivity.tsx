@@ -19,6 +19,7 @@ export function EditActivity() {
   const [rebuttalPrompt, setRebuttalPrompt] = useState('')
   const [explainPrompt, setExplainPrompt] = useState('')
   const [gapPrompt, setGapPrompt] = useState('')
+  const [autoAdvance, setAutoAdvance] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -49,6 +50,7 @@ export function EditActivity() {
       setRebuttalPrompt(data.config.rebuttal_prompt ?? '')
       setExplainPrompt(data.config.explain_prompt ?? '')
       setGapPrompt(data.config.gap_prompt ?? '')
+      setAutoAdvance(data.config.auto_advance ?? false)
     }
   }
 
@@ -81,6 +83,7 @@ export function EditActivity() {
           ...(activity.type === 'evidence_analysis' && {
             gap_prompt: gapPrompt.trim() || null,
           }),
+          auto_advance: autoAdvance,
         },
       })
       .eq('id', id)
@@ -271,6 +274,26 @@ export function EditActivity() {
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Auto-advance toggle */}
+        <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <p className="text-sm font-medium text-slate-700">Auto-advance rounds</p>
+            <p className="text-xs text-slate-400 mt-0.5">Move to the next round automatically when the timer expires</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAutoAdvance((v) => !v)}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
+              autoAdvance ? 'bg-kiln-500' : 'bg-slate-300'
+            }`}
+            aria-label="Toggle auto-advance"
+          >
+            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+              autoAdvance ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </button>
         </div>
 
         {saveError && (
