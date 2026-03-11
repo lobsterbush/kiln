@@ -17,6 +17,8 @@ export function EditActivity() {
   const [objectives, setObjectives] = useState('')
   const [critiquePrompt, setCritiquePrompt] = useState('')
   const [rebuttalPrompt, setRebuttalPrompt] = useState('')
+  const [explainPrompt, setExplainPrompt] = useState('')
+  const [gapPrompt, setGapPrompt] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -45,6 +47,8 @@ export function EditActivity() {
       setObjectives(data.config.learning_objectives?.join('\n') ?? '')
       setCritiquePrompt(data.config.critique_prompt ?? '')
       setRebuttalPrompt(data.config.rebuttal_prompt ?? '')
+      setExplainPrompt(data.config.explain_prompt ?? '')
+      setGapPrompt(data.config.gap_prompt ?? '')
     }
   }
 
@@ -59,7 +63,7 @@ export function EditActivity() {
       .update({
         title: title.trim(),
         config: {
-        ...activity.config,
+          ...activity.config,
           initial_prompt: prompt.trim(),
           rounds,
           round_duration_sec: duration,
@@ -67,8 +71,16 @@ export function EditActivity() {
             .split('\n')
             .map((s) => s.trim())
             .filter(Boolean),
-          critique_prompt: critiquePrompt.trim() || null,
-          rebuttal_prompt: rebuttalPrompt.trim() || null,
+          ...(activity.type === 'peer_critique' && {
+            critique_prompt: critiquePrompt.trim() || null,
+            rebuttal_prompt: rebuttalPrompt.trim() || null,
+          }),
+          ...(activity.type === 'peer_clarification' && {
+            explain_prompt: explainPrompt.trim() || null,
+          }),
+          ...(activity.type === 'evidence_analysis' && {
+            gap_prompt: gapPrompt.trim() || null,
+          }),
         },
       })
       .eq('id', id)
@@ -187,8 +199,8 @@ export function EditActivity() {
               <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
             </label>
             <textarea
-              value={critiquePrompt}
-              onChange={(e) => setCritiquePrompt(e.target.value)}
+              value={explainPrompt}
+              onChange={(e) => setExplainPrompt(e.target.value)}
               placeholder="A classmate shared their confusion below. Explain this concept to them in plain language."
               className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
             />
@@ -202,8 +214,8 @@ export function EditActivity() {
               <span className="normal-case font-normal text-slate-400">(optional — leave blank for default)</span>
             </label>
             <textarea
-              value={rebuttalPrompt}
-              onChange={(e) => setRebuttalPrompt(e.target.value)}
+              value={gapPrompt}
+              onChange={(e) => setGapPrompt(e.target.value)}
               placeholder="Read your classmate's interpretation below. What is the biggest inferential gap in their reasoning?"
               className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed"
             />
@@ -215,19 +227,25 @@ export function EditActivity() {
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Rounds
             </label>
-            <select
-              value={rounds}
-              onChange={(e) => setRounds(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
-            >
-              {(activity.type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
-                <option key={n} value={n}>
-                  {n === 2 && activity.type === 'peer_critique' ? '2 — Claim + Critique'
-                    : n === 3 && activity.type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
-                    : `${n} rounds`}
-                </option>
-              ))}
-            </select>
+            {(activity.type === 'peer_clarification' || activity.type === 'evidence_analysis') ? (
+              <div className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-500 text-sm">
+                2 rounds (fixed)
+              </div>
+            ) : (
+              <select
+                value={rounds}
+                onChange={(e) => setRounds(Number(e.target.value))}
+                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
+              >
+                {(activity.type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
+                  <option key={n} value={n}>
+                    {n === 2 && activity.type === 'peer_critique' ? '2 — Claim + Critique'
+                      : n === 3 && activity.type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
+                      : `${n} rounds`}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">

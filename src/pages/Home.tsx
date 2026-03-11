@@ -155,7 +155,7 @@ export function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
-              { step: '01', title: 'Create an activity', body: 'Pick Peer Critique or Socratic Chain, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
+{ step: '01', title: 'Create an activity', body: 'Pick one of four activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
               { step: '02', title: 'Students join with a code', body: 'Share a 6-character code. Students open it on any phone, tablet, or laptop — no account needed.', note: 'Works on any device.' },
               { step: '03', title: 'Watch it happen live', body: 'Responses appear in real time. See who submitted and what they wrote before the class ends.', note: 'Export CSV when done.' },
             ].map((s) => (

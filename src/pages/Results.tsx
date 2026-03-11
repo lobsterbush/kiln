@@ -61,7 +61,7 @@ export function Results() {
       if (asReviewer) {
         const author = participants.find((q) => q.id === asReviewer.author_id)
         respondingTo = author?.display_name ?? ''
-      } else if (asAuthor && r.response_type === 'rebuttal') {
+      } else if (asAuthor && (r.response_type === 'rebuttal' || r.response_type === 'evidence_gap')) {
         const reviewer = participants.find((q) => q.id === asAuthor.reviewer_id)
         respondingTo = reviewer?.display_name ?? ''
       }
@@ -109,6 +109,8 @@ export function Results() {
     critique: 'Critique',
     rebuttal: 'Rebuttal',
     followup_answer: 'Follow-up',
+    clarification: 'Clarification',
+    evidence_gap: 'Gap Analysis',
   }
 
   // Summary stats
@@ -134,10 +136,17 @@ export function Results() {
       let context: string | null = null
       if (asReviewer) {
         const author = participants.find((q) => q.id === asReviewer.author_id)
-        context = `→ critiqued ${author?.display_name ?? 'a classmate'}`
+        const name = author?.display_name ?? 'a classmate'
+        if (activity?.type === 'peer_clarification') {
+          context = `\u2192 explained ${name}'s confusion`
+        } else if (activity?.type === 'evidence_analysis') {
+          context = `\u2192 found gap in ${name}'s interpretation`
+        } else {
+          context = `\u2192 critiqued ${name}`
+        }
       } else if (asAuthor && r.response_type === 'rebuttal') {
         const reviewer = participants.find((q) => q.id === asAuthor.reviewer_id)
-        context = `→ rebutted ${reviewer?.display_name ?? 'a classmate'}’s critique`
+        context = `\u2192 rebutted ${reviewer?.display_name ?? 'a classmate'}'s critique`
       }
 
       return { ...r, context }
