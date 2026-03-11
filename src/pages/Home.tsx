@@ -78,50 +78,44 @@ export function Home() {
                 AI-resistant active learning
               </span>
               <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-5">
-                AI can write the essay.<br />
-                <span className="text-kiln-500">It can't think live.</span>
+                Designed so AI shortcuts<br />
+                <span className="text-kiln-500">create more work, not less.</span>
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg">
-                Real-time, timed activities where students must argue, critique, and
-                defend their reasoning on the spot — no copy-pasting possible.
+                Timed, personalised, reactive activities that make it harder to
+                use AI than to just think. Every student responds on the spot
+                to content unique to them.
               </p>
             </div>
 
-            {/* Two-card CTAs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
-              {/* Student */}
-              <div className="flex flex-col gap-3 p-5 bg-white rounded-2xl border-2 border-kiln-200 shadow-sm">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">I’m a student</p>
-                <form onSubmit={handleJoin} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="ABC123"
-                    maxLength={6}
-                    className="flex-1 px-3 py-2.5 text-center text-lg font-mono font-bold tracking-[0.25em] bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors placeholder:text-slate-300 placeholder:tracking-[0.1em] placeholder:font-normal"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!code.trim()}
-                    className="px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 transition-all shadow-md shadow-kiln-200 active:scale-95"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </form>
-                <p className="text-xs text-slate-400">Enter the code from your instructor</p>
-              </div>
-
-              {/* Instructor */}
-              <div className="flex flex-col gap-3 p-5 bg-gradient-to-br from-kiln-500 to-kiln-600 rounded-2xl text-white shadow-lg shadow-kiln-200">
-                <p className="text-xs font-bold text-kiln-100 uppercase tracking-wider">I’m an instructor</p>
+            {/* Student join — primary action */}
+            <div className="flex flex-col gap-3 max-w-lg">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Student? Enter your session code</p>
+              <form onSubmit={handleJoin} className="flex gap-2">
+                <input
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="ABC123"
+                  maxLength={6}
+                  className="flex-1 px-5 py-4 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-300 rounded-2xl focus:outline-none focus:border-kiln-400 transition-colors shadow-sm placeholder:text-slate-200 placeholder:tracking-[0.15em] placeholder:font-normal"
+                />
+                <button
+                  type="submit"
+                  disabled={!code.trim()}
+                  className="px-5 py-4 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white rounded-2xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 transition-all shadow-md shadow-kiln-200 active:scale-95"
+                >
+                  <ArrowRight className="w-6 h-6" />
+                </button>
+              </form>
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-sm text-slate-400">Code is on the board or screen.</p>
                 <Link
                   to="/instructor"
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-kiln-700 font-bold rounded-xl hover:bg-kiln-50 transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-kiln-600 hover:text-kiln-700 transition-colors"
                 >
-                  Get started free <ArrowRight className="w-4 h-4" />
+                  Instructor? Get started free <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-                <p className="text-xs text-kiln-100">No credit card. Up in 60 seconds.</p>
               </div>
             </div>
           </div>
