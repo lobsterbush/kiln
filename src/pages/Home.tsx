@@ -345,7 +345,7 @@ export function Home() {
               <ul className="flex flex-col gap-2.5 mb-8 flex-1">
                 {[
                   '10 sessions per month',
-                  'Peer Critique + Socratic Chain',
+                  'All four activity types',
                   'Up to 40 students per session',
                   'Live monitor & CSV export',
                 ].map((f) => (

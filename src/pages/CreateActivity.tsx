@@ -286,38 +286,46 @@ export function CreateActivity() {
           />
         </div>
 
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+            Learning Objectives{' '}
+            <span className="normal-case font-normal text-slate-400">(optional — one per line)</span>
+          </label>
+          <textarea
+            value={objectives}
+            onChange={(e) => setObjectives(e.target.value)}
+            placeholder={type === 'socratic_chain'
+              ? 'Evaluate institutional vs cultural explanations\nIdentify necessary vs sufficient conditions'
+              : type === 'peer_critique'
+              ? 'Construct a well-evidenced argument\nIdentify weaknesses in reasoning\nRespond to critique under time pressure'
+              : type === 'peer_clarification'
+              ? 'Diagnose gaps in your own understanding\nExplain a concept in plain language'
+              : 'Interpret unfamiliar evidence cold\nIdentify inferential gaps in peer reasoning'
+            }
+            className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
+          />
+          <p className="text-xs text-slate-400 mt-1.5">Used by AI to generate more targeted student feedback.</p>
+        </div>
+
         {type === 'socratic_chain' && (
-          <>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                Learning Objectives (one per line)
-              </label>
-              <textarea
-                value={objectives}
-                onChange={(e) => setObjectives(e.target.value)}
-                placeholder="Evaluate institutional vs cultural explanations&#10;Identify necessary vs sufficient conditions"
-                className="w-full h-24 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Source Material{' '}
-                <span className="normal-case font-normal text-slate-400">(optional — paste readings, lecture notes, or key excerpts)</span>
-              </label>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Claude will use this to generate follow-up questions grounded in your specific material. Paste the most relevant 1–3 paragraphs for best results.
-              </p>
-              <textarea
-                value={sourceMaterial}
-                onChange={(e) => setSourceMaterial(e.target.value)}
-                placeholder="Paste a reading excerpt, key argument, lecture notes, or any text you want follow-up questions to engage with..."
-                className="w-full h-40 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed text-sm"
-              />
-              {sourceMaterial.length > 3000 && (
-                <p className="text-xs text-amber-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
-              )}
-            </div>
-          </>
+          <div className="flex flex-col gap-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Source Material{' '}
+              <span className="normal-case font-normal text-slate-400">(optional — paste readings, lecture notes, or key excerpts)</span>
+            </label>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Claude will use this to generate follow-up questions grounded in your specific material. Paste the most relevant 1–3 paragraphs for best results.
+            </p>
+            <textarea
+              value={sourceMaterial}
+              onChange={(e) => setSourceMaterial(e.target.value)}
+              placeholder="Paste a reading excerpt, key argument, lecture notes, or any text you want follow-up questions to engage with..."
+              className="w-full h-40 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed text-sm"
+            />
+            {sourceMaterial.length > 3000 && (
+              <p className="text-xs text-amber-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
+            )}
+          </div>
         )}
 
         {type === 'peer_critique' && (

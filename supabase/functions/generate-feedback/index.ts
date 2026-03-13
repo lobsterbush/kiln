@@ -87,6 +87,9 @@ Deno.serve(async (req) => {
     const config = activity?.config ?? {}
     const initialPrompt: string = config.initial_prompt ?? ''
     const actTitle: string = activity?.title ?? 'Untitled'
+    const learningObjectives: string[] = Array.isArray(config.learning_objectives)
+      ? config.learning_objectives.filter((s: string) => s.trim())
+      : []
 
     // Load all responses and participants
     const [responsesResult, participantsResult] = await Promise.all([
@@ -140,8 +143,12 @@ Deno.serve(async (req) => {
           .map((r) => `[${TYPE_LABELS[r.response_type] ?? r.response_type}, Round ${r.round}]: ${r.content}`)
           .join('\n\n')
 
+        const objectivesSection = learningObjectives.length > 0
+          ? `\nLearning objectives:\n${learningObjectives.map((o) => `- ${o}`).join('\n')}`
+          : ''
+
         const userMessage = `Activity: "${actTitle}"
-Opening question: "${initialPrompt}"
+Opening question: "${initialPrompt}"${objectivesSection}
 
 Student: ${name}
 Response chain:

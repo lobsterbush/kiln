@@ -98,9 +98,16 @@ export function ResponsePanel({
               <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{submitError}</p>
             )}
             <div className="flex items-center justify-between mt-4">
-              <span className="text-xs text-slate-400 font-medium tabular-nums">
-                {content.trim() ? content.trim().split(/\s+/).length : 0} {content.trim().split(/\s+/).length === 1 && content.trim() ? 'word' : 'words'}
-              </span>
+              {(() => {
+                const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
+                const isThin = wordCount > 0 && wordCount < 15
+                return (
+                  <span className={`text-xs font-medium tabular-nums ${isThin ? 'text-amber-500' : 'text-slate-400'}`}>
+                    {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                    {isThin && <span className="ml-1 font-normal">— aim for 15+</span>}
+                  </span>
+                )
+              })()}
               <button
                 onClick={handleSubmit}
                 disabled={isDisabled || !content.trim()}
