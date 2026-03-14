@@ -311,6 +311,13 @@ export function StudentSession() {
           )}
         </div>
         {myResponses.length > 0 && (
+          <>
+          <a
+            href={`${import.meta.env.BASE_URL}session/${id}/summary`}
+            className="px-5 py-2.5 bg-kiln-600 text-white text-sm font-semibold rounded-xl hover:bg-kiln-700 transition-colors"
+          >
+            View your summary →
+          </a>
           <div className="w-full max-w-lg flex flex-col gap-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Your responses this session</p>
             {myResponses.map((r, i) => (
@@ -329,6 +336,7 @@ export function StudentSession() {
               </div>
             ))}
           </div>
+          </>
         )}
       </div>
     )

@@ -186,6 +186,19 @@ Return this exact JSON (no other text):
       })
     )
 
+    // Persist each student's feedback to participants.ai_feedback so they
+    // can access it from the student-facing /session/:id/summary page.
+    await Promise.all(
+      feedbackResults
+        .filter((f: any) => f?.participant_id && f?.text)
+        .map((f: any) =>
+          supabase
+            .from('participants')
+            .update({ ai_feedback: f.text })
+            .eq('id', f.participant_id)
+        )
+    )
+
     return new Response(JSON.stringify({ feedback: feedbackResults }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
-import { Download, ArrowLeft, Sparkles, Loader2, Play, MessageSquare, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Download, ArrowLeft, Sparkles, Loader2, Play, MessageSquare, TrendingUp, TrendingDown, Minus, Copy, Check, Info } from 'lucide-react'
 import { generateJoinCode } from '../lib/utils'
 
 export function Results() {
@@ -31,6 +31,7 @@ export function Results() {
   const [feedback, setFeedback] = useState<{ participant_id: string; name: string; text: string }[] | null>(null)
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
+  const [debriefCopied, setDebriefCopied] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -130,6 +131,53 @@ export function Results() {
     } finally {
       setDebriefLoading(false)
     }
+  }
+
+  function exportGradebookCSV() {
+    if (!activity) return
+    const totalRounds = activity.config.rounds
+    const headers = ['name', 'participated', 'rounds_submitted', 'total_rounds', 'participation_pct', 'total_words', 'avg_words']
+    const rows = participants.map((p) => {
+      const pResponses = responses.filter((r) => r.participant_id === p.id)
+      const participated = pResponses.length > 0 ? 1 : 0
+      const roundsSubmitted = pResponses.length
+      const words = pResponses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).filter(Boolean).length, 0)
+      const avgWords = roundsSubmitted > 0 ? Math.round(words / roundsSubmitted) : 0
+      const pct = totalRounds > 0 ? Math.round((roundsSubmitted / totalRounds) * 100) : 0
+      return [`"${p.display_name.replace(/"/g, '""')}"`, participated, roundsSubmitted, totalRounds, pct, words, avgWords].join(',')
+    })
+    const csv = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `kiln-gradebook-${session?.join_code ?? id}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  async function copyDebrief() {
+    if (!debrief || !activity || !session) return
+    const date = new Date(session.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    const lines = [
+      `${activity.title} — ${date}`,
+      '',
+      `Themes: ${debrief.themes.map((t) => `• ${t}`).join('  ')}`,
+      '',
+      `Gaps: ${debrief.gaps.map((g) => `• ${g}`).join('  ')}`,
+    ]
+    if (debrief.notable?.length > 0) {
+      lines.push('')
+      lines.push('Worth discussing:')
+      debrief.notable.forEach((n) => lines.push(`  "${n.quote}" — ${n.why}`))
+    }
+    lines.push('')
+    lines.push(`Teaching suggestion: ${debrief.suggestion}`)
+    await navigator.clipboard.writeText(lines.join('\n'))
+    setDebriefCopied(true)
+    setTimeout(() => setDebriefCopied(false), 2000)
   }
 
   function exportCSV() {
@@ -285,11 +333,18 @@ export function Results() {
             {debriefLoading ? 'Analysing…' : 'AI Debrief'}
           </button>
           <button
+            onClick={exportGradebookCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
+          >
+            <Download className="w-4 h-4" />
+            Gradebook CSV
+          </button>
+          <button
             onClick={exportCSV}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
           >
             <Download className="w-4 h-4" />
-            Export CSV
+            Responses CSV
           </button>
         </div>
       </div>
@@ -344,7 +399,16 @@ export function Results() {
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-500" />
             <h3 className="font-bold text-slate-900">AI Session Debrief</h3>
-            <button onClick={() => setDebrief(null)} className="ml-auto text-slate-300 hover:text-slate-500 text-lg leading-none">×</button>
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={copyDebrief}
+                className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+              >
+                {debriefCopied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                {debriefCopied ? 'Copied!' : 'Copy for slides'}
+              </button>
+              <button onClick={() => setDebrief(null)} className="text-slate-300 hover:text-slate-500 text-lg leading-none">×</button>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -385,6 +449,19 @@ export function Results() {
             <p className="text-xs font-bold text-kiln-700 uppercase tracking-wider mb-1">Teaching suggestion</p>
             <p className="text-sm text-kiln-800">{debrief.suggestion}</p>
           </div>
+        </div>
+      )}
+
+      {/* Student summary info */}
+      {session.status === 'completed' && (
+        <div className="flex items-start gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+          <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+          <p className="text-slate-500">
+            Students can view their session summary from the device they used to participate. Ask them to visit{' '}
+            <span className="font-mono text-xs bg-white border border-slate-200 px-1 py-0.5 rounded">
+              {window.location.origin}{import.meta.env.BASE_URL}session/{id}/summary
+            </span>
+          </p>
         </div>
       )}
 

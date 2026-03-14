@@ -11,6 +11,7 @@ import { Results } from './pages/Results'
 import { EditActivity } from './pages/EditActivity'
 import { Pedagogy } from './pages/Pedagogy'
 import { ProjectorView } from './pages/ProjectorView'
+import { StudentSummary } from './pages/StudentSummary'
 
 function NotFound() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/join" element={<Join />} />
             <Route path="/session/:id" element={<StudentSession />} />
+            <Route path="/session/:id/summary" element={<StudentSummary />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
             <Route path="/instructor/create" element={<CreateActivity />} />
             <Route path="/instructor/session/:id" element={<InstructorSession />} />
