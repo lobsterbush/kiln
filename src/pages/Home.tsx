@@ -4,54 +4,195 @@ import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail } from 
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 
-// ─── Fake live-session mockup shown in the hero ───────────────────────────────
-function LivePreview() {
-  const students = [
-    { name: 'Priya K.',  submitted: true,  text: 'Electoral institutions create incentives that…' },
-    { name: 'Marcus T.', submitted: true,  text: 'The key factor is the breakdown of party…' },
-    { name: 'Sofia L.',  submitted: false },
-    { name: 'James W.',  submitted: true,  text: 'Without strong civil society, formal…' },
-    { name: 'Aisha M.',  submitted: false },
-    { name: 'Dev R.',    submitted: true,  text: 'Economic inequality amplifies political…' },
-  ]
+// ─── Live-session mockup carousel ────────────────────────────────────────────
+type SlideStudent = { name: string; submitted: boolean; text?: string; ai?: string }
+type Slide = {
+  label: string
+  badgeCls: string
+  accentCls: string
+  timerCls: string
+  barCls: string
+  round: string
+  code: string
+  submitted: number
+  total: number
+  timer: string
+  prompt: string
+  students: SlideStudent[]
+}
+
+const CAROUSEL_SLIDES: Slide[] = [
+  {
+    label: 'Peer Critique',
+    badgeCls: 'bg-blue-100 text-blue-700',
+    accentCls: 'text-kiln-600',
+    timerCls: 'text-emerald-600',
+    barCls: 'from-blue-400 to-blue-500',
+    round: '2 of 3',
+    code: 'XK7R4P',
+    submitted: 4,
+    total: 6,
+    timer: '1:24',
+    prompt: 'Identify the weakest assumption in your peer’s argument.',
+    students: [
+      { name: 'Priya K.',  submitted: true,  text: 'Assumes economic decline automatically causes…' },
+      { name: 'Marcus T.', submitted: true,  text: 'The causal mechanism is asserted, not shown.' },
+      { name: 'Sofia L.',  submitted: false },
+      { name: 'James W.',  submitted: true,  text: 'Conflates correlation with causation when…' },
+      { name: 'Aisha M.',  submitted: false },
+      { name: 'Dev R.',    submitted: true,  text: 'No counterfactual: why Hungary but not…' },
+    ],
+  },
+  {
+    label: 'Socratic Chain',
+    badgeCls: 'bg-purple-100 text-purple-700',
+    accentCls: 'text-purple-600',
+    timerCls: 'text-amber-500',
+    barCls: 'from-purple-400 to-purple-500',
+    round: '2 of 3',
+    code: 'MN3KQ8',
+    submitted: 5,
+    total: 5,
+    timer: '0:47',
+    prompt: 'AI follow-up questions sent — each student’s path diverges here.',
+    students: [
+      { name: 'Priya K.',  submitted: true,  ai: 'If institutions explain backsliding, why did Poland recover?' },
+      { name: 'Marcus T.', submitted: true,  ai: 'You argue elites defect — what prevents them from doing so earlier?' },
+      { name: 'Sofia L.',  submitted: true,  ai: 'What evidence would falsify your causal claim?' },
+      { name: 'James W.',  submitted: true,  ai: 'How does civil society slow the consolidation process?' },
+      { name: 'Dev R.',    submitted: false },
+    ],
+  },
+  {
+    label: 'Peer Clarification',
+    badgeCls: 'bg-teal-100 text-teal-700',
+    accentCls: 'text-teal-600',
+    timerCls: 'text-emerald-600',
+    barCls: 'from-teal-400 to-teal-500',
+    round: '1 of 2',
+    code: 'PQ5T2M',
+    submitted: 3,
+    total: 5,
+    timer: '2:11',
+    prompt: 'What is the single most confusing point from today’s material?',
+    students: [
+      { name: 'Priya K.',  submitted: true,  text: 'Unclear how veto players differ from…' },
+      { name: 'Marcus T.', submitted: false },
+      { name: 'Sofia L.',  submitted: true,  text: 'I don’t understand the distinction between…' },
+      { name: 'James W.',  submitted: true,  text: 'The mechanism connecting inequality to…' },
+      { name: 'Aisha M.',  submitted: false },
+    ],
+  },
+  {
+    label: 'Evidence Analysis',
+    badgeCls: 'bg-amber-100 text-amber-700',
+    accentCls: 'text-amber-600',
+    timerCls: 'text-slate-400',
+    barCls: 'from-amber-400 to-amber-500',
+    round: '2 of 2',
+    code: 'BR9W6L',
+    submitted: 5,
+    total: 5,
+    timer: '—',
+    prompt: '[Fig. 3] Party fragmentation in 12 new democracies, 1990–2020.',
+    students: [
+      { name: 'Priya K.',  submitted: true,  text: 'Fragmentation spikes after economic crises…' },
+      { name: 'Marcus T.', submitted: true,  text: 'Outliers in years 3–5 suggest the effect…' },
+      { name: 'Sofia L.',  submitted: true,  text: 'The trend line hides variation by regime…' },
+      { name: 'James W.',  submitted: true,  text: 'Electoral systems mediate this — look at…' },
+      { name: 'Dev R.',    submitted: true,  text: 'Correlation with GDP growth is conspicuous.' },
+    ],
+  },
+]
+
+function LivePreviewCarousel() {
+  const [idx, setIdx] = useState(0)
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    if (paused) return
+    const t = setInterval(() => setIdx((i) => (i + 1) % CAROUSEL_SLIDES.length), 4000)
+    return () => clearInterval(t)
+  }, [paused])
+
+  const slide = CAROUSEL_SLIDES[idx]
+  const pct = Math.round((slide.submitted / slide.total) * 100)
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200/60 p-5 select-none">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-slate-800">Round 1 of 3</span>
-            <span className="font-mono text-xs font-bold tracking-widest text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">XK7R4P</span>
+    <div
+      className="flex flex-col gap-3 select-none"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200/60 p-5">
+        {/* Activity type badge */}
+        <div className="flex items-center justify-between mb-3">
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${slide.badgeCls}`}>{slide.label}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono text-xs font-bold tracking-widest text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">{slide.code}</span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5"><span className="font-semibold text-kiln-600">4</span>/6 submitted</p>
-          <p className="text-xs text-slate-400 mt-0.5 italic line-clamp-1">What explains democratic backsliding in Hungary?</p>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-3xl font-mono font-bold text-emerald-600 tabular-nums leading-none">1:24</p>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">remaining</p>
-        </div>
-      </div>
-      <div className="w-full h-2 bg-slate-100 rounded-full mb-4 overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-kiln-400 to-kiln-500 rounded-full" style={{ width: '67%' }} />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {students.map((s) => (
-          <div key={s.name} className={`rounded-xl border p-3 ${s.submitted ? 'bg-white border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-slate-700">{s.name}</span>
-              {s.submitted
-                ? <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">✓ Submitted</span>
-                : <span className="text-xs bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full animate-pulse">Writing…</span>
-              }
+
+        {/* Header row */}
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-800">Round {slide.round}</span>
             </div>
-            {s.submitted && s.text && (
-              <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed">{s.text}</p>
-            )}
+            <p className="text-xs mt-0.5"><span className={`font-semibold ${slide.accentCls}`}>{slide.submitted}</span><span className="text-slate-500">/{slide.total} submitted</span></p>
+            <p className="text-xs text-slate-400 mt-0.5 italic line-clamp-1 max-w-[200px]">{slide.prompt}</p>
           </div>
-        ))}
+          <div className="text-right shrink-0">
+            <p className={`text-3xl font-mono font-bold tabular-nums leading-none ${slide.timerCls}`}>{slide.timer}</p>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">remaining</p>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full h-2 bg-slate-100 rounded-full mb-3 overflow-hidden">
+          <div className={`h-full bg-gradient-to-r ${slide.barCls} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
+        </div>
+
+        {/* Student grid */}
+        <div className="grid grid-cols-2 gap-2">
+          {slide.students.map((s) => (
+            <div key={s.name} className={`rounded-xl border p-2.5 ${s.submitted ? 'bg-white border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-slate-700">{s.name}</span>
+                {s.submitted
+                  ? <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">✓</span>
+                  : <span className="text-xs bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full animate-pulse">Writing…</span>
+                }
+              </div>
+              {s.submitted && s.ai && (
+                <p className="text-xs text-purple-600 line-clamp-1 leading-relaxed">✨ {s.ai}</p>
+              )}
+              {s.submitted && s.text && (
+                <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed">{s.text}</p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Controls */}
+        <div className="flex gap-2 mt-3 justify-end">
+          <div className="px-3.5 py-1.5 bg-slate-100 text-slate-400 text-xs font-medium rounded-xl">End Session</div>
+          <div className="px-3.5 py-1.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white text-xs font-semibold rounded-xl shadow-sm">Advance Early →</div>
+        </div>
       </div>
-      <div className="flex gap-2 mt-4 justify-end">
-        <div className="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-medium rounded-xl">End Session</div>
-        <div className="px-4 py-2 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white text-xs font-semibold rounded-xl shadow-sm">Advance Early →</div>
+
+      {/* Dot indicators + labels */}
+      <div className="flex items-center justify-center gap-2">
+        {CAROUSEL_SLIDES.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => { setIdx(i); setPaused(true) }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === idx ? 'w-6 bg-kiln-500' : 'w-1.5 bg-slate-300 hover:bg-slate-400'
+            }`}
+            aria-label={s.label}
+          />
+        ))}
       </div>
     </div>
   )
@@ -147,12 +288,12 @@ export function Home() {
             </div>
           </div>
 
-          {/* Right: live monitor mockup — desktop only */}
+          {/* Right: live monitor carousel — desktop only */}
           <div className="hidden lg:flex flex-1 flex-col w-full max-w-lg animate-slide-up py-20">
             <p className="text-xs font-bold text-kiln-600 uppercase tracking-widest text-center mb-3">
-              What you see as the instructor
+              What instructors see — all four activity types
             </p>
-            <LivePreview />
+            <LivePreviewCarousel />
           </div>
         </div>
       </section>
