@@ -24,14 +24,16 @@ export function InstructorDashboard() {
   const [sessionError, setSessionError] = useState<string | null>(null)
   const [activeSessions, setActiveSessions] = useState<{ id: string; join_code: string; status: string; activity: { title: string }[] | null }[]>([])
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-  const [pastSessions, setPastSessions] = useState<{ id: string; join_code: string; created_at: string; activity: { title: string }[] | null }[]>([])
+  const [pastSessions, setPastSessions] = useState<{ id: string; join_code: string; created_at: string; activity: { title: string }[] | null; participants: { count: number }[] }[]>([])
   const [showAllPast, setShowAllPast] = useState(false)
+  const [sessionStats, setSessionStats] = useState<Map<string, { count: number; lastRun: string }>>(new Map())
 
   useEffect(() => {
     if (user) {
       loadActivities()
       loadActiveSessions()
       loadPastSessions()
+      loadSessionStats()
     }
   }, [user])
 
@@ -57,10 +59,31 @@ export function InstructorDashboard() {
     }
   }
 
+  async function loadSessionStats() {
+    const { data } = await supabase
+      .from('sessions')
+      .select('activity_id, created_at')
+      .eq('instructor_id', user!.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+    if (!data) return
+    const map = new Map<string, { count: number; lastRun: string }>()
+    for (const s of data) {
+      const id = s.activity_id as string
+      const existing = map.get(id)
+      if (!existing) {
+        map.set(id, { count: 1, lastRun: s.created_at })
+      } else {
+        map.set(id, { count: existing.count + 1, lastRun: existing.lastRun })
+      }
+    }
+    setSessionStats(map)
+  }
+
   async function loadPastSessions(all = false) {
     const query = supabase
       .from('sessions')
-      .select('id, join_code, created_at, activity:activities(title)')
+      .select('id, join_code, created_at, activity:activities(title), participants:participants(count)')
       .eq('instructor_id', user!.id)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
@@ -525,18 +548,31 @@ export function InstructorDashboard() {
               <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
                 {a.config.initial_prompt}
               </p>
-              <p className="text-xs text-slate-400 mt-3 font-medium">
-                {a.type === 'peer_critique'
-                  ? a.config.rounds === 2
-                    ? `Claim \u2192 Critique \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                    : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                  : a.type === 'peer_clarification'
-                  ? `Confusion \u2192 Explanation \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                  : a.type === 'evidence_analysis'
-                  ? `Interpretation \u2192 Gap Analysis \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                  : `${a.config.rounds} rounds \u00b7 ${formatDuration(a.config.round_duration_sec)} each`
-                }
-              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-slate-400 font-medium">
+                  {a.type === 'peer_critique'
+                    ? a.config.rounds === 2
+                      ? `Claim \u2192 Critique \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                      : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                    : a.type === 'peer_clarification'
+                    ? `Confusion \u2192 Explanation \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                    : a.type === 'evidence_analysis'
+                    ? `Interpretation \u2192 Gap Analysis \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                    : `${a.config.rounds} rounds \u00b7 ${formatDuration(a.config.round_duration_sec)} each`
+                  }
+                </p>
+                {sessionStats.has(a.id) && (() => {
+                  const stats = sessionStats.get(a.id)!
+                  const d = new Date(stats.lastRun)
+                  const sameYear = d.getFullYear() === new Date().getFullYear()
+                  const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(!sameYear && { year: 'numeric' }) })
+                  return (
+                    <span className="text-xs text-slate-300 shrink-0">
+                      {stats.count} run{stats.count !== 1 ? 's' : ''} \u00b7 {dateStr}
+                    </span>
+                  )
+                })()}
+              </div>
             </div>
           ))}
         </div>
@@ -558,23 +594,30 @@ export function InstructorDashboard() {
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            {pastSessions.map((s) => (
-              <div key={s.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
-                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <span className="text-sm font-medium text-slate-700 truncate">{s.activity?.[0]?.title ?? 'Untitled'}</span>
-                  <span className="font-mono text-xs text-slate-400 shrink-0">{s.join_code}</span>
-                  <span className="text-xs text-slate-400 shrink-0">
-                    {new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
+            {pastSessions.map((s) => {
+              const d = new Date(s.created_at)
+              const sameYear = d.getFullYear() === new Date().getFullYear()
+              const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(!sameYear && { year: 'numeric' }) })
+              const participantCount = s.participants?.[0]?.count ?? null
+              return (
+                <div key={s.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className="text-sm font-medium text-slate-700 truncate">{s.activity?.[0]?.title ?? 'Untitled'}</span>
+                    <span className="font-mono text-xs text-slate-400 shrink-0">{s.join_code}</span>
+                    {participantCount !== null && (
+                      <span className="text-xs text-slate-400 shrink-0">{participantCount} student{participantCount !== 1 ? 's' : ''}</span>
+                    )}
+                    <span className="text-xs text-slate-400 shrink-0">{dateStr}</span>
+                  </div>
+                  <Link
+                    to={`/instructor/results/${s.id}`}
+                    className="text-xs font-medium text-kiln-600 hover:text-kiln-700 transition-colors shrink-0"
+                  >
+                    View results \u2192
+                  </Link>
                 </div>
-                <Link
-                  to={`/instructor/results/${s.id}`}
-                  className="text-xs font-medium text-kiln-600 hover:text-kiln-700 transition-colors shrink-0"
-                >
-                  View results →
-                </Link>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

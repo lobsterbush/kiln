@@ -197,9 +197,8 @@ export function Results() {
 
   // Summary stats
   const totalResponses = responses.length
-  const avgWords = totalResponses > 0
-    ? Math.round(responses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).length, 0) / totalResponses)
-    : 0
+  const totalWords = responses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).filter(Boolean).length, 0)
+  const avgWords = totalResponses > 0 ? Math.round(totalWords / totalResponses) : 0
 
   // Group responses by participant, with peer context inline
   // Filter out participants who never submitted (e.g. joined then left)
@@ -268,10 +267,14 @@ export function Results() {
           <button
             onClick={generateFeedback}
             disabled={feedbackLoading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border-2 border-blue-200 text-blue-700 font-medium rounded-xl hover:border-blue-300 hover:bg-blue-100 disabled:opacity-40 transition-all"
+            className={`flex items-center gap-2 px-4 py-2.5 border-2 font-medium rounded-xl disabled:opacity-40 transition-all ${
+              feedback
+                ? 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-100'
+                : 'bg-blue-50 border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-100'
+            }`}
           >
             {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
-            {feedbackLoading ? 'Generating…' : 'Student Feedback'}
+            {feedbackLoading ? 'Generating…' : feedback ? `Regenerate Feedback (${feedback.length})` : 'Student Feedback'}
           </button>
           <button
             onClick={generateDebrief}
@@ -387,7 +390,7 @@ export function Results() {
 
       {/* Summary stats */}
       {(participants.length > 0 || totalResponses > 0) && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{byParticipant.length}<span className="text-base font-normal text-slate-400">/{participants.length}</span></p>
             <p className="text-xs text-slate-500 mt-0.5">Participated</p>
@@ -395,6 +398,10 @@ export function Results() {
           <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{totalResponses}</p>
             <p className="text-xs text-slate-500 mt-0.5">Responses</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900">{totalWords.toLocaleString()}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Total words</p>
           </div>
           <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{avgWords}</p>
