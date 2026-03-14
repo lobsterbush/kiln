@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail, MessageCircle, Network } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 
@@ -101,6 +101,46 @@ const CAROUSEL_SLIDES: Slide[] = [
       { name: 'Sofia L.',  submitted: true,  text: 'The trend line hides variation by regime…' },
       { name: 'James W.',  submitted: true,  text: 'Electoral systems mediate this — look at…' },
       { name: 'Dev R.',    submitted: true,  text: 'Correlation with GDP growth is conspicuous.' },
+    ],
+  },
+  {
+    label: 'Scenario Solo',
+    badgeCls: 'bg-rose-100 text-rose-700',
+    accentCls: 'text-rose-600',
+    timerCls: 'text-rose-500',
+    barCls: 'from-rose-400 to-rose-500',
+    round: 'Turn 3 of 6',
+    code: 'DK4F9N',
+    submitted: 4,
+    total: 5,
+    timer: '—',
+    prompt: 'Negotiate an arms-reduction treaty with a resistant foreign minister.',
+    students: [
+      { name: 'Priya K.',  submitted: true,  text: 'Minister Chen, the verification protocols are non-negotiable…',  ai: '✨ AI: Your proposal assumes trust we do not have. Prove it first.' },
+      { name: 'Marcus T.', submitted: true,  text: 'A phased timeline addresses your security concerns…', ai: '✨ AI: Phased timelines have failed before. What is different now?' },
+      { name: 'Sofia L.',  submitted: true,  text: 'We can offer economic incentives alongside disarmament…', ai: '✨ AI: Economic incentives won’t substitute for sovereign security.' },
+      { name: 'James W.',  submitted: true,  text: 'Our domestic coalition requires visible concessions…', ai: '✨ AI: So does ours. Who moves first?' },
+      { name: 'Dev R.',    submitted: false },
+    ],
+  },
+  {
+    label: 'Scenario Multi',
+    badgeCls: 'bg-indigo-100 text-indigo-700',
+    accentCls: 'text-indigo-600',
+    timerCls: 'text-indigo-500',
+    barCls: 'from-indigo-400 to-indigo-500',
+    round: 'Turn 2 of 5',
+    code: 'LM8P3X',
+    submitted: 5,
+    total: 5,
+    timer: '—',
+    prompt: 'Town-hall rezoning: you are a concerned resident. Three stakeholders present.',
+    students: [
+      { name: 'Priya K.',  submitted: true,  text: 'Increased density will destroy neighbourhood character…', ai: '✨ Developer: Character and housing are not mutually exclusive.' },
+      { name: 'Marcus T.', submitted: true,  text: 'The traffic impact study has major gaps…', ai: '✨ Planner: The study meets statutory requirements. Please specify.' },
+      { name: 'Sofia L.',  submitted: true,  text: 'Affordable units must be genuinely affordable…', ai: '✨ Developer: Define “genuinely”. We’re at 20% below market rate.' },
+      { name: 'James W.',  submitted: true,  text: 'Who bears the infrastructure cost of 400 new units?…', ai: '✨ Planner: Council levies cover trunk infrastructure. Local streets differ.' },
+      { name: 'Aisha M.',  submitted: true,  text: 'This will price out long-term residents permanently…', ai: '✨ Developer: Restricting supply is what prices people out.' },
     ],
   },
 ]
@@ -243,16 +283,16 @@ export function Home() {
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-kiln-700 bg-white border border-kiln-200 shadow-sm px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 inline-block"></span>
-                Evidence-based formative assessment
+                AI-native tools for teaching
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.0] mb-5">
-                Active learning<br />
-                <span className="text-kiln-500 italic">you can see.</span>
+                AI-native tools<br />
+                <span className="text-kiln-500 italic">for teaching.</span>
               </h1>
               <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
-                Timed writing activities grounded in retrieval practice, peer
-                assessment, and Socratic questioning. Every student responds to
-                content unique to them — on the spot, in class, while you watch.
+                Kiln puts AI to work in your classroom — as Socratic interlocutor,
+                peer reviewer, negotiating counterpart, hostile stakeholder.
+                Every student responds to content unique to them.
               </p>
             </div>
 
@@ -291,7 +331,7 @@ export function Home() {
           {/* Right: live monitor carousel — desktop only */}
           <div className="hidden lg:flex flex-1 flex-col w-full max-w-lg animate-slide-up py-20">
             <p className="text-xs font-bold text-kiln-600 uppercase tracking-widest text-center mb-3">
-              What instructors see — all four activity types
+              What instructors see — all six activity types
             </p>
             <LivePreviewCarousel />
           </div>
@@ -308,7 +348,7 @@ export function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
-              { step: '01', title: 'Create an activity', body: 'Pick one of four activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
+              { step: '01', title: 'Create an activity', body: 'Pick one of six activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
               { step: '02', title: 'Students join with a code', body: 'Share a 6-character code. Students open it on any phone, tablet, or laptop — no account needed.', note: 'Works on any device.' },
               { step: '03', title: 'Watch it happen live', body: 'Responses appear in real time. See who submitted and what they wrote before the class ends.', note: 'Export CSV when done.' },
             ].map((s) => (
@@ -339,6 +379,68 @@ export function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* Scenario Solo */}
+            <div className="flex flex-col bg-rose-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-rose-100/60">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><MessageCircle className="w-5 h-5 text-rose-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Scenario Solo</h3>
+                    <p className="text-xs text-rose-500 font-medium">Open-ended turns · one AI persona</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student's moves, creating a unique and irreproducible exchange.
+                </p>
+              </div>
+              <div className="flex flex-col divide-y divide-rose-100/50 flex-1">
+                {[
+                  { round: 1, label: 'Enter the scenario', emoji: '🎭', text: 'The instructor sets context: your role, the stakes, who you are talking to. Students begin when the session opens.' },
+                  { round: 2, label: 'Exchange turns with an AI persona', emoji: '🤖', text: 'The AI responds in character — as foreign minister, employer, hostile journalist, or any persona the instructor defines. Each student’s conversation diverges immediately.' },
+                  { round: 3, label: 'Instructor evaluates with AI', emoji: '📋', text: 'One click runs a rubric evaluation across all transcripts. Scores and feedback per student, ready to review or export.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-rose-400 bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Scenario Multi */}
+            <div className="flex flex-col bg-indigo-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-indigo-100/60">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><Network className="w-5 h-5 text-indigo-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Scenario Multi</h3>
+                    <p className="text-xs text-indigo-500 font-medium">Open-ended turns · multiple AI personas</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  A richer simulation: each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn, making each conversation genuinely multi-party.
+                </p>
+              </div>
+              <div className="flex flex-col divide-y divide-indigo-100/50 flex-1">
+                {[
+                  { round: 1, label: 'Set the stage', emoji: '🏛️', text: 'Instructor defines the scenario, the student’s role, and a cast of personas — each with a name, position, and disposition.' },
+                  { round: 2, label: 'Engage a cast of stakeholders', emoji: '🗣️', text: 'Each student message is routed to the most contextually appropriate persona. The cast maintains consistent positions; the conversation is coherent, not random.' },
+                  { round: 3, label: 'Evaluate performance across the room', emoji: '📊', text: 'The same one-click AI evaluation runs across all transcripts, scoring against the same rubric so comparisons are fair.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Peer Critique */}
             <div className="flex flex-col bg-blue-50 rounded-2xl overflow-hidden">
@@ -486,7 +588,7 @@ export function Home() {
               <ul className="flex flex-col gap-2.5 mb-8 flex-1">
                 {[
                   '10 sessions per month',
-                  'All four activity types',
+                  'All six activity types',
                   'Up to 40 students per session',
                   'Live monitor & CSV export',
                 ].map((f) => (
@@ -510,7 +612,7 @@ export function Home() {
               <ul className="flex flex-col gap-2.5 mb-8 flex-1">
                 {[
                   'Unlimited sessions',
-                  'All four activity types',
+                  'All six activity types',
                   'Projector view for class display',
                   'Async / take-home mode',
                   'Session analytics',

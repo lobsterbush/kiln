@@ -32,6 +32,10 @@ export function Results() {
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [debriefCopied, setDebriefCopied] = useState(false)
+  const [scenarioMessages, setScenarioMessages] = useState<{ participant_id: string; turn: number; speaker_type: string; speaker_name: string; content: string }[]>([])
+  const [scenarioEvaluations, setScenarioEvaluations] = useState<{ participant_id: string; content: { scores: Record<string, number>; feedback: string } }[]>([])
+  const [evaluatingScenario, setEvaluatingScenario] = useState(false)
+  const [evaluationError, setEvaluationError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
@@ -67,6 +71,17 @@ export function Results() {
     if (respsResult.data) setResponses(respsResult.data)
     if (assignsResult.data) setAssignments(assignsResult.data)
     if (followUpsResult.data) setFollowUps(followUpsResult.data as FollowUp[])
+
+    // For scenario activities, load scenario data
+    const actType = (sessResult.data.activity as Activity).type
+    if (actType === 'scenario_solo' || actType === 'scenario_multi') {
+      const [msgsRes, evalsRes] = await Promise.all([
+        supabase.from('scenario_messages').select('participant_id, turn, speaker_type, speaker_name, content').eq('session_id', id!).order('turn', { ascending: true }),
+        supabase.from('scenario_evaluations').select('participant_id, content').eq('session_id', id!),
+      ])
+      if (msgsRes.data) setScenarioMessages(msgsRes.data)
+      if (evalsRes.data) setScenarioEvaluations(evalsRes.data as any)
+    }
 
     // Load cross-session history (non-blocking)
     const activityId = (sessResult.data.activity as Activity).id
@@ -158,6 +173,23 @@ export function Results() {
     URL.revokeObjectURL(url)
   }
 
+  async function evaluateScenario() {
+    if (!session) return
+    setEvaluatingScenario(true)
+    setEvaluationError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('evaluate-scenario', {
+        body: { session_id: session.id },
+      })
+      if (error || !data) throw new Error(error?.message ?? 'No data')
+      setScenarioEvaluations(data.evaluations ?? [])
+    } catch {
+      setEvaluationError('Could not generate evaluations. Please try again.')
+    } finally {
+      setEvaluatingScenario(false)
+    }
+  }
+
   async function copyDebrief() {
     if (!debrief || !activity || !session) return
     const date = new Date(session.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -233,6 +265,8 @@ export function Results() {
   if (!session || !activity) {
     return <div className="flex justify-center py-20 text-slate-500">Loading results...</div>
   }
+
+  const isScenario = activity.type === 'scenario_solo' || activity.type === 'scenario_multi'
 
   const TYPE_LABELS: Record<string, string> = {
     initial: 'Initial',
@@ -312,26 +346,39 @@ export function Results() {
             {runningAgain ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
             Run again
           </button>
-          <button
-            onClick={generateFeedback}
-            disabled={feedbackLoading}
-            className={`flex items-center gap-2 px-4 py-2.5 border-2 font-medium rounded-xl disabled:opacity-40 transition-all ${
-              feedback
-                ? 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-100'
-                : 'bg-blue-50 border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-100'
-            }`}
-          >
-            {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
-            {feedbackLoading ? 'Generating…' : feedback ? `Regenerate Feedback (${feedback.length})` : 'Student Feedback'}
-          </button>
-          <button
-            onClick={generateDebrief}
-            disabled={debriefLoading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border-2 border-purple-200 text-purple-700 font-medium rounded-xl hover:border-purple-300 hover:bg-purple-100 disabled:opacity-40 transition-all"
-          >
-            {debriefLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            {debriefLoading ? 'Analysing…' : 'AI Debrief'}
-          </button>
+          {isScenario ? (
+            <button
+              onClick={evaluateScenario}
+              disabled={evaluatingScenario}
+              className="flex items-center gap-2 px-4 py-2.5 bg-rose-50 border-2 border-rose-200 text-rose-700 font-medium rounded-xl hover:border-rose-300 hover:bg-rose-100 disabled:opacity-40 transition-all"
+            >
+              {evaluatingScenario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {evaluatingScenario ? 'Evaluating…' : scenarioEvaluations.length > 0 ? `Re-evaluate (${scenarioEvaluations.length})` : 'Evaluate All'}
+            </button>
+          ) : (
+            <button
+              onClick={generateFeedback}
+              disabled={feedbackLoading}
+              className={`flex items-center gap-2 px-4 py-2.5 border-2 font-medium rounded-xl disabled:opacity-40 transition-all ${
+                feedback
+                  ? 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-100'
+                  : 'bg-blue-50 border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-100'
+              }`}
+            >
+              {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
+              {feedbackLoading ? 'Generating…' : feedback ? `Regenerate Feedback (${feedback.length})` : 'Student Feedback'}
+            </button>
+          )}
+          {!isScenario && (
+            <button
+              onClick={generateDebrief}
+              disabled={debriefLoading}
+              className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border-2 border-purple-200 text-purple-700 font-medium rounded-xl hover:border-purple-300 hover:bg-purple-100 disabled:opacity-40 transition-all"
+            >
+              {debriefLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {debriefLoading ? 'Analysing…' : 'AI Debrief'}
+            </button>
+          )}
           <button
             onClick={exportGradebookCSV}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
@@ -385,9 +432,12 @@ export function Results() {
         )
       })()}
 
-      {/* Feedback / debrief errors */}
+      {/* Feedback / debrief / evaluation errors */}
       {feedbackError && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{feedbackError}</p>
+      )}
+      {evaluationError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{evaluationError}</p>
       )}
 
       {/* AI Debrief panel */}
@@ -495,7 +545,66 @@ export function Results() {
           {participants.length - byParticipant.length} participant{participants.length - byParticipant.length !== 1 ? 's' : ''} joined but did not submit.
         </p>
       )}
-      <div className="flex flex-col gap-4 stagger-children">
+      {/* Scenario participant cards */}
+      {isScenario && (
+        <div className="flex flex-col gap-4 stagger-children">
+          {participants.map((p) => {
+            const msgs = scenarioMessages.filter((m) => m.participant_id === p.id)
+            const evalResult = scenarioEvaluations.find((e) => e.participant_id === p.id)
+            const turnCount = msgs.filter((m) => m.speaker_type === 'student').length
+            return (
+              <details key={p.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow group" open={!!evalResult}>
+                <summary className="flex items-center justify-between cursor-pointer list-none">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{p.display_name}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{turnCount} turn{turnCount !== 1 ? 's' : ''} · {msgs.length} messages</p>
+                  </div>
+                  {evalResult && (
+                    <div className="flex gap-3 mr-3">
+                      {Object.entries(evalResult.content.scores).map(([k, v]) => (
+                        <div key={k} className="text-center">
+                          <p className="text-base font-bold text-slate-800">{v}</p>
+                          <p className="text-xs text-slate-400 capitalize">{k}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </summary>
+                {evalResult && (
+                  <div className="mt-4 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 animate-fade-in">
+                    <p className="text-xs font-bold text-rose-600 uppercase tracking-wider mb-1">AI Evaluation</p>
+                    <p className="text-sm text-rose-900 leading-relaxed">{evalResult.content.feedback}</p>
+                  </div>
+                )}
+                {msgs.length > 0 && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    {msgs.map((m, i) => (
+                      <div key={i} className={`flex gap-3 ${m.speaker_type === 'student' ? '' : 'pl-4'}`}>
+                        <div className="flex flex-col items-center">
+                          <span className={`text-xs font-mono w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                            m.speaker_type === 'student' ? 'bg-slate-100 text-slate-400' : 'bg-rose-100 text-rose-400'
+                          }`}>{m.turn}</span>
+                          {i < msgs.length - 1 && <div className="w-px flex-1 bg-slate-100 mt-1" />}
+                        </div>
+                        <div className="flex-1 pb-1">
+                          <p className="text-xs font-medium text-slate-500 mb-0.5">{m.speaker_name}</p>
+                          <p className="text-sm text-slate-700 leading-relaxed">{m.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {msgs.length === 0 && (
+                  <p className="text-xs text-slate-400 mt-3">No messages yet.</p>
+                )}
+              </details>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Round-based participant cards */}
+      {!isScenario && <div className="flex flex-col gap-4 stagger-children">
         {byParticipant.map(({ participant, chain }) => (
           <div key={participant.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
             <h3 className="font-semibold text-slate-900 mb-4">{participant.display_name}</h3>
@@ -560,7 +669,7 @@ export function Results() {
             </div>
           </div>
         ))}
-      </div>
+      </div>}
     </div>
   )
 }

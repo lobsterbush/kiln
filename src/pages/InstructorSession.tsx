@@ -6,6 +6,7 @@ import { shuffleArray } from '../lib/utils'
 import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT } from '../lib/constants'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { LiveMonitor } from '../components/instructor/LiveMonitor'
+import { ScenarioMonitor } from '../components/instructor/ScenarioMonitor'
 import type { Session, Activity, Participant, Response as KilnResponse } from '../lib/types'
 
 export function InstructorSession() {
@@ -337,6 +338,21 @@ export function InstructorSession() {
 
   if (!session || !activity) {
     return <div className="flex justify-center py-20 text-slate-500">Loading session...</div>
+  }
+
+  // Scenario activities use a dedicated monitor (no round-advance needed)
+  if (activity.type === 'scenario_solo' || activity.type === 'scenario_multi') {
+    return (
+      <ScenarioMonitor
+        sessionId={id!}
+        activity={activity}
+        participants={participants}
+        sessionStatus={session.status}
+        isAdvancing={advancing}
+        onStart={() => startSession()}
+        onEnd={endSession}
+      />
+    )
   }
 
   if (session.status === 'lobby') {

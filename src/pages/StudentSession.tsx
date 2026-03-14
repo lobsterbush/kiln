@@ -9,6 +9,7 @@ import { PeerCritiqueView } from '../components/student/PeerCritiqueView'
 import { PeerClarificationView } from '../components/student/PeerClarificationView'
 import { EvidenceAnalysisView } from '../components/student/EvidenceAnalysisView'
 import { SocraticView } from '../components/student/SocraticView'
+import { ScenarioChat } from '../components/student/ScenarioChat'
 import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT, FOLLOW_UP_TIMEOUT_MS } from '../lib/constants'
 import type { Session, Participant, Activity, RoundStartEvent } from '../lib/types'
 
@@ -269,6 +270,30 @@ export function StudentSession() {
 
   if (!session || !activity) {
     return <div className="flex justify-center py-20 text-slate-500">Loading session...</div>
+  }
+
+  // Scenario activities: delegate entirely to ScenarioChat
+  if (activity.type === 'scenario_solo' || activity.type === 'scenario_multi') {
+    if (session.status === 'lobby') {
+      return (
+        <SessionLobby
+          joinCode={session.join_code}
+          participants={participants}
+          isInstructor={false}
+          activityTitle={activity.title}
+        />
+      )
+    }
+    if (session.status === 'completed') {
+      return (
+        <div className="flex flex-col items-center gap-4 py-16 text-center animate-fade-in">
+          <div className="text-4xl">🎭</div>
+          <h2 className="text-2xl font-bold text-slate-900">Session Complete</h2>
+          <p className="text-slate-500 text-sm">Your transcript has been saved. Thank you for participating.</p>
+        </div>
+      )
+    }
+    return <ScenarioChat sessionId={id!} activity={activity} sessionStatus={session.status} />
   }
 
   // Disconnected banner (shown inline, doesn't block the UI)

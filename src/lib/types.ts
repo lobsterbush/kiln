@@ -1,8 +1,15 @@
-export type ActivityType = 'peer_critique' | 'socratic_chain' | 'peer_clarification' | 'evidence_analysis'
+export type ActivityType = 'peer_critique' | 'socratic_chain' | 'peer_clarification' | 'evidence_analysis' | 'scenario_solo' | 'scenario_multi'
 
 export type SessionStatus = 'lobby' | 'active' | 'between_rounds' | 'completed'
 
 export type ResponseType = 'initial' | 'critique' | 'rebuttal' | 'followup_answer' | 'clarification' | 'evidence_gap'
+
+export interface ScenarioPersona {
+  name: string
+  role: string
+  goals: string
+  personality?: string
+}
 
 export interface ActivityConfig {
   rounds: number
@@ -16,6 +23,12 @@ export interface ActivityConfig {
   explain_prompt?: string | null
   gap_prompt?: string | null
   auto_advance?: boolean
+  // Scenario types only
+  scenario_context?: string
+  student_role?: string
+  ai_personas?: ScenarioPersona[]
+  max_turns?: number
+  evaluation_rubric?: string[]
 }
 
 export interface Activity {
@@ -77,6 +90,28 @@ export interface FollowUp {
   round: number
   prompt: string
   based_on_response_id: string
+  created_at: string
+}
+
+export interface ScenarioMessage {
+  id: string
+  session_id: string
+  participant_id: string
+  turn: number
+  speaker_type: 'student' | 'ai'
+  speaker_name: string
+  content: string
+  created_at: string
+}
+
+export interface ScenarioEvaluation {
+  id: string
+  session_id: string
+  participant_id: string
+  content: {
+    scores: { reasoning: number; communication: number; evidence: number; ethics: number }
+    feedback: string
+  }
   created_at: string
 }
 

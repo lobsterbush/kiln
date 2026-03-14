@@ -122,11 +122,15 @@ export function EditActivity() {
           activity.type === 'peer_critique' ? 'bg-blue-100 text-blue-700' :
           activity.type === 'socratic_chain' ? 'bg-purple-100 text-purple-700' :
           activity.type === 'peer_clarification' ? 'bg-teal-100 text-teal-700' :
+          activity.type === 'scenario_solo' ? 'bg-rose-100 text-rose-700' :
+          activity.type === 'scenario_multi' ? 'bg-indigo-100 text-indigo-700' :
           'bg-amber-100 text-amber-700'
         }`}>
           {activity.type === 'peer_critique' ? 'Peer Critique' :
            activity.type === 'socratic_chain' ? 'Socratic Chain' :
            activity.type === 'peer_clarification' ? 'Peer Clarification' :
+           activity.type === 'scenario_solo' ? 'Scenario Solo' :
+           activity.type === 'scenario_multi' ? 'Scenario Multi' :
            'Evidence Analysis'}
         </span>
       </div>

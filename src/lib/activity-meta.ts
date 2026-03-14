@@ -88,4 +88,36 @@ export const ACTIVITY_META: Record<ActivityType, ActivityMeta> = {
       accent: 'from-amber-500 to-amber-600',
     },
   },
+
+  scenario_solo: {
+    label: 'Scenario Solo',
+    shortLabel: 'Scenario Solo',
+    description: 'Each student negotiates or argues with a single AI persona across open-ended turns.',
+    rounds: [
+      { round: 1, label: 'Enter the scenario', emoji: '🎭', text: 'Students begin when the session opens and engage in freeform turns.' },
+    ],
+    color: {
+      bg: 'bg-rose-50',
+      text: 'text-rose-600',
+      border: 'border-rose-200',
+      badge: 'bg-rose-100 text-rose-700',
+      accent: 'from-rose-500 to-rose-600',
+    },
+  },
+
+  scenario_multi: {
+    label: 'Scenario Multi',
+    shortLabel: 'Scenario Multi',
+    description: 'Each student engages a cast of AI personas across open-ended turns, with an AI orchestrator selecting the responding persona.',
+    rounds: [
+      { round: 1, label: 'Set the stage', emoji: '🏛️', text: 'Students engage multiple personas; the AI orchestrator routes each message to the appropriate stakeholder.' },
+    ],
+    color: {
+      bg: 'bg-indigo-50',
+      text: 'text-indigo-600',
+      border: 'border-indigo-200',
+      badge: 'bg-indigo-100 text-indigo-700',
+      accent: 'from-indigo-500 to-indigo-600',
+    },
+  },
 }
