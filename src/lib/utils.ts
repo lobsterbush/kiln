@@ -94,6 +94,20 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
+/**
+ * Public-facing origin for join links and QR codes.
+ * Inside a Capacitor/WKWebView, window.location.origin is 'http://localhost',
+ * which would produce broken join URLs. Fall back to the production domain.
+ */
+export const KILN_ORIGIN: string = (() => {
+  const o = window.location.origin
+  // Capacitor WebView uses 'http://localhost' (no port) or 'capacitor://localhost'
+  if (o === 'http://localhost' || o.startsWith('capacitor://')) {
+    return 'https://usekiln.org'
+  }
+  return o
+})()
+
 /** cn - simple class name joiner */
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(' ')

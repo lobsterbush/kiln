@@ -107,3 +107,31 @@ input:focus {
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+/*
+ * iOS safe-area utilities — used for Capacitor / standalone PWA with viewport-fit=cover.
+ * .pt-safe  — header top padding (clears status bar / Dynamic Island)
+ * .pb-safe  — footer / scroll-area bottom padding (clears home indicator)
+ */
+.pt-safe  { padding-top:    env(safe-area-inset-top,    0px); }
+.pb-safe  { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pl-safe  { padding-left:   env(safe-area-inset-left,   0px); }
+.pr-safe  { padding-right:  env(safe-area-inset-right,  0px); }
+
+/*
+ * iOS Safari zooms in on form fields when font-size < 16px.
+ * Setting a 16px minimum prevents the unwanted zoom without disabling
+ * user-scalable (which would break accessibility).
+ * We use max() so larger Tailwind sizes (text-base and up) are unaffected.
+ */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='number'],
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}

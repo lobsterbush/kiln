@@ -15,7 +15,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 pt-safe">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="p-1.5 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-lg shadow-sm group-hover:shadow-md group-hover:shadow-kiln-200 transition-all">
@@ -107,7 +107,7 @@ export function Layout() {
           <Outlet />
         </ErrorBoundary>
       </main>
-      <footer className="border-t border-slate-200/60 bg-white py-6">
+      <footer className="border-t border-slate-200/60 bg-white py-6 pb-safe">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-400">© 2026 Kiln · <em>Where thinking hardens</em></p>
           <div className="flex items-center gap-5 text-xs text-slate-400">

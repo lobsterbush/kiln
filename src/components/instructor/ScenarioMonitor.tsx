@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, ChevronUp, Users, User, Play, Square, Loader2, Copy, Check, Link as LinkIcon } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
-import { copyToClipboard } from '../../lib/utils'
+import { copyToClipboard, KILN_ORIGIN } from '../../lib/utils'
 import type { Participant, Activity } from '../../lib/types'
 
 interface ScenarioMsg {
@@ -41,7 +41,7 @@ export function ScenarioMonitor({
   const [linkCopied, setLinkCopied] = useState(false)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
-  const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}join?code=${joinCode}`
+  const joinUrl = `${KILN_ORIGIN}/join?code=${joinCode}`
 
   async function copyCode() {
     const ok = await copyToClipboard(joinCode)
@@ -229,7 +229,7 @@ export function ScenarioMonitor({
               </button>
             </div>
             <p className="text-sm text-slate-400 mt-2">
-              Or go to <span className="font-mono text-slate-600">{window.location.host}</span>
+              Or go to <span className="font-mono text-slate-600">usekiln.org</span>
             </p>
             <p className="text-xs text-kiln-600 font-semibold mt-3">
               {participants.length} {participants.length === 1 ? 'student' : 'students'} joined
