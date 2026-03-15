@@ -274,11 +274,9 @@ export function DemoPlayer() {
     const sc = SCENES[sceneIdx]
     const n  = sc.students.length
 
-    // Phase 1: Students fade/slide in one by one (180 ms apart)
-    for (let i = 0; i < n; i++) {
-      at(200 + i * 180, () => setJoined((j) => j + 1))
-    }
-    const joinedAt = 200 + n * 180
+    // Phase 1: All students fade/slide in together
+    at(250, () => setJoined(n))
+    const joinedAt = 550
 
     if (!sc.isScenario) {
       // Phase 2: Cursor drifts over student grid
