@@ -345,6 +345,7 @@ export function InstructorSession() {
     return (
       <ScenarioMonitor
         sessionId={id!}
+        joinCode={session.join_code}
         activity={activity}
         participants={participants}
         sessionStatus={session.status}

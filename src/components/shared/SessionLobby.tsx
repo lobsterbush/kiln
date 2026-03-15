@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Users, Loader2, Copy, Check, Link as LinkIcon } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import type { Participant } from '../../lib/types'
+import { copyToClipboard } from '../../lib/utils'
 
 interface SessionLobbyProps {
   joinCode: string
@@ -19,18 +20,20 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
   const [linkCopied, setLinkCopied] = useState(false)
   const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}join?code=${joinCode}`
 
-  function copyCode() {
-    navigator.clipboard.writeText(joinCode).then(() => {
+  async function copyCode() {
+    const ok = await copyToClipboard(joinCode)
+    if (ok) {
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
-    })
+    }
   }
 
-  function copyLink() {
-    navigator.clipboard.writeText(joinUrl).then(() => {
+  async function copyLink() {
+    const ok = await copyToClipboard(joinUrl)
+    if (ok) {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
-    })
+    }
   }
 
   return (

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, ChevronUp, Users, User, Play, Square, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Users, User, Play, Square, Loader2, Copy, Check, Link as LinkIcon } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
+import { copyToClipboard } from '../../lib/utils'
 import type { Participant, Activity } from '../../lib/types'
 
 interface ScenarioMsg {
@@ -12,6 +14,7 @@ interface ScenarioMsg {
 
 interface Props {
   sessionId: string
+  joinCode: string
   activity: Activity
   participants: Participant[]
   sessionStatus: string
@@ -22,6 +25,7 @@ interface Props {
 
 export function ScenarioMonitor({
   sessionId,
+  joinCode,
   activity,
   participants,
   sessionStatus,
@@ -33,7 +37,20 @@ export function ScenarioMonitor({
   const maxTurns = config.max_turns ?? 8
   const [messagesByParticipant, setMessagesByParticipant] = useState<Map<string, ScenarioMsg[]>>(new Map())
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [codeCopied, setCodeCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+  const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}join?code=${joinCode}`
+
+  async function copyCode() {
+    const ok = await copyToClipboard(joinCode)
+    if (ok) { setCodeCopied(true); setTimeout(() => setCodeCopied(false), 2000) }
+  }
+  async function copyLink() {
+    const ok = await copyToClipboard(joinUrl)
+    if (ok) { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000) }
+  }
 
   // Initial load of existing messages
   useEffect(() => {
@@ -171,9 +188,54 @@ export function ScenarioMonitor({
 
       {/* Per-participant rows */}
       {sessionStatus === 'lobby' && (
-        <p className="text-sm text-slate-400 text-center py-8">
-          Waiting for students to join… ({participants.length} so far)
-        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 py-8">
+          {/* QR code */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-sm">
+              <QRCodeSVG value={joinUrl} size={130} fgColor="#0f172a" bgColor="#ffffff" />
+            </div>
+            <p className="text-xs text-slate-400">Scan to join</p>
+          </div>
+          {/* Code tiles + copy buttons */}
+          <div className="text-center">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Session Code</p>
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+              {joinCode.split('').map((char, i) => (
+                <span
+                  key={i}
+                  className="w-10 h-12 sm:w-14 sm:h-16 flex items-center justify-center text-2xl sm:text-3xl font-mono font-bold text-slate-900 bg-white border-2 border-slate-200 rounded-xl shadow-sm"
+                >
+                  {char}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-4">
+              <button
+                onClick={copyCode}
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-kiln-600 transition-colors"
+              >
+                {codeCopied
+                  ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Copied!</span></>
+                  : <><Copy className="w-3.5 h-3.5" /> Copy code</>}
+              </button>
+              <span className="text-slate-200">|</span>
+              <button
+                onClick={copyLink}
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-kiln-600 transition-colors"
+              >
+                {linkCopied
+                  ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Link copied!</span></>
+                  : <><LinkIcon className="w-3.5 h-3.5" /> Copy link</>}
+              </button>
+            </div>
+            <p className="text-sm text-slate-400 mt-2">
+              Or go to <span className="font-mono text-slate-600">{window.location.host}</span>
+            </p>
+            <p className="text-xs text-kiln-600 font-semibold mt-3">
+              {participants.length} {participants.length === 1 ? 'student' : 'students'} joined
+            </p>
+          </div>
+        </div>
       )}
 
       {sessionStatus !== 'lobby' && (

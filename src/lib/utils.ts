@@ -68,6 +68,32 @@ export function shuffleArray<T>(arr: T[]): T[] {
   return a
 }
 
+/**
+ * Robust clipboard copy — tries the modern async API first,
+ * falls back to a hidden textarea + execCommand for older browsers
+ * or non-focused contexts. Returns true on success.
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+    // Fallback: create an off-screen textarea and execCommand
+    const el = document.createElement('textarea')
+    el.value = text
+    el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0'
+    document.body.appendChild(el)
+    el.focus()
+    el.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(el)
+    return ok
+  } catch {
+    return false
+  }
+}
+
 /** cn - simple class name joiner */
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(' ')
