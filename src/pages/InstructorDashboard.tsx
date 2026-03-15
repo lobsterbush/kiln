@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { generateJoinCode, formatDuration } from '../lib/utils'
-import type { Activity } from '../lib/types'
+import type { Activity, ActivityType } from '../lib/types'
 import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus, Eye, EyeOff, ChevronRight } from 'lucide-react'
+import { ACTIVITY_META } from '../lib/activity-meta'
 
 export function InstructorDashboard() {
   const { user, loading, signIn, signUp, sendMagicLink, signOut } = useAuth()
@@ -479,21 +480,16 @@ export function InstructorDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-children">
-          {activities.map((a) => (
+          {activities.map((a) => {
+            const meta = ACTIVITY_META[a.type as ActivityType]
+            const isScenario = a.type === 'scenario_solo' || a.type === 'scenario_multi'
+            return (
             <div key={a.id} className="group bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md hover:border-slate-300 transition-all duration-200">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-slate-900">{a.title}</h3>
-                  <span className={`inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                    a.type === 'peer_critique' ? 'bg-blue-100 text-blue-700' :
-                    a.type === 'socratic_chain' ? 'bg-purple-100 text-purple-700' :
-                    a.type === 'peer_clarification' ? 'bg-teal-100 text-teal-700' :
-                    'bg-amber-100 text-amber-700'
-                  }`}>
-                    {a.type === 'peer_critique' ? 'Peer Critique' :
-                     a.type === 'socratic_chain' ? 'Socratic Chain' :
-                     a.type === 'peer_clarification' ? 'Peer Clarification' :
-                     'Evidence Analysis'}
+                  <span className={`inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${meta?.color.badge ?? 'bg-slate-100 text-slate-600'}`}>
+                    {meta?.shortLabel ?? a.type}
                   </span>
                 </div>
                 {confirmDelete === a.id ? (
@@ -546,11 +542,13 @@ export function InstructorDashboard() {
                 )}
               </div>
               <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
-                {a.config.initial_prompt}
+                {isScenario ? (a.config.scenario_context ?? '') : a.config.initial_prompt}
               </p>
               <div className="flex items-center justify-between mt-3">
                 <p className="text-xs text-slate-400 font-medium">
-                  {a.type === 'peer_critique'
+                  {isScenario
+                    ? `${a.config.max_turns ?? 8} turns${a.config.ai_personas?.length ? ` \u00b7 ${a.config.ai_personas.length} persona${a.config.ai_personas.length !== 1 ? 's' : ''}` : ''}`
+                    : a.type === 'peer_critique'
                     ? a.config.rounds === 2
                       ? `Claim \u2192 Critique \u00b7 ${formatDuration(a.config.round_duration_sec)}`
                       : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${formatDuration(a.config.round_duration_sec)}`
@@ -574,7 +572,8 @@ export function InstructorDashboard() {
                 })()}
               </div>
             </div>
-          ))}
+          )})
+          }
         </div>
       )}
       {pastSessions.length > 0 && (
@@ -607,7 +606,7 @@ export function InstructorDashboard() {
                     {participantCount !== null && (
                       <span className="text-xs text-slate-400 shrink-0">{participantCount} student{participantCount !== 1 ? 's' : ''}</span>
                     )}
-                    <span className="text-xs text-slate-400 shrink-0">{dateStr}</span>
+                    <span className="text-xs text-slate-300 shrink-0">{dateStr}</span>
                   </div>
                   <Link
                     to={`/instructor/results/${s.id}`}
