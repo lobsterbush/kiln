@@ -31,7 +31,28 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [briefVisible, setBriefVisible] = useState(true)
+  const [loadingHistory, setLoadingHistory] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Load existing transcript on mount (handles page refresh mid-scenario)
+  useEffect(() => {
+    if (!studentToken) { setLoadingHistory(false); return }
+    supabase
+      .from('scenario_messages')
+      .select('turn, speaker_type, speaker_name, content')
+      .eq('session_id', sessionId)
+      .eq('participant_id', studentToken.participant_id)
+      .order('turn', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setMessages(data as Message[])
+          const studentTurnsDone = data.filter((m) => m.speaker_type === 'student').length
+          setStudentTurns(studentTurnsDone)
+          if (studentTurnsDone >= maxTurns) setCompleted(true)
+        }
+        setLoadingHistory(false)
+      })
+  }, [sessionId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -98,6 +119,17 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   }
 
   const turnsLeft = maxTurns - studentTurns
+
+  if (loadingHistory) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <p className="text-sm">Loading your conversation…</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto animate-fade-in">

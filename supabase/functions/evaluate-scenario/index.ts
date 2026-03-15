@@ -198,7 +198,7 @@ Evaluate this student's performance. Return this exact JSON:
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 })

@@ -241,7 +241,7 @@ Stay fully in character as ${respondingPersonaName}. Do NOT break character or m
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 })

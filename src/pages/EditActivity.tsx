@@ -255,76 +255,81 @@ export function EditActivity() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Rounds
-            </label>
-            {(activity.type === 'peer_clarification' || activity.type === 'evidence_analysis') ? (
-              <div className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-500 text-sm">
-                2 rounds (fixed)
+        {/* Rounds / duration / auto-advance — not applicable for scenario activities */}
+        {activity.type !== 'scenario_solo' && activity.type !== 'scenario_multi' && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Rounds
+                </label>
+                {(activity.type === 'peer_clarification' || activity.type === 'evidence_analysis') ? (
+                  <div className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-500 text-sm">
+                    2 rounds (fixed)
+                  </div>
+                ) : (
+                  <select
+                    value={rounds}
+                    onChange={(e) => setRounds(Number(e.target.value))}
+                    className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
+                  >
+                    {(activity.type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
+                      <option key={n} value={n}>
+                        {n === 2 && activity.type === 'peer_critique' ? '2 — Claim + Critique'
+                          : n === 3 && activity.type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
+                          : `${n} rounds`}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
-            ) : (
-              <select
-                value={rounds}
-                onChange={(e) => setRounds(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
-              >
-                {(activity.type === 'peer_critique' ? [2, 3] : [2, 3, 4, 5]).map((n) => (
-                  <option key={n} value={n}>
-                    {n === 2 && activity.type === 'peer_critique' ? '2 — Claim + Critique'
-                      : n === 3 && activity.type === 'peer_critique' ? '3 — Claim + Critique + Rebuttal'
-                      : `${n} rounds`}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Time per Round
-            </label>
-            <select
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
-            >
-              {[
-                [30, '30 sec'],
-                [60, '1 min'],
-                [90, '90 sec'],
-                [120, '2 min'],
-                [300, '5 min'],
-                [600, '10 min'],
-                [900, '15 min'],
-                [1800, '30 min — take-home'],
-                [3600, '60 min — async'],
-              ].map(([s, label]) => (
-                <option key={s} value={s}>{label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Time per Round
+                </label>
+                <select
+                  value={duration}
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
+                >
+                  {[
+                    [30, '30 sec'],
+                    [60, '1 min'],
+                    [90, '90 sec'],
+                    [120, '2 min'],
+                    [300, '5 min'],
+                    [600, '10 min'],
+                    [900, '15 min'],
+                    [1800, '30 min — take-home'],
+                    [3600, '60 min — async'],
+                  ].map(([s, label]) => (
+                    <option key={s} value={s}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-        {/* Auto-advance toggle */}
-        <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200">
-          <div>
-            <p className="text-sm font-medium text-slate-700">Auto-advance rounds</p>
-            <p className="text-xs text-slate-400 mt-0.5">Move to the next round automatically when the timer expires</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setAutoAdvance((v) => !v)}
-            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
-              autoAdvance ? 'bg-kiln-500' : 'bg-slate-300'
-            }`}
-            aria-label="Toggle auto-advance"
-          >
-            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-              autoAdvance ? 'translate-x-6' : 'translate-x-1'
-            }`} />
-          </button>
-        </div>
+            {/* Auto-advance toggle */}
+            <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Auto-advance rounds</p>
+                <p className="text-xs text-slate-400 mt-0.5">Move to the next round automatically when the timer expires</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAutoAdvance((v) => !v)}
+                className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
+                  autoAdvance ? 'bg-kiln-500' : 'bg-slate-300'
+                }`}
+                aria-label="Toggle auto-advance"
+              >
+                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  autoAdvance ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+          </>
+        )}
 
         {saveError && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
 import { Download, ArrowLeft, Sparkles, Loader2, Play, MessageSquare, TrendingUp, TrendingDown, Minus, Copy, Check, Info } from 'lucide-react'
-import { generateJoinCode } from '../lib/utils'
+import { generateJoinCode, copyToClipboard } from '../lib/utils'
 
 export function Results() {
   const { id } = useParams<{ id: string }>()
@@ -207,9 +207,11 @@ export function Results() {
     }
     lines.push('')
     lines.push(`Teaching suggestion: ${debrief.suggestion}`)
-    await navigator.clipboard.writeText(lines.join('\n'))
-    setDebriefCopied(true)
-    setTimeout(() => setDebriefCopied(false), 2000)
+    const ok = await copyToClipboard(lines.join('\n'))
+    if (ok) {
+      setDebriefCopied(true)
+      setTimeout(() => setDebriefCopied(false), 2000)
+    }
   }
 
   function exportCSV() {
