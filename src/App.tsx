@@ -12,6 +12,8 @@ import { EditActivity } from './pages/EditActivity'
 import { Pedagogy } from './pages/Pedagogy'
 import { ProjectorView } from './pages/ProjectorView'
 import { StudentSummary } from './pages/StudentSummary'
+import { Privacy } from './pages/Privacy'
+import { Feedback } from './pages/Feedback'
 
 function NotFound() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
             <Route path="/instructor/results/:id" element={<Results />} />
             <Route path="/instructor/edit/:id" element={<EditActivity />} />
             <Route path="/pedagogy" element={<Pedagogy />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           {/* Full-screen projector view — no Layout wrapper */}

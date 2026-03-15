@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { generateJoinCode, formatDuration } from '../lib/utils'
 import type { Activity, ActivityType } from '../lib/types'
-import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus, Eye, EyeOff, ChevronRight } from 'lucide-react'
+import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus, Eye, EyeOff, ChevronRight, MessageSquare } from 'lucide-react'
 import { ACTIVITY_META } from '../lib/activity-meta'
 
 export function InstructorDashboard() {
@@ -439,6 +439,13 @@ export function InstructorDashboard() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Your Activities</h1>
         <div className="flex gap-3">
+          <Link
+            to="/feedback"
+            className="flex items-center gap-1.5 px-3 py-2.5 text-slate-500 hover:text-kiln-600 border border-slate-200 hover:border-kiln-200 hover:bg-kiln-50 rounded-xl text-sm font-medium transition-all"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">Feedback</span>
+          </Link>
           <Link
             to="/instructor/create"
             className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-medium rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"

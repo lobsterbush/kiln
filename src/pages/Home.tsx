@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, Mail, MessageCircle, Network } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, MessageCircle, Network, Sparkles } from 'lucide-react'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
 import { DemoPlayer } from '../components/marketing/DemoPlayer'
 
 
@@ -10,24 +9,6 @@ export function Home() {
   const [code, setCode] = useState('')
   const navigate = useNavigate()
   const { user, loading } = useAuth()
-  const [waitlistEmail, setWaitlistEmail] = useState('')
-  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false)
-  const [waitlistDone, setWaitlistDone] = useState(false)
-
-  async function handleWaitlist(e: React.FormEvent) {
-    e.preventDefault()
-    if (!waitlistEmail.trim()) return
-    setWaitlistSubmitting(true)
-    try {
-      await supabase.from('waitlist').insert({ email: waitlistEmail.trim(), tier: 'pro' })
-    } catch {
-      // Table may not exist yet — still show success to capture intent
-    } finally {
-      setWaitlistDone(true)
-      setWaitlistSubmitting(false)
-    }
-  }
-
   // Instructor confirmed email or clicked magic link — Supabase lands them here;
   // forward immediately to the dashboard. Wait for auth to resolve first.
   useEffect(() => {
@@ -336,116 +317,41 @@ export function Home() {
         </div>
       </section>
 
-      {/* ═══ PRICING ═══ */}
+      {/* ═══ FREE BETA ═══ */}
       <section id="pricing" className="w-full py-16 sm:py-24 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div className="mb-12">
-            <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Pricing</p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2 leading-tight">Simple pricing</h2>
-            <p className="text-slate-500">Free to use today. Pro and Department tiers launching later this year.</p>
+        <div className="max-w-2xl mx-auto px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 animate-pulse inline-block"></span>
+            Open Beta
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 leading-tight">Free during beta.<br />No credit card. No limits.</h2>
+          <p className="text-slate-500 mb-10 max-w-md mx-auto">Every feature is available to every instructor while we're in beta. Help us improve — your feedback shapes what gets built.</p>
+          <div className="bg-white rounded-2xl border-2 border-kiln-200 shadow-sm p-7 mb-8">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-8">
+              {[
+                'Unlimited sessions',
+                'All six activity types',
+                'Unlimited students per session',
+                'Live instructor monitor',
+                'AI Debrief & Evaluate All',
+                'Projector view',
+                'CSV export',
+                'Results & analytics',
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                  <Check className="w-4 h-4 text-kiln-500 shrink-0" />{f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/instructor"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+            >
+              <Sparkles className="w-4 h-4" /> Get started free
+            </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {/* Free */}
-            <div className="flex flex-col p-5 sm:p-7 bg-white rounded-2xl border-2 border-kiln-300 shadow-sm">
-              <span className="inline-block text-xs font-bold text-kiln-600 bg-kiln-50 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Free</span>
-              <div className="mb-5">
-                <span className="text-4xl font-extrabold text-slate-900">$0</span>
-                <span className="text-slate-400 ml-1 text-sm">/month</span>
-              </div>
-              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
-                {[
-                  '10 sessions per month',
-                  'All six activity types',
-                  'Up to 40 students per session',
-                  'Live monitor & CSV export',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-kiln-500 shrink-0 mt-0.5" />{f}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/instructor" className="block text-center px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95 text-sm">
-                Get started free
-              </Link>
-            </div>
-
-            {/* Pro */}
-            <div className="flex flex-col p-5 sm:p-7 bg-slate-900 rounded-2xl border-2 border-slate-700">
-              <span className="inline-block text-xs font-bold text-kiln-400 bg-kiln-900 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Pro</span>
-              <div className="mb-5">
-                <span className="text-4xl font-extrabold text-white">$99</span>
-                <span className="text-slate-400 ml-1 text-sm">/year</span>
-              </div>
-              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
-                {[
-                  'Unlimited sessions',
-                  'All six activity types',
-                  'Projector view for class display',
-                  'Async / take-home mode',
-                  'Session analytics',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-300">
-                    <Check className="w-4 h-4 text-kiln-400 shrink-0 mt-0.5" />{f}
-                  </li>
-                ))}
-              </ul>
-              {waitlistDone ? (
-                <div className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white font-semibold rounded-xl text-sm">
-                  <Check className="w-4 h-4" /> You're on the list!
-                </div>
-              ) : (
-                <form onSubmit={handleWaitlist} className="flex gap-2">
-                  <input
-                    type="email"
-                    value={waitlistEmail}
-                    onChange={(e) => setWaitlistEmail(e.target.value)}
-                    placeholder="your@email.edu"
-                    className="flex-1 min-w-0 px-3 py-2.5 bg-slate-800 border border-slate-600 text-slate-200 placeholder-slate-500 rounded-xl text-sm focus:outline-none focus:border-kiln-500 transition-colors"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={waitlistSubmitting || !waitlistEmail.trim()}
-                    className="shrink-0 px-4 py-2.5 bg-kiln-600 hover:bg-kiln-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors text-sm"
-                  >
-                    {waitlistSubmitting ? '…' : 'Join'}
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Department */}
-            <div className="flex flex-col p-5 sm:p-7 bg-slate-50 rounded-2xl border-2 border-slate-200">
-              <span className="inline-block text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-fit">Department</span>
-              <div className="mb-5">
-                <span className="text-4xl font-extrabold text-slate-400">$1,200</span>
-                <span className="text-slate-400 ml-1 text-sm">/year</span>
-              </div>
-              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
-                {[
-                  'Everything in Pro',
-                  'Unlimited instructors in dept.',
-                  'Canvas & Moodle LMS integration',
-                  'SSO / institutional login',
-                  'Priority support & onboarding',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-500">
-                    <Check className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />{f}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="mailto:charles.crabtree@monash.edu?subject=Kiln%20Department%20Enquiry"
-                className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-300 transition-colors text-sm"
-              >
-                <Mail className="w-4 h-4" /> Contact us
-              </a>
-            </div>
-
-          </div>
-          <p className="text-center text-xs text-slate-400 mt-8">
-            All tiers are free during the current beta. Billing begins when Pro and Department tiers launch.
+          <p className="text-xs text-slate-400">
+            Questions? <a href="mailto:feedback@usekiln.org" className="text-kiln-600 hover:underline">feedback@usekiln.org</a>
           </p>
         </div>
       </section>

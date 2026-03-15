@@ -359,7 +359,7 @@ export function DemoPlayer() {
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-300" />
           <div className="flex-1 mx-2">
             <div className="bg-white border border-slate-100 rounded px-2 py-0.5 text-[10px] text-slate-400 font-mono text-center">
-              app.kiln.education/instructor/session
+              app.usekiln.org/instructor/session
             </div>
           </div>
         </div>

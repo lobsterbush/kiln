@@ -36,12 +36,6 @@ export function Layout() {
             >
               Features
             </a>
-            <a
-              href={`${import.meta.env.BASE_URL}#pricing`}
-              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
-            >
-              Pricing
-            </a>
             <NavLink
               to="/pedagogy"
               className={({ isActive }) =>
@@ -87,13 +81,6 @@ export function Layout() {
             >
               Features
             </a>
-            <a
-              href={`${import.meta.env.BASE_URL}#pricing`}
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-colors"
-            >
-              Pricing
-            </a>
             <NavLink
               to="/pedagogy"
               className={({ isActive }) =>
@@ -124,24 +111,24 @@ export function Layout() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-400">© 2026 Kiln · <em>Where thinking hardens</em></p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
-            <a
-              href="mailto:charles.crabtree@monash.edu?subject=Kiln Support"
+            <Link
+              to="/feedback"
               className="hover:text-kiln-600 transition-colors"
             >
-              Support
-            </a>
+              Feedback
+            </Link>
             <Link
               to="/pedagogy"
               className="hover:text-kiln-600 transition-colors hidden sm:block"
             >
               Pedagogy
             </Link>
-            <a
-              href={`${import.meta.env.BASE_URL}#pricing`}
+            <Link
+              to="/privacy"
               className="hover:text-kiln-600 transition-colors hidden sm:block"
             >
-              Pricing
-            </a>
+              Privacy
+            </Link>
           </div>
         </div>
       </footer>
