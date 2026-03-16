@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Loader2, MessageSquare, Sparkles } from 'lucide-react'
+import { Loader2, MessageSquare, Sparkles, User, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getStudentToken } from '../lib/utils'
 
@@ -25,6 +25,15 @@ const ACTIVITY_LABELS: Record<string, string> = {
   socratic_chain: 'Socratic Chain',
   peer_clarification: 'Peer Clarification',
   evidence_analysis: 'Evidence Analysis',
+  scenario_solo: 'Scenario Solo',
+  scenario_multi: 'Scenario Multi',
+}
+
+interface ScenarioMessage {
+  turn: number
+  speaker_type: 'student' | 'ai'
+  speaker_name: string
+  content: string
 }
 
 interface SummaryData {
@@ -43,6 +52,7 @@ export function StudentSummary() {
   const { id } = useParams<{ id: string }>()
   const studentToken = getStudentToken()
   const [summary, setSummary] = useState<SummaryData | null>(null)
+  const [scenarioMessages, setScenarioMessages] = useState<ScenarioMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,9 +77,26 @@ export function StudentSummary() {
 
     if (rpcError || !data) {
       setError('load-failed')
-    } else {
-      setSummary(data as SummaryData)
+      setLoading(false)
+      return
     }
+
+    const summaryData = data as SummaryData
+    setSummary(summaryData)
+
+    // For scenario activities, load the chat transcript separately
+    // (scenario turns are stored in scenario_messages, not responses)
+    if (summaryData.activity_type === 'scenario_solo' || summaryData.activity_type === 'scenario_multi') {
+      const { data: transcriptData } = await supabase.rpc('get_scenario_transcript', {
+        p_participant_id: studentToken.participant_id,
+        p_token: studentToken.token,
+        p_session_id: id,
+      })
+      if (transcriptData?.messages) {
+        setScenarioMessages(transcriptData.messages as ScenarioMessage[])
+      }
+    }
+
     setLoading(false)
   }
 
@@ -105,9 +132,12 @@ export function StudentSummary() {
     )
   }
 
-  const totalWords = summary.responses.reduce(
-    (sum, r) => sum + r.content.trim().split(/\s+/).filter(Boolean).length, 0
-  )
+  const isScenario = summary.activity_type === 'scenario_solo' || summary.activity_type === 'scenario_multi'
+  const studentScenarioMessages = scenarioMessages.filter((m) => m.speaker_type === 'student')
+  const totalWords = isScenario
+    ? studentScenarioMessages.reduce((sum, m) => sum + m.content.trim().split(/\s+/).filter(Boolean).length, 0)
+    : summary.responses.reduce((sum, r) => sum + r.content.trim().split(/\s+/).filter(Boolean).length, 0)
+  const roundsOrTurns = isScenario ? studentScenarioMessages.length : summary.responses.length
   const sessionDate = new Date(summary.session_date)
   const followUpMap = new Map(summary.follow_ups.map((f) => [f.round, f.prompt]))
 
@@ -130,8 +160,8 @@ export function StudentSummary() {
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
-          <p className="text-2xl font-bold text-slate-900">{summary.responses.length}</p>
-          <p className="text-xs text-slate-500 mt-0.5">Rounds completed</p>
+          <p className="text-2xl font-bold text-slate-900">{roundsOrTurns}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{isScenario ? 'Turns taken' : 'Rounds completed'}</p>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
           <p className="text-2xl font-bold text-slate-900">{totalWords}</p>
@@ -139,11 +169,9 @@ export function StudentSummary() {
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
           <p className="text-2xl font-bold text-slate-900">
-            {summary.responses.length > 0
-              ? Math.round(totalWords / summary.responses.length)
-              : 0}
+            {roundsOrTurns > 0 ? Math.round(totalWords / roundsOrTurns) : 0}
           </p>
-          <p className="text-xs text-slate-500 mt-0.5">Avg. per round</p>
+          <p className="text-xs text-slate-500 mt-0.5">{isScenario ? 'Avg. per turn' : 'Avg. per round'}</p>
         </div>
       </div>
 
@@ -160,69 +188,108 @@ export function StudentSummary() {
         </div>
       )}
 
-      {/* Response chain */}
-      <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-          Your responses
-        </p>
-        <div className="flex flex-col gap-0">
-          {summary.responses.map((r, i) => {
-            const followUp = followUpMap.get(r.round)
-            const isLast = i === summary.responses.length - 1
-            const wc = r.content.trim().split(/\s+/).filter(Boolean).length
-            return (
-              <div key={r.round}>
-                <div className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
-                      {r.round}
-                    </span>
-                    {(!isLast || followUp) && (
-                      <div className="w-px flex-1 bg-slate-200 mt-1 min-h-[1.5rem]" />
-                    )}
+      {/* Scenario transcript */}
+      {isScenario && (
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Your conversation
+          </p>
+          {scenarioMessages.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">No transcript found for this session.</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {scenarioMessages.map((msg) => {
+                const isStudent = msg.speaker_type === 'student'
+                return (
+                  <div key={msg.turn} className={`flex gap-3 ${isStudent ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                      isStudent ? 'bg-kiln-100' : 'bg-slate-100'
+                    }`}>
+                      {isStudent
+                        ? <User className="w-3.5 h-3.5 text-kiln-600" />
+                        : <Users className="w-3.5 h-3.5 text-slate-500" />}
+                    </div>
+                    <div className={`flex flex-col gap-1 max-w-[85%] ${isStudent ? 'items-end' : 'items-start'}`}>
+                      <span className="text-xs text-slate-400 font-medium">{msg.speaker_name}</span>
+                      <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                        isStudent
+                          ? 'bg-kiln-600 text-white rounded-tr-sm'
+                          : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
+                      }`}>
+                        {msg.content}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 pb-3">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-xs text-slate-400 font-medium">
-                        {TYPE_LABELS[r.response_type] ?? r.response_type}
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Response chain (non-scenario activities) */}
+      {!isScenario && (
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Your responses
+          </p>
+          <div className="flex flex-col gap-0">
+            {summary.responses.map((r, i) => {
+              const followUp = followUpMap.get(r.round)
+              const isLast = i === summary.responses.length - 1
+              const wc = r.content.trim().split(/\s+/).filter(Boolean).length
+              return (
+                <div key={r.round}>
+                  <div className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs font-mono text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                        {r.round}
                       </span>
-                      <span className="text-xs text-slate-300">{wc} words</span>
-                      {r.time_taken_ms != null && (
-                        <span className="text-xs text-slate-300">
-                          {(r.time_taken_ms / 1000).toFixed(0)}s
-                        </span>
+                      {(!isLast || followUp) && (
+                        <div className="w-px flex-1 bg-slate-200 mt-1 min-h-[1.5rem]" />
                       )}
                     </div>
-                    <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 shadow-sm">
-                      <p className="text-sm text-slate-700 leading-relaxed">{r.content}</p>
+                    <div className="flex-1 pb-3">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs text-slate-400 font-medium">
+                          {TYPE_LABELS[r.response_type] ?? r.response_type}
+                        </span>
+                        <span className="text-xs text-slate-300">{wc} words</span>
+                        {r.time_taken_ms != null && (
+                          <span className="text-xs text-slate-300">
+                            {(r.time_taken_ms / 1000).toFixed(0)}s
+                          </span>
+                        )}
+                      </div>
+                      <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 shadow-sm">
+                        <p className="text-sm text-slate-700 leading-relaxed">{r.content}</p>
+                      </div>
                     </div>
                   </div>
+                  {/* AI follow-up shown between rounds for Socratic Chain */}
+                  {followUp && (
+                    <div className="flex gap-3 mb-1">
+                      <div className="flex flex-col items-center">
+                        <div className="w-px h-2 bg-slate-200" />
+                        <span className="w-6 h-6 flex items-center justify-center shrink-0">
+                          <Sparkles className="w-3 h-3 text-purple-400" />
+                        </span>
+                        <div className="w-px flex-1 bg-slate-200" />
+                      </div>
+                      <div className="flex-1 py-2">
+                        <p className="text-xs text-purple-500 font-medium mb-0.5">Your follow-up question</p>
+                        <p className="text-xs text-slate-500 italic leading-relaxed">{followUp}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {/* AI follow-up shown between rounds for Socratic Chain */}
-                {followUp && (
-                  <div className="flex gap-3 mb-1">
-                    <div className="flex flex-col items-center">
-                      <div className="w-px h-2 bg-slate-200" />
-                      <span className="w-6 h-6 flex items-center justify-center shrink-0">
-                        <Sparkles className="w-3 h-3 text-purple-400" />
-                      </span>
-                      <div className="w-px flex-1 bg-slate-200" />
-                    </div>
-                    <div className="flex-1 py-2">
-                      <p className="text-xs text-purple-500 font-medium mb-0.5">Your follow-up question</p>
-                      <p className="text-xs text-slate-500 italic leading-relaxed">{followUp}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
+          {summary.responses.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-8">No responses found for this session.</p>
+          )}
         </div>
-      </div>
-
-      {/* No responses */}
-      {summary.responses.length === 0 && (
-        <p className="text-sm text-slate-400 text-center py-8">No responses found for this session.</p>
       )}
 
       <p className="text-xs text-center text-slate-300 pb-6">

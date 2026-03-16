@@ -34,19 +34,22 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   const [loadingHistory, setLoadingHistory] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Load existing transcript on mount (handles page refresh mid-scenario)
+  // Load existing transcript on mount (handles page refresh mid-scenario).
+  // Uses the SECURITY DEFINER RPC — direct SELECT on scenario_messages is blocked
+  // by RLS for the anon role (no student SELECT policy exists).
   useEffect(() => {
     if (!studentToken) { setLoadingHistory(false); return }
     supabase
-      .from('scenario_messages')
-      .select('turn, speaker_type, speaker_name, content')
-      .eq('session_id', sessionId)
-      .eq('participant_id', studentToken.participant_id)
-      .order('turn', { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setMessages(data as Message[])
-          const studentTurnsDone = data.filter((m) => m.speaker_type === 'student').length
+      .rpc('get_scenario_transcript', {
+        p_participant_id: studentToken.participant_id,
+        p_token: studentToken.token,
+        p_session_id: sessionId,
+      })
+      .then(({ data, error }) => {
+        if (!error && data?.messages?.length > 0) {
+          const msgs = data.messages as Message[]
+          setMessages(msgs)
+          const studentTurnsDone = msgs.filter((m) => m.speaker_type === 'student').length
           setStudentTurns(studentTurnsDone)
           if (studentTurnsDone >= maxTurns) setCompleted(true)
         }
