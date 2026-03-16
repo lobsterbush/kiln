@@ -17,7 +17,7 @@ export function Home() {
 
   function handleJoin(e: React.FormEvent) {
     e.preventDefault()
-    if (code.trim()) navigate(`/join?code=${code.trim().toUpperCase()}`)
+    if (code.trim()) navigate(`/join?code=${encodeURIComponent(code.trim().toUpperCase())}`)
   }
 
   return (

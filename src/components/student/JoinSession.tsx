@@ -8,16 +8,19 @@ interface JoinSessionProps {
 }
 
 export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProps) {
-  const [code, setCode] = useState(initialCode)
+  const [code, setCode] = useState(initialCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6))
   const [name, setName] = useState('')
   const [joining, setJoining] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!code.trim() || !name.trim()) return
+    const normalizedCode = code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6)
+    if (!normalizedCode || !name.trim()) return
     setJoining(true)
     try {
-      await onJoin(code.trim().toUpperCase(), name.trim())
+      await onJoin(normalizedCode, name.trim())
+    } catch {
+      // Parent handles user-facing errors; this prevents unhandled rejections.
     } finally {
       setJoining(false)
     }
@@ -42,7 +45,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
               id="code"
               type="text"
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6))}
               placeholder="ABCDEF"
               maxLength={6}
               className="w-full px-4 py-3.5 text-center text-2xl font-mono font-bold tracking-[0.3em] bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors"
@@ -72,7 +75,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
 
           <button
             type="submit"
-            disabled={joining || !code.trim() || !name.trim()}
+          disabled={joining || code.replace(/[^a-zA-Z0-9]/g, '').length === 0 || !name.trim()}
             className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
           >
             {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join'}
