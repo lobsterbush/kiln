@@ -9,6 +9,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string) => Promise<{ error: Error | null; needsConfirmation?: boolean }>
   sendMagicLink: (email: string) => Promise<{ error: Error | null }>
+  signInWithOAuth: (provider: 'google' | 'github' | 'azure') => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
 }
 
@@ -55,6 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null, needsConfirmation }
   }
 
+  async function signInWithOAuth(provider: 'google' | 'github' | 'azure') {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}instructor`,
+      },
+    })
+    return { error: error as Error | null }
+  }
+
   async function sendMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -72,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, sendMagicLink, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, sendMagicLink, signInWithOAuth, signOut }}>
       {children}
     </AuthContext.Provider>
   )
