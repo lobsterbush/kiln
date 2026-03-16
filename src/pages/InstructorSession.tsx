@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { shuffleArray } from '../lib/utils'
-import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT } from '../lib/constants'
+import { DEFAULT_CRITIQUE_PROMPT, DEFAULT_REBUTTAL_PROMPT, DEFAULT_EXPLAIN_PROMPT, DEFAULT_GAP_PROMPT, FALLBACK_FOLLOW_UP_PROMPT } from '../lib/constants'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { LiveMonitor } from '../components/instructor/LiveMonitor'
 import { ScenarioMonitor } from '../components/instructor/ScenarioMonitor'
@@ -229,10 +229,19 @@ export function InstructorSession() {
         const ok = await assignPeers(currentResponses, session.current_round, 'evidence_gap')
         if (!ok) setPeerWarning('Peer assignment skipped — fewer than 2 students submitted.')
       } else if (activity.type === 'socratic_chain') {
-        const prompt = 'Your personalised follow-up question is being generated…'
+        // Generate all follow-ups first so students don't see a loading delay after round start.
+        const promptsByParticipant = await generateFollowUps(currentResponses, session.current_round)
+        const prompt = 'Your personalised follow-up question'
         setCurrentPrompt(prompt)
         await broadcastEvent('round:start', { round: nextRound, duration_sec: activity.config.round_duration_sec, prompt, server_timestamp: now })
-        await generateFollowUps(currentResponses, session.current_round)
+        await Promise.all(
+          currentResponses.map(async (response) => {
+            await broadcastEvent('followup:ready', {
+              participant_id: response.participant_id,
+              prompt: promptsByParticipant.get(response.participant_id) ?? FALLBACK_FOLLOW_UP_PROMPT,
+            })
+          })
+        )
       }
     } finally {
       advancingRef.current = false
@@ -294,9 +303,9 @@ export function InstructorSession() {
     }
   }
 
-  async function generateFollowUps(currentResponses: KilnResponse[], fromRound: number) {
-    if (!session) return
-    await Promise.all(
+  async function generateFollowUps(currentResponses: KilnResponse[], fromRound: number): Promise<Map<string, string>> {
+    if (!session) return new Map()
+    const promptEntries = await Promise.all(
       currentResponses.map(async (response) => {
         try {
           const { data } = await supabase.functions.invoke('generate-followup', {
@@ -307,17 +316,15 @@ export function InstructorSession() {
               round: fromRound,
             },
           })
-          if (data?.prompt) {
-            await broadcastEvent('followup:ready', {
-              participant_id: response.participant_id,
-              prompt: data.prompt,
-            })
-          }
+          const prompt = data?.prompt ?? FALLBACK_FOLLOW_UP_PROMPT
+          return [response.participant_id, prompt] as const
         } catch (err) {
           console.error('Failed to generate follow-up:', err)
+          return [response.participant_id, FALLBACK_FOLLOW_UP_PROMPT] as const
         }
       })
     )
+    return new Map(promptEntries)
   }
 
   async function featureResponse(responseId: string, participantName: string, content: string) {

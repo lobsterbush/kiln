@@ -40,6 +40,9 @@ export function StudentSession() {
   const [disconnected, setDisconnected] = useState(false)
   const followUpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const subscribedOnceRef = useRef(false)
+  // Ref keeps activity type accessible inside stale broadcast handler closures
+  const activityTypeRef = useRef<string | null>(null)
+  useEffect(() => { activityTypeRef.current = activity?.type ?? null }, [activity])
 
   // Restore response history from sessionStorage on mount (survives page refresh)
   useEffect(() => {
@@ -175,7 +178,11 @@ export function StudentSession() {
         setPeerResponse(null)
         setFollowUp(null)
         setWaitingForNext(false)
-        setFollowUpLoading(false)
+        // For socratic_chain, keep followUpLoading=true so the spinner shows only
+        // for the brief gap until followup:ready arrives (already pre-generated).
+        if (activityTypeRef.current !== 'socratic_chain') {
+          setFollowUpLoading(false)
+        }
       })
       .on('broadcast', { event: 'peer:assigned' }, ({ payload }) => {
         if (payload.participant_id === studentToken.participant_id) {
@@ -367,8 +374,10 @@ export function StudentSession() {
     )
   }
 
-  // Waiting between rounds
-  if (waitingForNext && !peerResponse && !followUp && !followUpLoading && !followUpTimedOut) {
+  // Waiting between rounds — show whenever waitingForNext, regardless of followUpLoading
+  // (followUpLoading while waitingForNext means Claude is being called by the instructor;
+  //  the spinner will only appear after round:start arrives, which is post-generation)
+  if (waitingForNext && !peerResponse && !followUp && !followUpTimedOut) {
     const lastResponse = myResponses.length > 0 ? myResponses[myResponses.length - 1] : null
     const completedRound = lastResponse?.round ?? (roundEvent?.round ?? 0)
     const totalRounds = activity.config.rounds
