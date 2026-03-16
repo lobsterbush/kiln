@@ -11,8 +11,14 @@ export function Join() {
 
   async function handleJoin(code: string, name: string) {
     setError(null)
+
+    // Hoisted so the broadcast (outside the try block) can reference them
+    let resolvedSessionId = ''
+    let resolvedParticipantId = ''
+    let resolvedName = name.trim()
+
     try {
-      if (name.trim().length < 2) {
+      if (resolvedName.length < 2) {
         setError('Name must be at least 2 characters.')
         return
       }
@@ -40,10 +46,10 @@ export function Join() {
         .select('display_name')
         .eq('session_id', session.id)
       const nameTaken = existingParticipants?.some(
-        (p) => p.display_name.toLowerCase() === name.trim().toLowerCase()
+        (p) => p.display_name.toLowerCase() === resolvedName.toLowerCase()
       )
       if (nameTaken) {
-        setError(`"${name.trim()}" is already taken in this session. Please use a different name.`)
+        setError(`"${resolvedName}" is already taken in this session. Please use a different name.`)
         return
       }
 
@@ -53,7 +59,7 @@ export function Join() {
         .from('participants')
         .insert({
           session_id: session.id,
-          display_name: name.trim(),
+          display_name: resolvedName,
           token,
         })
         .select()
@@ -65,30 +71,54 @@ export function Join() {
         return
       }
 
-      // Save token locally
-      saveStudentToken({
-        participant_id: participant.id,
-        token,
-        session_id: session.id,
-        display_name: name.trim(),
-      })
+      // Save token — inner catch gives a specific storage error message
+      try {
+        saveStudentToken({
+          participant_id: participant.id,
+          token,
+          session_id: session.id,
+          display_name: resolvedName,
+        })
+      } catch (storageErr) {
+        console.error('[Kiln] localStorage error:', storageErr)
+        const msg = storageErr instanceof Error ? storageErr.message : String(storageErr)
+        setError(
+          `Could not save your session token (${msg}). ` +
+          'Your browser may be blocking storage — try disabling private browsing or allowing cookies for this site.'
+        )
+        return
+      }
 
-      // Non-blocking broadcast: wait for SUBSCRIBED before sending to avoid race condition
-      const bc = supabase.channel(`session:${session.id}`)
-      bc.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          bc.send({
-            type: 'broadcast',
-            event: 'participant:joined',
-            payload: { participant_id: participant.id, display_name: name.trim() },
-          }).then(() => supabase.removeChannel(bc))
-        }
-      })
+      resolvedSessionId = session.id
+      resolvedParticipantId = participant.id
 
+      // Navigate before broadcast — broadcast must never block this
       navigate(`/session/${session.id}`)
+
     } catch (err) {
+      // Catches anything unexpected: crypto failure, network throw, etc.
+      const msg = err instanceof Error ? err.message : String(err)
       console.error('[Kiln] Unexpected join error:', err)
-      setError('Something went wrong. Please check your connection and try again.')
+      setError(`Something went wrong (${msg}). Please check your connection and try again.`)
+    }
+
+    // Broadcast is completely outside the critical try block —
+    // it fires after navigate and never prevents the student from entering the session
+    if (resolvedSessionId) {
+      try {
+        const bc = supabase.channel(`session:${resolvedSessionId}`)
+        bc.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            bc.send({
+              type: 'broadcast',
+              event: 'participant:joined',
+              payload: { participant_id: resolvedParticipantId, display_name: resolvedName },
+            }).then(() => supabase.removeChannel(bc))
+          }
+        })
+      } catch {
+        // Non-critical; instructor sees the participant on page load
+      }
     }
   }
 
