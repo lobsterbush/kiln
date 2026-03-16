@@ -418,7 +418,9 @@ export function StudentSession() {
   //  the spinner will only appear after round:start arrives, which is post-generation)
   if (waitingForNext && !peerResponse && !followUp && !followUpTimedOut) {
     const lastResponse = myResponses.length > 0 ? myResponses[myResponses.length - 1] : null
-    const completedRound = lastResponse?.round ?? (roundEvent?.round ?? 0)
+    // Fall back to session.current_round so we never show "Round 0 of N" for
+    // between_rounds arrivals, late joiners, or students on a new device (no sessionStorage).
+    const completedRound = lastResponse?.round ?? roundEvent?.round ?? session.current_round
     const totalRounds = activity.config.rounds
     const isLastRound = completedRound >= totalRounds
 
@@ -443,11 +445,15 @@ export function StudentSession() {
           <span className="text-emerald-500 text-lg">✓</span>
           <div className="flex-1">
             <p className="text-sm font-semibold text-emerald-800">
-              {isLastRound ? 'All done — waiting for the session to wrap up.' : 'Submitted!'}
+              {isLastRound && lastResponse
+                ? 'All done — waiting for the session to wrap up.'
+                : lastResponse
+                ? 'Submitted!'
+                : 'Waiting for the next round…'}
             </p>
             {!isLastRound && (
               <p className="text-xs text-emerald-600 mt-0.5">
-                Round {completedRound} of {totalRounds} complete
+                {lastResponse ? `Round ${completedRound} of ${totalRounds} complete` : `Round ${completedRound} of ${totalRounds}`}
               </p>
             )}
           </div>

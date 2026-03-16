@@ -106,9 +106,33 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
       if (data.completed) setCompleted(true)
     } catch (err) {
       setError('Could not send message. Please try again.')
-      // Roll back optimistic message
-      setMessages((prev) => prev.filter((m) => m.turn !== studentTurn))
-      setInput(userContent)
+      // The edge function saves the student message BEFORE calling Claude, so
+      // the DB may have the message even though the AI response failed.
+      // Re-query transcript to get ground truth:
+      //   • If message is in DB: keep it displayed (don't roll back) so the
+      //     student knows it was received and turn count stays accurate.
+      //   • If not in DB: safe to roll back and let them retry.
+      try {
+        const { data: syncData } = await supabase.rpc('get_scenario_transcript', {
+          p_participant_id: studentToken.participant_id,
+          p_token: studentToken.token,
+          p_session_id: sessionId,
+        })
+        if (syncData?.messages?.length > 0) {
+          const synced = syncData.messages as Message[]
+          setMessages(synced)
+          setStudentTurns(synced.filter((m) => m.speaker_type === 'student').length)
+          // Don't restore input — student message is in the DB
+        } else {
+          // Nothing saved — safe to roll back
+          setMessages((prev) => prev.filter((m) => m.turn !== studentTurn))
+          setInput(userContent)
+        }
+      } catch {
+        // DB sync failed — roll back so student can retry
+        setMessages((prev) => prev.filter((m) => m.turn !== studentTurn))
+        setInput(userContent)
+      }
     } finally {
       setSending(false)
     }
