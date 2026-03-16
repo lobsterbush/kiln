@@ -39,6 +39,7 @@ export function StudentSession() {
   const [followUpTimedOut, setFollowUpTimedOut] = useState(false)
   const [disconnected, setDisconnected] = useState(false)
   const followUpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const peerAssignmentRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const subscribedOnceRef = useRef(false)
   // Ref keeps activity type accessible inside stale broadcast handler closures
   const activityTypeRef = useRef<string | null>(null)
@@ -63,6 +64,43 @@ export function StudentSession() {
     if (!id || myResponses.length === 0) return
     sessionStorage.setItem(`kiln_responses_${id}`, JSON.stringify(myResponses))
   }, [myResponses, id])
+
+  // Auto-recovery for missed peer:assigned broadcasts.
+  // If the peer-assignment spinner has been showing for 15s with no delivery,
+  // re-query get_student_round_context to pull the assignment from DB.
+  useEffect(() => {
+    const isPeerSpinner =
+      !!roundEvent &&
+      (activity?.type === 'peer_critique' || activity?.type === 'peer_clarification' || activity?.type === 'evidence_analysis') &&
+      roundEvent.round > 1 &&
+      !peerResponse
+
+    if (isPeerSpinner && studentToken && id) {
+      peerAssignmentRetryRef.current = setTimeout(async () => {
+        if (!roundEvent || !activity) return
+        const { data: ctx } = await supabase.rpc('get_student_round_context', {
+          p_participant_id: studentToken.participant_id,
+          p_token: studentToken.token,
+          p_session_id: id,
+          p_round: roundEvent.round,
+          p_activity_type: activity.type,
+        })
+        if (ctx?.peer_response_content) {
+          setPeerResponse({ content: ctx.peer_response_content, name: ctx.peer_name })
+          setPeerResponseType(ctx.peer_response_type as 'critique' | 'rebuttal' | 'clarification' | 'evidence_gap')
+          setWaitingForNext(false)
+        }
+      }, 15_000)
+    } else {
+      if (peerAssignmentRetryRef.current) {
+        clearTimeout(peerAssignmentRetryRef.current)
+        peerAssignmentRetryRef.current = null
+      }
+    }
+    return () => {
+      if (peerAssignmentRetryRef.current) clearTimeout(peerAssignmentRetryRef.current)
+    }
+  }, [roundEvent?.round, peerResponse, activity?.type, studentToken, id])
 
   // Follow-up timeout: if Claude doesn't respond within FOLLOW_UP_TIMEOUT_MS, show fallback
   useEffect(() => {
@@ -178,6 +216,7 @@ export function StudentSession() {
         setPeerResponse(null)
         setFollowUp(null)
         setWaitingForNext(false)
+        setFollowUpTimedOut(false)
         // For socratic_chain, keep followUpLoading=true so the spinner shows only
         // for the brief gap until followup:ready arrives (already pre-generated).
         if (activityTypeRef.current !== 'socratic_chain') {
@@ -398,6 +437,7 @@ export function StudentSession() {
 
     return (
       <div className="flex flex-col gap-6 animate-fade-in">
+        {disconnectedBanner}
         {/* Submitted confirmation */}
         <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-2xl">
           <span className="text-emerald-500 text-lg">✓</span>
@@ -456,70 +496,85 @@ export function StudentSession() {
       const spinColor = activity.type === 'peer_clarification' ? 'bg-teal-50' : activity.type === 'evidence_analysis' ? 'bg-amber-50' : 'bg-blue-50'
       const iconColor = activity.type === 'peer_clarification' ? 'text-teal-500' : activity.type === 'evidence_analysis' ? 'text-amber-500' : 'text-blue-500'
       return (
-        <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">
-          <div className={`p-4 ${spinColor} rounded-2xl`}>
-            <Loader2 className={`w-8 h-8 ${iconColor} animate-spin`} />
+        <>
+          {disconnectedBanner}
+          <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">
+            <div className={`p-4 ${spinColor} rounded-2xl`}>
+              <Loader2 className={`w-8 h-8 ${iconColor} animate-spin`} />
+            </div>
+            <p className="text-sm text-slate-500 font-medium">Receiving your peer assignment…</p>
           </div>
-          <p className="text-sm text-slate-500 font-medium">Receiving your peer assignment…</p>
-        </div>
+        </>
       )
     }
 
     // Peer critique: show peer's response
     if (peerResponse && activity.type === 'peer_critique') {
       return (
-        <PeerCritiqueView
-          peerResponse={peerResponse.content}
-          peerName={peerResponse.name}
-          critiquePrompt={roundEvent.prompt}
-          serverTimestamp={roundEvent.server_timestamp}
-          durationSec={roundEvent.duration_sec}
-          onSubmit={handleSubmitResponse}
-        />
+        <>
+          {disconnectedBanner}
+          <PeerCritiqueView
+            peerResponse={peerResponse.content}
+            peerName={peerResponse.name}
+            critiquePrompt={roundEvent.prompt}
+            serverTimestamp={roundEvent.server_timestamp}
+            durationSec={roundEvent.duration_sec}
+            onSubmit={handleSubmitResponse}
+          />
+        </>
       )
     }
 
     // Peer clarification: show peer's confusion
     if (peerResponse && activity.type === 'peer_clarification') {
       return (
-        <PeerClarificationView
-          peerResponse={peerResponse.content}
-          peerName={peerResponse.name}
-          explainPrompt={roundEvent.prompt}
-          serverTimestamp={roundEvent.server_timestamp}
-          durationSec={roundEvent.duration_sec}
-          onSubmit={handleSubmitResponse}
-        />
+        <>
+          {disconnectedBanner}
+          <PeerClarificationView
+            peerResponse={peerResponse.content}
+            peerName={peerResponse.name}
+            explainPrompt={roundEvent.prompt}
+            serverTimestamp={roundEvent.server_timestamp}
+            durationSec={roundEvent.duration_sec}
+            onSubmit={handleSubmitResponse}
+          />
+        </>
       )
     }
 
     // Evidence analysis: show peer's interpretation
     if (peerResponse && activity.type === 'evidence_analysis') {
       return (
-        <EvidenceAnalysisView
-          peerResponse={peerResponse.content}
-          peerName={peerResponse.name}
-          gapPrompt={roundEvent.prompt}
-          serverTimestamp={roundEvent.server_timestamp}
-          durationSec={roundEvent.duration_sec}
-          onSubmit={handleSubmitResponse}
-        />
+        <>
+          {disconnectedBanner}
+          <EvidenceAnalysisView
+            peerResponse={peerResponse.content}
+            peerName={peerResponse.name}
+            gapPrompt={roundEvent.prompt}
+            serverTimestamp={roundEvent.server_timestamp}
+            durationSec={roundEvent.duration_sec}
+            onSubmit={handleSubmitResponse}
+          />
+        </>
       )
     }
 
     // Socratic chain: show AI follow-up (or fallback if timed out)
     if ((followUp || followUpLoading || followUpTimedOut) && activity.type === 'socratic_chain') {
       return (
-        <SocraticView
-          followUpPrompt={followUp}
-          previousResponse={previousResponse}
-          round={roundEvent.round}
-          serverTimestamp={roundEvent.server_timestamp}
-          durationSec={roundEvent.duration_sec}
-          onSubmit={handleSubmitResponse}
-          loading={followUpLoading}
-          timedOut={followUpTimedOut}
-        />
+        <>
+          {disconnectedBanner}
+          <SocraticView
+            followUpPrompt={followUp}
+            previousResponse={previousResponse}
+            round={roundEvent.round}
+            serverTimestamp={roundEvent.server_timestamp}
+            durationSec={roundEvent.duration_sec}
+            onSubmit={handleSubmitResponse}
+            loading={followUpLoading}
+            timedOut={followUpTimedOut}
+          />
+        </>
       )
     }
 
@@ -537,5 +592,10 @@ export function StudentSession() {
     )
   }
 
-  return <div className="text-center py-20 text-slate-500">Waiting for session to begin...</div>
+  return (
+    <>
+      {disconnectedBanner}
+      <div className="text-center py-20 text-slate-500">Waiting for session to begin...</div>
+    </>
+  )
 }
