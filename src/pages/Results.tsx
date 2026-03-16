@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import type { Session, Activity, Participant, Response as KilnResponse, PeerAssignment, FollowUp } from '../lib/types'
 import { Download, ArrowLeft, Sparkles, Loader2, Play, MessageSquare, TrendingUp, TrendingDown, Minus, Copy, Check, Info } from 'lucide-react'
-import { generateJoinCode, copyToClipboard } from '../lib/utils'
+import { generateJoinCode, copyToClipboard, KILN_ORIGIN } from '../lib/utils'
 
 export function Results() {
   const { id } = useParams<{ id: string }>()
@@ -336,7 +336,10 @@ export function Results() {
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">{activity.title}</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Session <span className="font-mono font-semibold">{session.join_code}</span> · {participants.length} participants · {activity.config.rounds} rounds
+            Session <span className="font-mono font-semibold">{session.join_code}</span> · {participants.length} participants
+            {isScenario
+              ? ` · ${activity.config.max_turns ?? 8} turns max`
+              : ` · ${activity.config.rounds} rounds`}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap justify-end">
@@ -381,20 +384,24 @@ export function Results() {
               {debriefLoading ? 'Analysing…' : 'AI Debrief'}
             </button>
           )}
-          <button
-            onClick={exportGradebookCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
-          >
-            <Download className="w-4 h-4" />
-            Gradebook CSV
-          </button>
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
-          >
-            <Download className="w-4 h-4" />
-            Responses CSV
-          </button>
+          {!isScenario && (
+            <button
+              onClick={exportGradebookCSV}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Gradebook CSV
+            </button>
+          )}
+          {!isScenario && (
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-medium rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Responses CSV
+            </button>
+          )}
         </div>
       </div>
 
@@ -505,20 +512,20 @@ export function Results() {
       )}
 
       {/* Student summary info */}
-      {session.status === 'completed' && (
+      {session.status === 'completed' && !isScenario && (
         <div className="flex items-start gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
           <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
           <p className="text-slate-500">
             Students can view their session summary from the device they used to participate. Ask them to visit{' '}
             <span className="font-mono text-xs bg-white border border-slate-200 px-1 py-0.5 rounded">
-              {window.location.origin}{import.meta.env.BASE_URL}session/{id}/summary
+              {KILN_ORIGIN}{import.meta.env.BASE_URL}session/{id}/summary
             </span>
           </p>
         </div>
       )}
 
       {/* Summary stats */}
-      {(participants.length > 0 || totalResponses > 0) && (
+      {!isScenario && (participants.length > 0 || totalResponses > 0) && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{byParticipant.length}<span className="text-base font-normal text-slate-400">/{participants.length}</span></p>
@@ -539,10 +546,10 @@ export function Results() {
         </div>
       )}
 
-      {byParticipant.length === 0 && (
+      {!isScenario && byParticipant.length === 0 && (
         <p className="text-slate-400 text-sm text-center py-10">No responses were submitted this session.</p>
       )}
-      {participants.length > byParticipant.length && byParticipant.length > 0 && (
+      {!isScenario && participants.length > byParticipant.length && byParticipant.length > 0 && (
         <p className="text-xs text-slate-400">
           {participants.length - byParticipant.length} participant{participants.length - byParticipant.length !== 1 ? 's' : ''} joined but did not submit.
         </p>

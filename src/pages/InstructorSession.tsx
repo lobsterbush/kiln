@@ -56,9 +56,24 @@ export function InstructorSession() {
     setSession(sessResult.data)
     const act = sessResult.data.activity as Activity
     setActivity(act)
-    // Reconstruct prompt for active round 1 on page reload
-    if (sessResult.data.status === 'active' && sessResult.data.current_round === 1) {
-      setCurrentPrompt(act.config.initial_prompt)
+    // Reconstruct prompt for active session on page reload
+    if (sessResult.data.status === 'active') {
+      const round = sessResult.data.current_round
+      if (round === 1) {
+        setCurrentPrompt(act.config.initial_prompt)
+      } else if (act.type === 'peer_critique') {
+        if (round === 2) setCurrentPrompt(act.config.critique_prompt ?? DEFAULT_CRITIQUE_PROMPT)
+        else if (round === 3) setCurrentPrompt(act.config.rebuttal_prompt ?? DEFAULT_REBUTTAL_PROMPT)
+        else setCurrentPrompt('Continue developing your argument based on the discussion so far.')
+      } else if (act.type === 'peer_clarification') {
+        setCurrentPrompt(act.config.explain_prompt ?? DEFAULT_EXPLAIN_PROMPT)
+      } else if (act.type === 'evidence_analysis') {
+        setCurrentPrompt(act.config.gap_prompt ?? DEFAULT_GAP_PROMPT)
+      } else if (act.type === 'socratic_chain') {
+        setCurrentPrompt('Your personalised follow-up question is being generated…')
+      } else {
+        setCurrentPrompt(act.config.initial_prompt)
+      }
     }
     if (partsResult.data) setParticipants(partsResult.data)
     if (respsResult.data) setResponses(respsResult.data)
