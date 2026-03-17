@@ -127,6 +127,7 @@ export function StudentSession() {
   }, [id])
 
   async function loadSession() {
+    if (!studentToken) return
     const { data } = await supabase
       .from('sessions')
       .select('*, activity:activities(*)')
