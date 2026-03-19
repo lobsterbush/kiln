@@ -4,6 +4,7 @@
 // updated transcript plus a `completed` flag when max_turns is reached.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callClaude } from '../_shared/anthropic.ts'
 
 const ALLOWED_ORIGINS = [
   'https://usekiln.org',
@@ -73,6 +74,7 @@ Deno.serve(async (req) => {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const activity = session.activity as any
     const config = activity?.config ?? {}
     const maxTurns: number = config.max_turns ?? 8
@@ -93,7 +95,7 @@ Deno.serve(async (req) => {
     const transcript = existingMessages ?? []
 
     // Each student message + AI reply = 1 "turn"; student turns are odd (1,3,5…)
-    const studentTurnCount = transcript.filter((m: any) => m.speaker_type === 'student').length
+    const studentTurnCount = transcript.filter((m: { speaker_type: string }) => m.speaker_type === 'student').length
     if (studentTurnCount >= maxTurns) {
       return new Response(JSON.stringify({ error: 'Max turns reached', completed: true }), {
         status: 422,
@@ -145,27 +147,18 @@ You are engaged in a real-time simulation. Stay fully in character as ${persona.
 
       // Build prior turn context to decide who responds
       const recentTurns = [...transcript.slice(-6), { speaker_type: 'student', speaker_name: participant.display_name, content: content.trim() }]
-      const turnSummary = recentTurns.map((m: any) => `${m.speaker_name}: ${m.content}`).join('\n')
+      const turnSummary = recentTurns.map((m: { speaker_name: string; content: string }) => `${m.speaker_name}: ${m.content}`).join('\n')
 
       // First ask Claude which persona should respond
-      const orchestratorRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': anthropicKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
-          max_tokens: 20,
-          system: `You are an orchestrator for a multi-stakeholder simulation. Given the conversation and the stakeholders, decide which ONE stakeholder should respond to the student's latest message. Reply with only the name of that stakeholder, nothing else.`,
-          messages: [{
-            role: 'user',
-            content: `Stakeholders:\n${personaDescriptions}\n\nRecent conversation:\n${turnSummary}\n\nWhich stakeholder responds next? (name only)`,
-          }],
-        }),
+      const orchData = await callClaude(anthropicKey, {
+        model: 'claude-3-5-haiku-20241022',
+        max_tokens: 20,
+        system: `You are an orchestrator for a multi-stakeholder simulation. Given the conversation and the stakeholders, decide which ONE stakeholder should respond to the student's latest message. Reply with only the name of that stakeholder, nothing else.`,
+        messages: [{
+          role: 'user',
+          content: `Stakeholders:\n${personaDescriptions}\n\nRecent conversation:\n${turnSummary}\n\nWhich stakeholder responds next? (name only)`,
+        }],
       })
-      const orchData = await orchestratorRes.json()
       const chosenName = orchData.content?.[0]?.text?.trim() ?? personas[0]?.name ?? 'Counterpart'
       const chosenPersona = personas.find((p) => p.name.toLowerCase() === chosenName.toLowerCase()) ?? personas[0]
       respondingPersonaName = chosenPersona?.name ?? chosenName
@@ -196,22 +189,12 @@ Stay fully in character as ${respondingPersonaName}. Do NOT break character or m
     historyMessages.push({ role: 'user', content: content.trim() })
 
     // Generate AI response
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 400,
-        system: systemPrompt,
-        messages: historyMessages,
-      }),
+    const aiData = await callClaude(anthropicKey, {
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 400,
+      system: systemPrompt,
+      messages: historyMessages,
     })
-
-    const aiData = await aiRes.json()
     const aiContent: string = aiData.content?.[0]?.text ?? '...'
 
     // Persist AI reply

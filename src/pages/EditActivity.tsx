@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -28,17 +28,13 @@ export function EditActivity() {
     if (!authLoading && !user) navigate('/instructor')
   }, [user, authLoading, navigate])
 
-  useEffect(() => {
+  const loadActivity = useCallback(async () => {
     if (!id || !user) return
-    loadActivity()
-  }, [id, user])
-
-  async function loadActivity() {
     const { data } = await supabase
       .from('activities')
       .select('*')
       .eq('id', id)
-      .eq('instructor_id', user!.id)
+      .eq('instructor_id', user.id)
       .single()
     if (data) {
       setActivity(data)
@@ -54,7 +50,11 @@ export function EditActivity() {
       setSourceMaterial(data.config.source_material ?? '')
       setAutoAdvance(data.config.auto_advance ?? false)
     }
-  }
+  }, [id, user])
+
+  useEffect(() => {
+    loadActivity()
+  }, [loadActivity])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

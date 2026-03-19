@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { generateJoinCode, formatDuration } from '../lib/utils'
+import { trackEvent } from '../lib/analytics'
 import type { Activity, ActivityType } from '../lib/types'
-import { Plus, Play, LogOut, Mail, ArrowRight, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus, Eye, EyeOff, ChevronRight, MessageSquare } from 'lucide-react'
+import { Plus, Play, LogOut, Mail, ArrowUpRight, Pencil, Trash2, Clock, CopyPlus, Eye, EyeOff, ChevronRight, MessageSquare, Library, BarChart2, AlertTriangle } from 'lucide-react'
 import { ACTIVITY_META } from '../lib/activity-meta'
+import { checkUsage } from '../lib/usage-limits'
+import type { UsageStatus } from '../lib/usage-limits'
 
 export function InstructorDashboard() {
   const { user, loading, signIn, signUp, sendMagicLink, signInWithOAuth, signOut } = useAuth()
@@ -28,26 +31,19 @@ export function InstructorDashboard() {
   const [pastSessions, setPastSessions] = useState<{ id: string; join_code: string; created_at: string; activity: { title: string }[] | null; participants: { count: number }[] }[]>([])
   const [showAllPast, setShowAllPast] = useState(false)
   const [sessionStats, setSessionStats] = useState<Map<string, { count: number; lastRun: string }>>(new Map())
+  const [usage, setUsage] = useState<UsageStatus | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      loadActivities()
-      loadActiveSessions()
-      loadPastSessions()
-      loadSessionStats()
-    }
-  }, [user])
-
-  async function loadActiveSessions() {
+  const loadActiveSessions = useCallback(async () => {
+    if (!user) return
     const { data } = await supabase
       .from('sessions')
       .select('id, join_code, status, activity:activities(title)')
-      .eq('instructor_id', user!.id)
+      .eq('instructor_id', user.id)
       .in('status', ['lobby', 'active', 'between_rounds'])
       .order('created_at', { ascending: false })
       .limit(5)
     if (data) setActiveSessions(data as typeof activeSessions)
-  }
+  }, [user])
 
   async function handleDiscardSession(sessionId: string) {
     const { error } = await supabase
@@ -57,14 +53,30 @@ export function InstructorDashboard() {
       .eq('instructor_id', user!.id)
     if (!error) {
       setActiveSessions((prev) => prev.filter((s) => s.id !== sessionId))
+      // Notify any connected students that the session has ended
+      try {
+        const bc = supabase.channel(`session:${sessionId}`)
+        bc.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            bc.send({
+              type: 'broadcast',
+              event: 'session:status',
+              payload: { status: 'completed' },
+            }).then(() => supabase.removeChannel(bc))
+          }
+        })
+      } catch {
+        // Non-critical: students will see updated status on next refresh
+      }
     }
   }
 
-  async function loadSessionStats() {
+  const loadSessionStats = useCallback(async () => {
+    if (!user) return
     const { data } = await supabase
       .from('sessions')
       .select('activity_id, created_at')
-      .eq('instructor_id', user!.id)
+      .eq('instructor_id', user.id)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
     if (!data) return
@@ -79,18 +91,19 @@ export function InstructorDashboard() {
       }
     }
     setSessionStats(map)
-  }
+  }, [user])
 
-  async function loadPastSessions(all = false) {
+  const loadPastSessions = useCallback(async (all = false) => {
+    if (!user) return
     const query = supabase
       .from('sessions')
       .select('id, join_code, created_at, activity:activities(title), participants:participants(count)')
-      .eq('instructor_id', user!.id)
+      .eq('instructor_id', user.id)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
     const { data } = all ? await query : await query.limit(5)
     if (data) setPastSessions(data as typeof pastSessions)
-  }
+  }, [user])
 
   async function handleDelete(activityId: string) {
     const { error } = await supabase
@@ -107,18 +120,30 @@ export function InstructorDashboard() {
     setConfirmDelete(null)
   }
 
-  async function loadActivities() {
+  const loadActivities = useCallback(async () => {
+    if (!user) return
     setLoadingActivities(true)
     const { data, error } = await supabase
       .from('activities')
       .select('*')
-      .eq('instructor_id', user!.id)
+      .eq('instructor_id', user.id)
       .order('created_at', { ascending: false })
       .limit(200)
     if (error) setLoadError('Could not load activities. Please refresh.')
     if (data) setActivities(data)
     setLoadingActivities(false)
-  }
+  }, [user])
+
+   
+  useEffect(() => {
+    if (user) {
+      loadActivities()
+      loadActiveSessions()
+      loadPastSessions()
+      loadSessionStats()
+      checkUsage(user.id).then(setUsage)
+    }
+  }, [user, loadActivities, loadActiveSessions, loadPastSessions, loadSessionStats])
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
@@ -183,6 +208,13 @@ export function InstructorDashboard() {
 
   async function startSession(activity: Activity) {
     if (starting) return
+
+    // Enforce session limit
+    if (usage && !usage.canCreateSession) {
+      setSessionError(`You've reached the free tier limit of ${usage.limits.maxSessionsPerSemester} sessions this semester. Upgrade to Pro for unlimited sessions.`)
+      return
+    }
+
     setStarting(true)
     const joinCode = generateJoinCode()
     const { data: session, error } = await supabase
@@ -202,6 +234,9 @@ export function InstructorDashboard() {
     }
 
     setStarting(false)
+    trackEvent('Session Created', { activity_type: activity.type })
+    // Refresh usage count
+    checkUsage(user!.id).then(setUsage)
     navigate(`/instructor/session/${session.id}`)
   }
 
@@ -486,6 +521,24 @@ export function InstructorDashboard() {
         </div>
       )}
 
+      {/* Usage limit warning */}
+      {usage?.nearLimit && usage.canCreateSession && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>
+            You've used <strong>{usage.sessionsUsed}</strong> of <strong>{usage.limits.maxSessionsPerSemester}</strong> sessions this semester ({usage.sessionsRemaining} remaining).
+          </span>
+        </div>
+      )}
+      {usage && !usage.canCreateSession && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>
+            Free tier limit reached ({usage.limits.maxSessionsPerSemester} sessions/semester). Upgrade to Pro for unlimited sessions.
+          </span>
+        </div>
+      )}
+
       {sessionError && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{sessionError}</p>
       )}
@@ -499,6 +552,20 @@ export function InstructorDashboard() {
           >
             <MessageSquare className="w-4 h-4" />
             <span className="hidden sm:inline">Feedback</span>
+          </Link>
+          <Link
+            to="/instructor/analytics"
+            className="flex items-center gap-1.5 px-3 py-2.5 text-slate-500 hover:text-kiln-600 border border-slate-200 hover:border-kiln-200 hover:bg-kiln-50 rounded-xl text-sm font-medium transition-all"
+          >
+            <BarChart2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Analytics</span>
+          </Link>
+          <Link
+            to="/instructor/templates"
+            className="flex items-center gap-1.5 px-3 py-2.5 text-slate-500 hover:text-kiln-600 border border-slate-200 hover:border-kiln-200 hover:bg-kiln-50 rounded-xl text-sm font-medium transition-all"
+          >
+            <Library className="w-4 h-4" />
+            <span className="hidden sm:inline">Templates</span>
           </Link>
           <Link
             to="/instructor/create"
@@ -528,16 +595,25 @@ export function InstructorDashboard() {
         </div>
       ) : activities.length === 0 ? (
         <div className="text-center py-20 animate-slide-up">
-          <div className="p-4 bg-slate-100 rounded-2xl w-fit mx-auto mb-5">
-            <Plus className="w-8 h-8 text-slate-400" />
+          <div className="p-4 bg-kiln-50 rounded-2xl w-fit mx-auto mb-5">
+            <Library className="w-8 h-8 text-kiln-400" />
           </div>
-          <p className="text-lg text-slate-500 mb-3">No activities yet.</p>
-          <Link
-            to="/instructor/create"
-            className="inline-flex items-center gap-1 text-kiln-600 font-medium hover:text-kiln-700 transition-colors"
-          >
-            Create your first activity <ArrowRight className="w-4 h-4" />
-          </Link>
+          <p className="text-lg text-slate-700 font-semibold mb-2">Welcome to Kiln</p>
+          <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Start from a template — 20+ ready-to-use activities across political science, law, philosophy, business, and more.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              to="/instructor/templates"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+            >
+              <Library className="w-4 h-4" /> Browse Templates
+            </Link>
+            <Link
+              to="/instructor/create"
+              className="inline-flex items-center gap-1.5 px-5 py-3 text-sm text-slate-600 font-medium border border-slate-200 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all"
+            >
+              <Plus className="w-4 h-4" /> Create from scratch
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-children">

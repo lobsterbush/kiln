@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Loader2, WifiOff } from 'lucide-react'
+import { Loader2, WifiOff, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getStudentToken } from '../lib/utils'
+import { enqueue, listenForReconnect, queueLength } from '../lib/offline-queue'
 import { SessionLobby } from '../components/shared/SessionLobby'
 import { ResponsePanel } from '../components/student/ResponsePanel'
 import { PeerCritiqueView } from '../components/student/PeerCritiqueView'
@@ -16,14 +17,14 @@ import type { Session, Participant, Activity, RoundStartEvent } from '../lib/typ
 export function StudentSession() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const studentToken = getStudentToken()
+  const [studentToken] = useState(() => getStudentToken())
 
   // Redirect to join if there is no token or if it belongs to a different session
   useEffect(() => {
     if (!studentToken || studentToken.session_id !== id) {
       navigate('/join', { replace: true })
     }
-  }, [])
+  }, [studentToken, id, navigate])
 
   const [session, setSession] = useState<Session | null>(null)
   const [activity, setActivity] = useState<Activity | null>(null)
@@ -38,12 +39,27 @@ export function StudentSession() {
   const [followUpLoading, setFollowUpLoading] = useState(false)
   const [followUpTimedOut, setFollowUpTimedOut] = useState(false)
   const [disconnected, setDisconnected] = useState(false)
+  const [queuedCount, setQueuedCount] = useState(() => queueLength())
+  const [flushedBanner, setFlushedBanner] = useState(false)
   const followUpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const peerAssignmentRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const subscribedOnceRef = useRef(false)
   // Ref keeps activity type accessible inside stale broadcast handler closures
   const activityTypeRef = useRef<string | null>(null)
   useEffect(() => { activityTypeRef.current = activity?.type ?? null }, [activity])
+
+  // Offline queue: listen for reconnection and flush queued responses
+  useEffect(() => {
+    const cleanup = listenForReconnect((remaining, online) => {
+      setQueuedCount(remaining)
+      if (online && remaining === 0 && queueLength() === 0) {
+        // All queued items flushed — show brief success banner
+        setFlushedBanner(true)
+        setTimeout(() => setFlushedBanner(false), 4000)
+      }
+    })
+    return cleanup
+  }, [])
 
   // Restore response history from sessionStorage on mount (survives page refresh)
   useEffect(() => {
@@ -55,7 +71,7 @@ export function StudentSession() {
         setMyResponses(saved)
         // Restore last response for Socratic chain follow-up context
         if (saved.length > 0) setPreviousResponse(saved[saved.length - 1].content)
-      } catch {}
+      } catch { /* corrupt sessionStorage — ignore */ }
     }
   }, [id])
 
@@ -68,6 +84,7 @@ export function StudentSession() {
   // Auto-recovery for missed peer:assigned broadcasts.
   // If the peer-assignment spinner has been showing for 15s with no delivery,
   // re-query get_student_round_context to pull the assignment from DB.
+   
   useEffect(() => {
     const isPeerSpinner =
       !!roundEvent &&
@@ -100,7 +117,7 @@ export function StudentSession() {
     return () => {
       if (peerAssignmentRetryRef.current) clearTimeout(peerAssignmentRetryRef.current)
     }
-  }, [roundEvent?.round, peerResponse, activity?.type, studentToken, id])
+  }, [roundEvent, peerResponse, activity, studentToken, id])
 
   // Follow-up timeout: if Claude doesn't respond within FOLLOW_UP_TIMEOUT_MS, show fallback
   useEffect(() => {
@@ -121,13 +138,8 @@ export function StudentSession() {
   }, [followUpLoading])
 
   // Load session data
-  useEffect(() => {
-    if (!id) return
-    loadSession()
-  }, [id])
-
-  async function loadSession() {
-    if (!studentToken) return
+  const loadSession = useCallback(async () => {
+    if (!studentToken || !id) return
     const { data } = await supabase
       .from('sessions')
       .select('*, activity:activities(*)')
@@ -201,7 +213,11 @@ export function StudentSession() {
       .eq('session_id', id!)
       .eq('is_active', true)
     if (parts) setParticipants(parts)
-  }
+  }, [id, studentToken])
+
+  useEffect(() => {
+    loadSession()
+  }, [loadSession])
 
   // Subscribe to realtime
   useEffect(() => {
@@ -274,6 +290,7 @@ export function StudentSession() {
       subscribedOnceRef.current = false
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, studentToken?.participant_id])
 
   const handleSubmitResponse = useCallback(
@@ -296,7 +313,25 @@ export function StudentSession() {
         p_time_taken_ms: timeTakenMs,
       })
 
-      if (rpcError) throw new Error('Failed to save response')
+      if (rpcError) {
+        // Network failure: queue the response offline and treat as submitted
+        if (!navigator.onLine || rpcError.message?.includes('Failed to fetch')) {
+          enqueue({
+            token: studentToken.token,
+            session_id: id,
+            participant_id: studentToken.participant_id,
+            round: roundEvent.round,
+            content,
+            response_type: responseType,
+            time_taken_ms: timeTakenMs,
+            queued_at: new Date().toISOString(),
+          })
+          setQueuedCount(queueLength())
+          // Don't throw — let the student continue
+        } else {
+          throw new Error('Failed to save response')
+        }
+      }
 
       setMyResponses((prev) => [...prev, { round: roundEvent.round, prompt: roundEvent.prompt, content }])
       setPreviousResponse(content)
@@ -343,11 +378,27 @@ export function StudentSession() {
     return <ScenarioChat sessionId={id!} activity={activity} sessionStatus={session.status} />
   }
 
-  // Disconnected banner (shown inline, doesn't block the UI)
-  const disconnectedBanner = disconnected && (
-    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 mb-4">
-      <WifiOff className="w-4 h-4 shrink-0" />
-      <span>Connection lost — reconnecting...</span>
+  // Disconnected / offline banner (shown inline, doesn't block the UI)
+  const disconnectedBanner = (disconnected || queuedCount > 0 || flushedBanner) && (
+    <div role="status" aria-live="polite" className="mb-4 flex flex-col gap-2">
+      {disconnected && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+          <WifiOff className="w-4 h-4 shrink-0" />
+          <span>Connection lost — reconnecting…</span>
+        </div>
+      )}
+      {queuedCount > 0 && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
+          <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+          <span>{queuedCount} response{queuedCount !== 1 ? 's' : ''} saved offline — will submit when connection returns</span>
+        </div>
+      )}
+      {flushedBanner && queuedCount === 0 && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>Offline responses submitted successfully</span>
+        </div>
+      )}
     </div>
   )
 

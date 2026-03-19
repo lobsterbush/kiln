@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, MessageCircle, Network, Sparkles } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, MessageCircle, Network, Sparkles, Play } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { DemoPlayer } from '../components/marketing/DemoPlayer'
 
@@ -74,6 +74,15 @@ export function Home() {
                   Instructor sign up <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
+
+              {/* Demo CTA */}
+              <Link
+                to="/demo"
+                className="flex items-center justify-center gap-2 mt-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-2xl transition-all shadow-md active:scale-95"
+              >
+                <Play className="w-4 h-4" />
+                Try a live demo — no sign-up needed
+              </Link>
             </div>
           </div>
 
@@ -106,6 +115,40 @@ export function Home() {
                 <h3 className="text-xl font-bold text-white">{s.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed flex-1">{s.body}</p>
                 <p className="text-xs text-kiln-500 font-semibold">{s.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ SOCIAL PROOF ═══ */}
+      <section id="testimonials" className="w-full py-14 sm:py-20 bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest text-center mb-10">What instructors are saying</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: 'I used this in my seminar last week and every single student was writing — not one person checked out. That never happens.',
+                name: 'Political Science Instructor',
+                school: 'Monash University',
+              },
+              {
+                quote: 'The peer critique activity replaced my discussion section. Students arrived to class having already argued, been critiqued, and defended their position.',
+                name: 'Law Lecturer',
+                school: 'Partner Institution',
+              },
+              {
+                quote: 'My students told me the AI scenario felt more real than any role-play I\'ve run in 15 years of teaching negotiation. They were genuinely stressed.',
+                name: 'Business School Faculty',
+                school: 'Partner Institution',
+              },
+            ].map((t, i) => (
+              <div key={i} className="flex flex-col gap-4">
+                <p className="text-sm text-slate-600 leading-relaxed italic flex-1">"{t.quote}"</p>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{t.name}</p>
+                  <p className="text-xs text-slate-400">{t.school}</p>
+                </div>
               </div>
             ))}
           </div>

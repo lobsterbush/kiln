@@ -29,19 +29,8 @@ export function InstructorSession() {
     if (!authLoading && !user) navigate('/instructor')
   }, [user, authLoading, navigate])
 
-  useEffect(() => {
+  const loadSession = useCallback(async () => {
     if (!id || !user) return
-    loadSession()
-  }, [id, user])
-
-  // Navigate to results once session completes (avoids calling navigate() during render)
-  useEffect(() => {
-    if (session?.status === 'completed' && session.id) {
-      navigate(`/instructor/results/${session.id}`)
-    }
-  }, [session?.status, session?.id, navigate])
-
-  async function loadSession() {
     const [sessResult, partsResult, respsResult] = await Promise.all([
       supabase.from('sessions').select('*, activity:activities(*)')
         .eq('id', id).eq('instructor_id', user!.id).single(),
@@ -77,7 +66,18 @@ export function InstructorSession() {
     }
     if (partsResult.data) setParticipants(partsResult.data)
     if (respsResult.data) setResponses(respsResult.data)
-  }
+  }, [id, user, navigate])
+
+  useEffect(() => {
+    loadSession()
+  }, [loadSession])
+
+  // Navigate to results once session completes (avoids calling navigate() during render)
+  useEffect(() => {
+    if (session?.status === 'completed' && session.id) {
+      navigate(`/instructor/results/${session.id}`)
+    }
+  }, [session?.status, session?.id, navigate])
 
   // Listen for new participants and responses; set up persistent broadcast channel
   useEffect(() => {

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { JoinSession } from '../components/student/JoinSession'
 import { supabase } from '../lib/supabase'
 import { generateToken, saveStudentToken } from '../lib/utils'
+import { TIER_LIMITS, getUserTier } from '../lib/usage-limits'
 
 export function Join() {
   const [searchParams] = useSearchParams()
@@ -15,7 +16,7 @@ export function Join() {
     // Hoisted so the broadcast (outside the try block) can reference them
     let resolvedSessionId = ''
     let resolvedParticipantId = ''
-    let resolvedName = name.trim()
+    const resolvedName = name.trim()
 
     try {
       if (resolvedName.length < 2) {
@@ -40,11 +41,19 @@ export function Join() {
         return
       }
 
-      // Duplicate name check (case-insensitive)
+      // Duplicate name check (case-insensitive) + student cap
       const { data: existingParticipants } = await supabase
         .from('participants')
         .select('display_name')
         .eq('session_id', session.id)
+
+      // Check student-per-session limit
+      const limits = TIER_LIMITS[getUserTier()]
+      if (existingParticipants && existingParticipants.length >= limits.maxStudentsPerSession) {
+        setError(`This session is full (max ${limits.maxStudentsPerSession} students). Please ask your instructor to start a new session.`)
+        return
+      }
+
       const nameTaken = existingParticipants?.some(
         (p) => p.display_name.toLowerCase() === resolvedName.toLowerCase()
       )

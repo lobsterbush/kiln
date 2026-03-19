@@ -12,23 +12,22 @@ export function Timer({ serverTimestamp, durationSec, onExpire, className }: Tim
   // Compute initial remaining from server timestamp, clamped to [0, durationSec].
   // This absorbs clock skew at the start; subsequent ticks use purely local time delta
   // to avoid drift from ongoing skew accumulation.
-  const localStartRef = useRef(Date.now())
-  const initialRemainingRef = useRef(
-    Math.max(0, Math.min(durationSec,
-      Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
-    ))
-  )
+  // Refs are initialised with placeholder values; the first useEffect below sets the
+  // real values. This avoids calling Date.now() during render (React purity rule).
+  const localStartRef = useRef(0)
+  const initialRemainingRef = useRef(durationSec)
   // Guard: onExpire must fire at most once per round even if the effect re-runs
   // (e.g. when onExpire reference changes due to parent re-renders from keystroke state)
   const firedRef = useRef(false)
 
-  const [remaining, setRemaining] = useState(initialRemainingRef.current)
+  const [remaining, setRemaining] = useState(durationSec)
 
   // Reset refs when serverTimestamp or durationSec changes (new round)
   useEffect(() => {
-    localStartRef.current = Date.now()
+    const now = Date.now()
+    localStartRef.current = now
     initialRemainingRef.current = Math.max(0, Math.min(durationSec,
-      Math.ceil(durationSec - (Date.now() - new Date(serverTimestamp).getTime()) / 1000)
+      Math.ceil(durationSec - (now - new Date(serverTimestamp).getTime()) / 1000)
     ))
     firedRef.current = false
     setRemaining(initialRemainingRef.current)

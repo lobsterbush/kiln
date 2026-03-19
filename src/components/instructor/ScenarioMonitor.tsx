@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronDown, ChevronUp, Users, User, Play, Square, Loader2, Copy, Check, Link as LinkIcon } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
@@ -52,12 +52,7 @@ export function ScenarioMonitor({
     if (ok) { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000) }
   }
 
-  // Initial load of existing messages
-  useEffect(() => {
-    loadMessages()
-  }, [sessionId])
-
-  async function loadMessages() {
+  const loadMessages = useCallback(async () => {
     const { data } = await supabase
       .from('scenario_messages')
       .select('participant_id, turn, speaker_type, speaker_name, content')
@@ -72,7 +67,12 @@ export function ScenarioMonitor({
       }
       setMessagesByParticipant(map)
     }
-  }
+  }, [sessionId])
+
+  // Initial load of existing messages
+  useEffect(() => {
+    loadMessages()
+  }, [loadMessages])
 
   // Subscribe to new scenario_messages
   useEffect(() => {
@@ -84,7 +84,7 @@ export function ScenarioMonitor({
         table: 'scenario_messages',
         filter: `session_id=eq.${sessionId}`,
       }, (payload) => {
-        const msg = payload.new as any
+        const msg = payload.new as { participant_id: string; turn: number; speaker_type: 'student' | 'ai'; speaker_name: string; content: string }
         setMessagesByParticipant((prev) => {
           const next = new Map(prev)
           const existing = next.get(msg.participant_id) ?? []

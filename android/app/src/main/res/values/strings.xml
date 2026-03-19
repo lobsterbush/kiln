@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kiln</string>
+    <string name="title_activity_main">Kiln</string>
+    <string name="package_name">org.usekiln.app</string>
+    <string name="custom_url_scheme">org.usekiln.app</string>
+</resources>

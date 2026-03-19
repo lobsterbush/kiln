@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Timer } from '../shared/Timer'
 import { cn } from '../../lib/utils'
@@ -23,18 +23,22 @@ export function ResponsePanel({
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const startTime = useRef(Date.now())
+  const startTime = useRef(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
+  const resetPanel = useCallback(() => {
     startTime.current = Date.now()
     setContent('')
     setLocked(false)
     setSubmitted(false)
     setSubmitting(false)
     setSubmitError(null)
+  }, [])
+
+  useEffect(() => {
+    resetPanel()
     textareaRef.current?.focus()
-  }, [prompt, serverTimestamp])
+  }, [prompt, serverTimestamp, resetPanel])
 
   function handleExpire() {
     setLocked(true)
@@ -86,6 +90,7 @@ export function ResponsePanel({
               onChange={(e) => setContent(e.target.value)}
               disabled={isDisabled}
               placeholder="Type your response..."
+              aria-label="Your response"
               className={cn(
                 'w-full h-52 sm:h-44 p-4 border-2 rounded-xl resize-none text-base leading-relaxed transition-all focus:outline-none',
                 isDisabled
@@ -95,7 +100,7 @@ export function ResponsePanel({
             />
 
             {submitError && (
-              <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{submitError}</p>
+              <p role="alert" className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{submitError}</p>
             )}
             <div className="flex items-center justify-between mt-4">
               {(() => {

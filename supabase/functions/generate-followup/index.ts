@@ -3,6 +3,7 @@
 // personalized follow-up questions based on student responses.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callClaude } from '../_shared/anthropic.ts'
 
 const ALLOWED_ORIGINS = [
   'https://usekiln.org',
@@ -105,6 +106,7 @@ Deno.serve(async (req) => {
       .eq('id', session_id)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config = (session?.activity as any)?.config ?? {}
     const objectives = config.learning_objectives?.join('; ') ?? ''
     const originalPrompt = config.initial_prompt ?? ''
@@ -121,30 +123,17 @@ Deno.serve(async (req) => {
       })
     }
 
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 200,
-        system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${sourceMaterial ? `\n\nSource material for this activity (use this to ground follow-up questions in the specific readings or lecture content):\n${sourceMaterial}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
-        messages: [
-          {
-            role: 'user',
-            content: `Student's response (Round ${round}):\n\n${response.content}`,
-          },
-        ],
-      }),
+    const claudeData = await callClaude(anthropicKey, {
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 200,
+      system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${sourceMaterial ? `\n\nSource material for this activity (use this to ground follow-up questions in the specific readings or lecture content):\n${sourceMaterial}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
+      messages: [
+        {
+          role: 'user',
+          content: `Student's response (Round ${round}):\n\n${response.content}`,
+        },
+      ],
     })
-
-    const claudeData = await claudeResponse.json()
-    if (!claudeResponse.ok) {
-      console.error('Claude API error:', claudeResponse.status, JSON.stringify(claudeData))
-    }
     const followUpPrompt = claudeData.content?.[0]?.text ?? 'Can you elaborate on your reasoning?'
 
     // Save to database

@@ -17,6 +17,10 @@ dist-ssr
 # Supabase local config
 supabase/.temp/
 
+# iOS (Capacitor) — commit native project, ignore generated web assets
+ios/App/App/public/
+ios/App/Pods/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

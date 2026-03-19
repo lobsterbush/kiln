@@ -19,5 +19,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Every instance in this codebase is an async data-load (fetch → setState),
+      // the standard React pattern before adopting Suspense / React Query.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

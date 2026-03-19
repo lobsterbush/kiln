@@ -4,6 +4,7 @@
 // upserts results to scenario_evaluations.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callClaude } from '../_shared/anthropic.ts'
 
 const ALLOWED_ORIGINS = [
   'https://usekiln.org',
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const activity = session.activity as any
     const config = activity?.config ?? {}
     const scenarioContext: string = config.scenario_context ?? ''
@@ -154,22 +156,14 @@ Evaluate this student's performance. Return this exact JSON:
 }`
 
           try {
-            const res = await fetch('https://api.anthropic.com/v1/messages', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': anthropicKey,
-                'anthropic-version': '2023-06-01',
-              },
-              body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 500,
-                system: systemPrompt,
-                messages: [{ role: 'user', content: userMessage }],
-              }),
+            const data = await callClaude(anthropicKey, {
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 500,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userMessage }],
             })
-            const data = await res.json()
             const raw: string = data.content?.[0]?.text ?? '{}'
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let parsed: any
             try {
               parsed = JSON.parse(raw)

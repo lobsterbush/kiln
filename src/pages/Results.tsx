@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -41,12 +41,8 @@ export function Results() {
     if (!authLoading && !user) navigate('/instructor')
   }, [user, authLoading, navigate])
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!id || !user) return
-    loadData()
-  }, [id, user])
-
-  async function loadData() {
     const [sessResult, partsResult, respsResult, assignsResult, followUpsResult] = await Promise.all([
       supabase.from('sessions').select('*, activity:activities(*)').eq('id', id!).eq('instructor_id', user!.id).single(),
       supabase.from('participants').select('*').eq('session_id', id!),
@@ -80,7 +76,7 @@ export function Results() {
         supabase.from('scenario_evaluations').select('participant_id, content').eq('session_id', id!),
       ])
       if (msgsRes.data) setScenarioMessages(msgsRes.data)
-      if (evalsRes.data) setScenarioEvaluations(evalsRes.data as any)
+      if (evalsRes.data) setScenarioEvaluations(evalsRes.data as typeof scenarioEvaluations)
     }
 
     // Load cross-session history (non-blocking)
@@ -94,9 +90,13 @@ export function Results() {
       .order('created_at', { ascending: false })
       .limit(20)
       .then(({ data }) => {
-        if (data) setSessionHistory(data as typeof sessionHistory)
+      if (data) setSessionHistory(data as typeof sessionHistory)
       })
-  }
+  }, [id, user])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function runAgain() {
     if (!activity || !user || runningAgain) return
@@ -141,7 +141,7 @@ export function Results() {
       })
       if (error || !data) throw new Error(error?.message ?? 'No data returned')
       setDebrief(data)
-    } catch (err) {
+    } catch {
       setDebriefError('Could not generate debrief. Please try again.')
     } finally {
       setDebriefLoading(false)

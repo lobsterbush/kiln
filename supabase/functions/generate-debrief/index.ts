@@ -3,6 +3,7 @@
 // a structured teaching debrief: themes, gaps, notable quotes, suggestion.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callClaude } from '../_shared/anthropic.ts'
 
 const ALLOWED_ORIGINS = [
   'https://usekiln.org',
@@ -83,6 +84,7 @@ Deno.serve(async (req) => {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const activity = session.activity as any
     const config = activity?.config ?? {}
     const actType: string = activity?.type ?? ''
@@ -157,29 +159,12 @@ Return this exact JSON structure (no other text):
   "suggestion": "one concrete sentence about what the instructor should address or build on next class"
 }`
 
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 800,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
+    const claudeData = await callClaude(anthropicKey, {
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
     })
-
-    const claudeData = await claudeResponse.json()
-    if (!claudeResponse.ok) {
-      console.error('Claude API error:', claudeResponse.status, JSON.stringify(claudeData))
-      return new Response(JSON.stringify({ error: 'AI generation failed' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
 
     const rawText: string = claudeData.content?.[0]?.text ?? '{}'
 

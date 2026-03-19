@@ -21,6 +21,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Native iOS feel — prevents WebView behaviours that feel "web-like".
+ * These only affect interactive elements; inputs/textareas keep normal behaviour.
+ */
+html, body {
+  /* Kill rubber-band overscroll at the page edges */
+  overscroll-behavior: none;
+  /* Remove grey flash on tap */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Disable iOS callout menu (copy/paste/define) on non-input elements */
+body *:not(input):not(textarea):not(select):not([contenteditable="true"]) {
+  -webkit-touch-callout: none;
+}
+
+/* Disable text selection on UI chrome — keep it on actual content */
+button, a, nav, header, footer, label, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* Tight tracking on headings for a more editorial feel */
 h1, h2, h3 {
   letter-spacing: -0.025em;
@@ -94,6 +116,21 @@ textarea:focus {
 
 input:focus {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+/*
+ * Visible focus indicator for keyboard navigation (WCAG 2.1 AA).
+ * Uses :focus-visible so mouse clicks don't show the ring.
+ */
+:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default outline when not using keyboard */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Progress bar shimmer */

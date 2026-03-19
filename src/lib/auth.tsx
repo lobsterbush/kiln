@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { registerPushNotifications, unregisterPushNotifications } from './push-notifications'
 
 interface AuthState {
   user: User | null
@@ -25,12 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+      // Register for push notifications if already signed in (app relaunch)
+      if (session?.user) registerPushNotifications(session.user.id)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
+        // Register on sign-in, handled idempotently
+        if (session?.user) registerPushNotifications(session.user.id)
       }
     )
 
@@ -77,9 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    const uid = user?.id
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
+    if (uid) unregisterPushNotifications(uid)
   }
 
   return (
@@ -89,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')

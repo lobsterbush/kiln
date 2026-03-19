@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import type { ActivityType } from '../lib/types'
+import type { ActivityTemplate } from '../lib/templates'
 import { Users, BookOpen, HelpCircle, BarChart2, Zap, User, UsersRound, Plus, Trash2 } from 'lucide-react'
 
 interface Template {
@@ -148,31 +149,38 @@ const SCENARIO_MULTI_TEMPLATES = [
 export function CreateActivity() {
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const incomingTemplate = (location.state as { template?: ActivityTemplate } | null)?.template
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/instructor')
   }, [user, authLoading, navigate])
 
-  const [type, setType] = useState<ActivityType | null>(null)
-  const [title, setTitle] = useState('')
-  const [prompt, setPrompt] = useState('')
-  const [rounds, setRounds] = useState(3)
-  const [duration, setDuration] = useState(90)
-  const [objectives, setObjectives] = useState('')
-  const [sourceMaterial, setSourceMaterial] = useState('')
-  const [critiquePrompt, setCritiquePrompt] = useState('')
-  const [rebuttalPrompt, setRebuttalPrompt] = useState('')
-  const [explainPrompt, setExplainPrompt] = useState('')
-  const [gapPrompt, setGapPrompt] = useState('')
-  const [autoAdvance, setAutoAdvance] = useState(false)
+  const [type, setType] = useState<ActivityType | null>(incomingTemplate?.type ?? null)
+  const [title, setTitle] = useState(incomingTemplate?.title ?? '')
+  const [prompt, setPrompt] = useState(incomingTemplate?.config.initial_prompt ?? '')
+  const [rounds, setRounds] = useState(incomingTemplate?.config.rounds ?? 3)
+  const [duration, setDuration] = useState(incomingTemplate?.config.round_duration_sec ?? 90)
+  const [objectives, setObjectives] = useState(incomingTemplate?.config.learning_objectives?.join('\n') ?? '')
+  const [sourceMaterial, setSourceMaterial] = useState(incomingTemplate?.config.source_material ?? '')
+  const [critiquePrompt, setCritiquePrompt] = useState(incomingTemplate?.config.critique_prompt ?? '')
+  const [rebuttalPrompt, setRebuttalPrompt] = useState(incomingTemplate?.config.rebuttal_prompt ?? '')
+  const [explainPrompt, setExplainPrompt] = useState(incomingTemplate?.config.explain_prompt ?? '')
+  const [gapPrompt, setGapPrompt] = useState(incomingTemplate?.config.gap_prompt ?? '')
+  const [autoAdvance, setAutoAdvance] = useState(incomingTemplate?.config.auto_advance ?? false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   // Scenario fields
-  const [scenarioContext, setScenarioContext] = useState('')
-  const [studentRole, setStudentRole] = useState('')
-  const [scenarioPersonas, setScenarioPersonas] = useState<ScenarioPersonaForm[]>([{ name: '', role: '', goals: '', personality: '' }])
-  const [maxTurns, setMaxTurns] = useState(8)
-  const [evaluationRubric, setEvaluationRubric] = useState('reasoning\ncommunication\nevidence\nethics')
+  const [scenarioContext, setScenarioContext] = useState(incomingTemplate?.config.scenario_context ?? '')
+  const [studentRole, setStudentRole] = useState(incomingTemplate?.config.student_role ?? '')
+  const [scenarioPersonas, setScenarioPersonas] = useState<ScenarioPersonaForm[]>(
+    incomingTemplate?.config.ai_personas?.map((p) => ({ name: p.name, role: p.role, goals: p.goals, personality: p.personality ?? '' })) ??
+    [{ name: '', role: '', goals: '', personality: '' }]
+  )
+  const [maxTurns, setMaxTurns] = useState(incomingTemplate?.config.max_turns ?? 8)
+  const [evaluationRubric, setEvaluationRubric] = useState(
+    incomingTemplate?.config.evaluation_rubric?.join('\n') ?? 'reasoning\ncommunication\nevidence\nethics'
+  )
 
   if (authLoading) {
     return <div className="flex justify-center py-20 text-slate-500">Loading...</div>

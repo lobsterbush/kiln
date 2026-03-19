@@ -22,24 +22,24 @@ export function ProjectorView() {
     if (!authLoading && !user) navigate('/instructor')
   }, [user, authLoading, navigate])
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!id || !user) return
-    loadData()
-  }, [id, user])
-
-  async function loadData() {
     const [sessResult, partsResult, respsResult] = await Promise.all([
       supabase.from('sessions').select('*, activity:activities(*)')
-        .eq('id', id!).eq('instructor_id', user!.id).single(),
-      supabase.from('participants').select('*').eq('session_id', id!),
-      supabase.from('responses').select('*').eq('session_id', id!),
+        .eq('id', id).eq('instructor_id', user.id).single(),
+      supabase.from('participants').select('*').eq('session_id', id),
+      supabase.from('responses').select('*').eq('session_id', id),
     ])
     if (!sessResult.data) { navigate('/instructor'); return }
     setSession(sessResult.data)
     setActivity(sessResult.data.activity as Activity)
     if (partsResult.data) setParticipants(partsResult.data)
     if (respsResult.data) setResponses(respsResult.data)
-  }
+  }, [id, user, navigate])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   useEffect(() => {
     if (!id) return

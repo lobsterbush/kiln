@@ -3,6 +3,7 @@
 // for a session and generates 2–3 sentences of personalised formative feedback.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callClaude } from '../_shared/anthropic.ts'
 
 const ALLOWED_ORIGINS = [
   'https://usekiln.org',
@@ -83,6 +84,7 @@ Deno.serve(async (req) => {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const activity = session.activity as any
     const config = activity?.config ?? {}
     const initialPrompt: string = config.initial_prompt ?? ''
@@ -158,21 +160,12 @@ Return this exact JSON (no other text):
 {"participant_id": "${participantId}", "name": "${name}", "text": "2-3 sentence feedback"}`
 
         try {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': anthropicKey,
-              'anthropic-version': '2023-06-01',
-            },
-            body: JSON.stringify({
-              model: 'claude-3-5-sonnet-20241022',
-              max_tokens: 300,
-              system: systemPrompt,
-              messages: [{ role: 'user', content: userMessage }],
-            }),
+          const data = await callClaude(anthropicKey, {
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 300,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userMessage }],
           })
-          const data = await res.json()
           const raw: string = data.content?.[0]?.text ?? '{}'
           try {
             return JSON.parse(raw)
@@ -190,8 +183,8 @@ Return this exact JSON (no other text):
     // can access it from the student-facing /session/:id/summary page.
     await Promise.all(
       feedbackResults
-        .filter((f: any) => f?.participant_id && f?.text)
-        .map((f: any) =>
+        .filter((f: { participant_id?: string; text?: string }) => f?.participant_id && f?.text)
+        .map((f: { participant_id: string; text: string }) =>
           supabase
             .from('participants')
             .update({ ai_feedback: f.text })

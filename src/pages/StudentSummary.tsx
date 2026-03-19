@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Loader2, MessageSquare, Sparkles, User, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -50,18 +50,14 @@ interface SummaryData {
 
 export function StudentSummary() {
   const { id } = useParams<{ id: string }>()
-  const studentToken = getStudentToken()
+  const [studentToken] = useState(() => getStudentToken())
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [scenarioMessages, setScenarioMessages] = useState<ScenarioMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!id) return
-    load()
-  }, [id])
-
-  async function load() {
     // Token must exist and belong to this session
     if (!studentToken || studentToken.session_id !== id) {
       setError('wrong-device')
@@ -98,7 +94,11 @@ export function StudentSummary() {
     }
 
     setLoading(false)
-  }
+  }, [id, studentToken])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   if (loading) {
     return (

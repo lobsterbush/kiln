@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Send, Loader2, Users, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getStudentToken } from '../../lib/utils'
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
-  const studentToken = getStudentToken()
+  const [studentToken] = useState(() => getStudentToken())
   const config = activity.config
   const maxTurns = config.max_turns ?? 8
   const personas = config.ai_personas ?? []
@@ -37,25 +37,27 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   // Load existing transcript on mount (handles page refresh mid-scenario).
   // Uses the SECURITY DEFINER RPC — direct SELECT on scenario_messages is blocked
   // by RLS for the anon role (no student SELECT policy exists).
-  useEffect(() => {
+  const loadTranscript = useCallback(async () => {
     if (!studentToken) { setLoadingHistory(false); return }
-    supabase
+    const { data, error } = await supabase
       .rpc('get_scenario_transcript', {
         p_participant_id: studentToken.participant_id,
         p_token: studentToken.token,
         p_session_id: sessionId,
       })
-      .then(({ data, error }) => {
-        if (!error && data?.messages?.length > 0) {
-          const msgs = data.messages as Message[]
-          setMessages(msgs)
-          const studentTurnsDone = msgs.filter((m) => m.speaker_type === 'student').length
-          setStudentTurns(studentTurnsDone)
-          if (studentTurnsDone >= maxTurns) setCompleted(true)
-        }
-        setLoadingHistory(false)
-      })
-  }, [sessionId])
+    if (!error && data?.messages?.length > 0) {
+      const msgs = data.messages as Message[]
+      setMessages(msgs)
+      const studentTurnsDone = msgs.filter((m) => m.speaker_type === 'student').length
+      setStudentTurns(studentTurnsDone)
+      if (studentTurnsDone >= maxTurns) setCompleted(true)
+    }
+    setLoadingHistory(false)
+  }, [sessionId, maxTurns, studentToken])
+
+  useEffect(() => {
+    loadTranscript()
+  }, [loadTranscript])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -104,7 +106,7 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
       setMessages((prev) => [...prev, aiMsg])
       setStudentTurns(data.student_turns_used ?? studentTurns + 1)
       if (data.completed) setCompleted(true)
-    } catch (err) {
+    } catch {
       setError('Could not send message. Please try again.')
       // The edge function saves the student message BEFORE calling Claude, so
       // the DB may have the message even though the AI response failed.
