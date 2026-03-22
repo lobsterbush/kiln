@@ -31,7 +31,6 @@ export function Home() {
           <div className="flex-1 flex flex-col gap-7 animate-fade-in lg:py-20">
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-kiln-700 bg-white border border-kiln-200 shadow-sm px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
-                <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 inline-block"></span>
                 AI-resilient active learning
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.0] mb-5">
@@ -40,8 +39,9 @@ export function Home() {
               </h1>
               <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
                 Every activity is designed so that honest thinking is faster than any AI shortcut.
-                Time pressure, peer dependency, and personalised context make each response
-                unique and irreproducible. Free for all instructors.
+                Timed rounds (30–120 s), peer dependency, and personalised context make each response
+                unique and irreproducible. Students join with a code — no accounts, no downloads.
+                Free for all instructors.
               </p>
             </div>
 
@@ -125,7 +125,6 @@ export function Home() {
       <section id="free" className="w-full py-14 sm:py-20 bg-white border-b border-slate-100">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
             100% free
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 leading-tight">Kiln is free for every instructor.</h2>
@@ -133,11 +132,12 @@ export function Home() {
             No credit card. No usage caps. No premium tier. Every activity type, every feature, every student — free.
             We built Kiln to improve teaching, not to monetise it.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto">
             {[
               { icon: '♾️', label: 'Unlimited sessions' },
               { icon: '👥', label: 'Unlimited students' },
               { icon: '🧪', label: 'All six activity types' },
+              { icon: '🔓', label: 'No student accounts' },
             ].map((f) => (
               <div key={f.label} className="flex flex-col items-center gap-2 bg-slate-50 rounded-xl py-4 px-3">
                 <span className="text-2xl">{f.icon}</span>
@@ -178,7 +178,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student's moves, creating a unique and irreproducible exchange.
                 </p>
-                <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: every conversation diverges immediately — no two students face the same exchange, so pre-generated answers are useless.</p>
+                <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds and diverging conversations mean no two students face the same exchange — pre-generated answers are useless.</p>
               </div>
               <div className="flex flex-col divide-y divide-rose-100/50 flex-1">
                 {[
@@ -210,7 +210,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   A richer simulation: each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn, making each conversation genuinely multi-party.
                 </p>
-                <p className="text-xs text-indigo-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: multi-party dynamics and branching turns make each session unpredictable and impossible to outsource.</p>
+                <p className="text-xs text-indigo-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds, multi-party dynamics, and branching turns make each session unpredictable and impossible to outsource.</p>
               </div>
               <div className="flex flex-col divide-y divide-indigo-100/50 flex-1">
                 {[
@@ -242,7 +242,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Argumentation has three moves: construct a claim, locate the weakness in opposing reasoning, defend under scrutiny. This activity sequences all three in a single session.
                 </p>
-                <p className="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: round 2 depends on a peer's argument that didn't exist until the session started. Round 3 is a rebuttal to a critique of your own words.</p>
+                <p className="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds plus peer dependency — round 2 critiques a peer's argument that didn't exist until the session started; round 3 rebuts a critique of your own words.</p>
               </div>
               <div className="flex flex-col divide-y divide-blue-100/50 flex-1">
                 {[
@@ -274,7 +274,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   The Socratic method at scale. Claude reads each student's response and generates a follow-up that targets the specific gap in <em>their</em> reasoning — not a generic prompt, but the question their own argument provoked.
                 </p>
-                <p className="text-xs text-purple-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: follow-ups are generated from your own prior response — copying it into a separate tool is slower than just thinking.</p>
+                <p className="text-xs text-purple-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds and personalised follow-ups generated from your own prior response — copying it into a separate tool is slower than just thinking.</p>
               </div>
               <div className="flex flex-col divide-y divide-purple-100/50 flex-1">
                 {[
@@ -306,7 +306,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Metacognitive awareness and peer-mediated explanation in one activity. Students first articulate what they don't understand — harder than it looks — then explain a different classmate's confusion in plain terms. Teaching something reorganises what the teacher knows.
                 </p>
-                <p className="text-xs text-teal-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: naming your own confusion requires genuine metacognition. Explaining a peer's specific confusion can't be pre-generated.</p>
+                <p className="text-xs text-teal-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds enforce real-time thinking. Naming your own confusion requires genuine metacognition; explaining a peer's specific confusion can't be pre-generated.</p>
               </div>
               <div className="flex flex-col divide-y divide-teal-100/50 flex-1">
                 {[
@@ -331,13 +331,13 @@ export function Home() {
                   <div className="p-2 bg-white rounded-xl shadow-sm"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Evidence Analysis</h3>
-                    <p className="text-xs text-amber-500 font-medium">2 rounds · highest AI resistance</p>
+                    <p className="text-xs text-amber-500 font-medium">2 rounds · mixed media · highest AI resistance</p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Reveal a dataset, quotation, or case the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading.
+                  Reveal an image, dataset, document, or quotation the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading.
                 </p>
-                <p className="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Highest AI-resilience: evidence doesn't exist until it appears, and round 2 depends on a peer's interpretation that was just written.</p>
+                <p className="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Highest AI-resilience: timed rounds, evidence that doesn't exist until it appears, and round 2 depends on a peer's interpretation that was just written.</p>
               </div>
               <div className="flex flex-col divide-y divide-amber-100/50 flex-1">
                 {[

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Timer } from '../shared/Timer'
+import { MediaDisplay } from '../shared/MediaDisplay'
 import { cn } from '../../lib/utils'
+import type { MediaType } from '../../lib/types'
 
 interface ResponsePanelProps {
   prompt: string
@@ -9,6 +11,8 @@ interface ResponsePanelProps {
   durationSec: number
   onSubmit: (content: string, timeTakenMs: number) => Promise<void>
   disabled?: boolean
+  mediaUrl?: string
+  mediaType?: MediaType
 }
 
 export function ResponsePanel({
@@ -17,6 +21,8 @@ export function ResponsePanel({
   durationSec,
   onSubmit,
   disabled = false,
+  mediaUrl,
+  mediaType,
 }: ResponsePanelProps) {
   const [content, setContent] = useState('')
   const [locked, setLocked] = useState(false)
@@ -72,7 +78,8 @@ export function ResponsePanel({
       />
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-slide-up overflow-hidden">
-        <div className="px-5 pt-5 pb-4 border-b border-slate-100 bg-slate-50/60">
+        <div className="px-5 pt-5 pb-4 border-b border-slate-100 bg-slate-50/60 flex flex-col gap-3">
+          {mediaUrl && mediaType && <MediaDisplay url={mediaUrl} type={mediaType} />}
           <p className="text-base sm:text-lg font-semibold text-slate-800 leading-snug">{prompt}</p>
         </div>
 

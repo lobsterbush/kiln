@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import type { Activity } from '../lib/types'
+import type { Activity, MediaType } from '../lib/types'
+import { MediaUpload } from '../components/shared/MediaUpload'
 
 export function EditActivity() {
   const { id } = useParams<{ id: string }>()
@@ -21,6 +22,8 @@ export function EditActivity() {
   const [gapPrompt, setGapPrompt] = useState('')
   const [sourceMaterial, setSourceMaterial] = useState('')
   const [autoAdvance, setAutoAdvance] = useState(false)
+  const [mediaUrl, setMediaUrl] = useState<string | undefined>()
+  const [mediaType, setMediaType] = useState<MediaType | undefined>()
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -49,6 +52,8 @@ export function EditActivity() {
       setGapPrompt(data.config.gap_prompt ?? '')
       setSourceMaterial(data.config.source_material ?? '')
       setAutoAdvance(data.config.auto_advance ?? false)
+      setMediaUrl(data.config.media_url)
+      setMediaType(data.config.media_type)
     }
   }, [id, user])
 
@@ -89,6 +94,7 @@ export function EditActivity() {
             source_material: sourceMaterial.trim() || null,
           }),
           auto_advance: autoAdvance,
+          ...(mediaUrl ? { media_url: mediaUrl, media_type: mediaType } : { media_url: null, media_type: null }),
         },
       })
       .eq('id', id)
@@ -329,6 +335,16 @@ export function EditActivity() {
               </button>
             </div>
           </>
+        )}
+
+        {/* Media upload */}
+        {user && (
+          <MediaUpload
+            instructorId={user.id}
+            mediaUrl={mediaUrl}
+            mediaType={mediaType}
+            onChange={(url, mt) => { setMediaUrl(url); setMediaType(mt) }}
+          />
         )}
 
         {saveError && (

@@ -11,6 +11,8 @@ export interface ScenarioPersona {
   personality?: string
 }
 
+export type MediaType = 'image' | 'pdf'
+
 export interface ActivityConfig {
   rounds: number
   round_duration_sec: number
@@ -18,6 +20,8 @@ export interface ActivityConfig {
   learning_objectives: string[]
   material_ids?: string[]
   source_material?: string
+  media_url?: string
+  media_type?: MediaType
   critique_prompt?: string | null
   rebuttal_prompt?: string | null
   explain_prompt?: string | null

@@ -636,7 +636,7 @@ export function StudentSession() {
       )
     }
 
-    // Default: initial response
+    // Default: initial response (round 1 — show attached media if any)
     return (
       <>
         {disconnectedBanner}
@@ -645,6 +645,8 @@ export function StudentSession() {
           serverTimestamp={roundEvent.server_timestamp}
           durationSec={roundEvent.duration_sec}
           onSubmit={handleSubmitResponse}
+          mediaUrl={roundEvent.round === 1 ? activity.config.media_url : undefined}
+          mediaType={roundEvent.round === 1 ? activity.config.media_type : undefined}
         />
       </>
     )

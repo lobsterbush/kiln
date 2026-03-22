@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import type { ActivityType } from '../lib/types'
+import type { ActivityType, MediaType } from '../lib/types'
 import type { ActivityTemplate } from '../lib/templates'
 import { Users, BookOpen, HelpCircle, BarChart2, Zap, User, UsersRound, Plus, Trash2 } from 'lucide-react'
+import { MediaUpload } from '../components/shared/MediaUpload'
 
 interface Template {
   label: string
@@ -69,12 +70,17 @@ const EVIDENCE_ANALYSIS_TEMPLATES: Template[] = [
   {
     label: 'Interpret a statistic',
     title: 'Data Interpretation',
-    prompt: '(Paste your data or statistic here before starting the session.) What does this figure tell us? What does it not tell us?',
+    prompt: 'What does this figure tell us? What does it not tell us? (Attach an image, chart, or paste data before starting the session.)',
   },
   {
     label: 'Analyse a quote',
     title: 'Source Analysis',
-    prompt: '(Paste your quote or excerpt here before starting the session.) What is the author claiming? What evidence supports or undermines this claim?',
+    prompt: 'What is the author claiming? What evidence supports or undermines this claim? (Paste your quote or attach a document before starting the session.)',
+  },
+  {
+    label: 'Analyse an image',
+    title: 'Image Analysis',
+    prompt: 'Examine the image carefully. What does it show? What claim or argument could you build from this evidence alone?',
   },
 ]
 
@@ -181,6 +187,8 @@ export function CreateActivity() {
   const [evaluationRubric, setEvaluationRubric] = useState(
     incomingTemplate?.config.evaluation_rubric?.join('\n') ?? 'reasoning\ncommunication\nevidence\nethics'
   )
+  const [mediaUrl, setMediaUrl] = useState<string | undefined>(incomingTemplate?.config.media_url)
+  const [mediaType, setMediaType] = useState<MediaType | undefined>(incomingTemplate?.config.media_type)
 
   if (authLoading) {
     return <div className="flex justify-center py-20 text-slate-500">Loading...</div>
@@ -218,6 +226,7 @@ export function CreateActivity() {
           max_turns: maxTurns,
           evaluation_rubric: evaluationRubric.split('\n').map((s) => s.trim()).filter(Boolean),
         }),
+        ...(mediaUrl && { media_url: mediaUrl, media_type: mediaType }),
       },
     })
 
@@ -738,6 +747,16 @@ export function CreateActivity() {
           </button>
         </div>
         </>)}
+
+        {/* Media upload — available for all activity types */}
+        {user && (
+          <MediaUpload
+            instructorId={user.id}
+            mediaUrl={mediaUrl}
+            mediaType={mediaType}
+            onChange={(url, mt) => { setMediaUrl(url); setMediaType(mt) }}
+          />
+        )}
 
         {saveError && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{saveError}</p>
