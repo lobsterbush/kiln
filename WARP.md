@@ -38,7 +38,7 @@ AI-resistant active learning platform for higher education classrooms.
 - AI functions use `_shared/anthropic.ts` retry helper; LTI functions use `_shared/lti.ts` (JWT, CORS)
 
 ## Architecture Notes
-- Pages are code-split via `React.lazy()` (16 lazy chunks)
+- Pages are code-split via `React.lazy()` (14 lazy chunks)
 - `ErrorBoundary` wraps both `<Layout>` outlet and standalone `ProjectorView`
 - Student auth uses participant tokens (localStorage), not Supabase Auth
 - Realtime: broadcast channels for round events, postgres_changes for responses/participants
@@ -60,6 +60,7 @@ AI-resistant active learning platform for higher education classrooms.
 - Canvas LTI 1.3: OIDC login → JWT launch → grade passback via edge functions; `src/lib/lti.ts` client types
 - i18n: `src/lib/i18n-constants.ts` + `src/lib/i18n.tsx` — English, Korean (한국어), Japanese (日本語); language switcher in footer
 - Usage limits: `src/lib/usage-limits.ts` — free tier (30 students/session, 50 sessions/semester); warning banners + session creation block
+- Landing page: DemoPlayer carousel (`src/components/marketing/DemoPlayer.tsx`) showing all six activity types
 
 ## Migrations (all applied)
 - 001–011: schema, RLS, indexes, RPC auth, activity types, scenarios, feedback

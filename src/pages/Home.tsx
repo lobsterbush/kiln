@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, MessageCircle, Network, Sparkles, Play } from 'lucide-react'
+import { ArrowRight, Users, BookOpen, HelpCircle, BarChart2, Check, MessageCircle, Network, Sparkles, Play, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { DemoPlayer } from '../components/marketing/DemoPlayer'
 
@@ -32,16 +32,16 @@ export function Home() {
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-kiln-700 bg-white border border-kiln-200 shadow-sm px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 inline-block"></span>
-                AI-native tools for teaching
+                AI-resilient active learning
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.0] mb-5">
-                AI-native tools<br />
+                AI-resilient tools<br />
                 <span className="text-kiln-500 italic">for teaching.</span>
               </h1>
               <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
-                Kiln puts AI to work in your classroom — as Socratic interlocutor,
-                peer reviewer, negotiating counterpart, hostile stakeholder.
-                Every student responds to content unique to them.
+                Every activity is designed so that honest thinking is faster than any AI shortcut.
+                Time pressure, peer dependency, and personalised context make each response
+                unique and irreproducible. Free for all instructors.
               </p>
             </div>
 
@@ -121,34 +121,27 @@ export function Home() {
         </div>
       </section>
 
-      {/* ═══ SOCIAL PROOF ═══ */}
-      <section id="testimonials" className="w-full py-14 sm:py-20 bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest text-center mb-10">What instructors are saying</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* ═══ FREE FOR EVERYONE ═══ */}
+      <section id="free" className="w-full py-14 sm:py-20 bg-white border-b border-slate-100">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+            100% free
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 leading-tight">Kiln is free for every instructor.</h2>
+          <p className="text-slate-500 max-w-lg mx-auto mb-8">
+            No credit card. No usage caps. No premium tier. Every activity type, every feature, every student — free.
+            We built Kiln to improve teaching, not to monetise it.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
             {[
-              {
-                quote: 'I used this in my seminar last week and every single student was writing — not one person checked out. That never happens.',
-                name: 'Political Science Instructor',
-                school: 'Monash University',
-              },
-              {
-                quote: 'The peer critique activity replaced my discussion section. Students arrived to class having already argued, been critiqued, and defended their position.',
-                name: 'Law Lecturer',
-                school: 'Partner Institution',
-              },
-              {
-                quote: 'My students told me the AI scenario felt more real than any role-play I\'ve run in 15 years of teaching negotiation. They were genuinely stressed.',
-                name: 'Business School Faculty',
-                school: 'Partner Institution',
-              },
-            ].map((t, i) => (
-              <div key={i} className="flex flex-col gap-4">
-                <p className="text-sm text-slate-600 leading-relaxed italic flex-1">"{t.quote}"</p>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">{t.name}</p>
-                  <p className="text-xs text-slate-400">{t.school}</p>
-                </div>
+              { icon: '♾️', label: 'Unlimited sessions' },
+              { icon: '👥', label: 'Unlimited students' },
+              { icon: '🧪', label: 'All six activity types' },
+            ].map((f) => (
+              <div key={f.label} className="flex flex-col items-center gap-2 bg-slate-50 rounded-xl py-4 px-3">
+                <span className="text-2xl">{f.icon}</span>
+                <span className="text-sm font-semibold text-slate-700">{f.label}</span>
               </div>
             ))}
           </div>
@@ -161,7 +154,7 @@ export function Home() {
           <div className="mb-12">
             <p className="text-xs font-bold text-kiln-500 uppercase tracking-widest mb-3">Activity types</p>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Each activity targets<br className="hidden sm:block" /> a different cognitive mechanism.</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Six activity types.<br className="hidden sm:block" /> Each one AI-resilient by design.</h2>
               <Link
                 to="/pedagogy"
                 className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-semibold transition-colors shrink-0"
@@ -185,6 +178,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student's moves, creating a unique and irreproducible exchange.
                 </p>
+                <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: every conversation diverges immediately — no two students face the same exchange, so pre-generated answers are useless.</p>
               </div>
               <div className="flex flex-col divide-y divide-rose-100/50 flex-1">
                 {[
@@ -216,6 +210,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   A richer simulation: each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn, making each conversation genuinely multi-party.
                 </p>
+                <p className="text-xs text-indigo-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: multi-party dynamics and branching turns make each session unpredictable and impossible to outsource.</p>
               </div>
               <div className="flex flex-col divide-y divide-indigo-100/50 flex-1">
                 {[
@@ -247,6 +242,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Argumentation has three moves: construct a claim, locate the weakness in opposing reasoning, defend under scrutiny. This activity sequences all three in a single session.
                 </p>
+                <p className="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: round 2 depends on a peer's argument that didn't exist until the session started. Round 3 is a rebuttal to a critique of your own words.</p>
               </div>
               <div className="flex flex-col divide-y divide-blue-100/50 flex-1">
                 {[
@@ -278,6 +274,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   The Socratic method at scale. Claude reads each student's response and generates a follow-up that targets the specific gap in <em>their</em> reasoning — not a generic prompt, but the question their own argument provoked.
                 </p>
+                <p className="text-xs text-purple-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: follow-ups are generated from your own prior response — copying it into a separate tool is slower than just thinking.</p>
               </div>
               <div className="flex flex-col divide-y divide-purple-100/50 flex-1">
                 {[
@@ -309,6 +306,7 @@ export function Home() {
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Metacognitive awareness and peer-mediated explanation in one activity. Students first articulate what they don't understand — harder than it looks — then explain a different classmate's confusion in plain terms. Teaching something reorganises what the teacher knows.
                 </p>
+                <p className="text-xs text-teal-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: naming your own confusion requires genuine metacognition. Explaining a peer's specific confusion can't be pre-generated.</p>
               </div>
               <div className="flex flex-col divide-y divide-teal-100/50 flex-1">
                 {[
@@ -337,8 +335,9 @@ export function Home() {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Reveal a dataset, quotation, or case the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading. The highest AI-resistance activity: the evidence doesn't exist until the moment it appears.
+                  Reveal a dataset, quotation, or case the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading.
                 </p>
+                <p className="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Highest AI-resilience: evidence doesn't exist until it appears, and round 2 depends on a peer's interpretation that was just written.</p>
               </div>
               <div className="flex flex-col divide-y divide-amber-100/50 flex-1">
                 {[
@@ -360,15 +359,11 @@ export function Home() {
         </div>
       </section>
 
-      {/* ═══ FREE BETA ═══ */}
-      <section id="pricing" className="w-full py-16 sm:py-24 bg-slate-50">
+      {/* ═══ GET STARTED ═══ */}
+      <section id="get-started" className="w-full py-16 sm:py-24 bg-slate-50">
         <div className="max-w-2xl mx-auto px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-kiln-500 animate-pulse inline-block"></span>
-            Open Beta
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 leading-tight">Free during beta.<br />No credit card. No limits.</h2>
-          <p className="text-slate-500 mb-10 max-w-md mx-auto">Every feature is available to every instructor while we're in beta. Help us improve — your feedback shapes what gets built.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 leading-tight">Start using Kiln today.</h2>
+          <p className="text-slate-500 mb-10 max-w-md mx-auto">Create your first AI-resilient activity in under a minute. Your feedback shapes what gets built next.</p>
           <div className="bg-white rounded-2xl border-2 border-kiln-200 shadow-sm p-7 mb-8">
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-8">
               {[
