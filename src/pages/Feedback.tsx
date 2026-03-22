@@ -60,7 +60,7 @@ export function Feedback() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Send feedback</h1>
-          <p className="text-sm text-slate-400">Kiln is in open beta — your input shapes the roadmap.</p>
+          <p className="text-sm text-slate-400">Your input shapes the roadmap.</p>
         </div>
       </div>
 
