@@ -481,7 +481,7 @@ export function Results() {
               </ul>
             </div>
             <div>
-              <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">Gaps & misconceptions</p>
+              <p className="text-xs font-bold text-cyan-600 uppercase tracking-wider mb-2">Gaps & misconceptions</p>
               <ul className="flex flex-col gap-1.5">
                 {debrief.gaps.map((g, i) => (
                   <li key={i} className="text-sm text-slate-700 flex gap-2">

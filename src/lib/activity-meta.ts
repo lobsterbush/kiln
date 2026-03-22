@@ -81,11 +81,11 @@ export const ACTIVITY_META: Record<ActivityType, ActivityMeta> = {
       { round: 2, label: 'Find the gap', emoji: '🧩', text: "Each student receives a peer's interpretation and must identify its biggest inferential gap or unsupported leap." },
     ],
     color: {
-      bg: 'bg-amber-50',
-      text: 'text-amber-600',
-      border: 'border-amber-200',
-      badge: 'bg-amber-100 text-amber-700',
-      accent: 'from-amber-500 to-amber-600',
+      bg: 'bg-cyan-50',
+      text: 'text-cyan-600',
+      border: 'border-cyan-200',
+      badge: 'bg-cyan-100 text-cyan-700',
+      accent: 'from-cyan-500 to-cyan-600',
     },
   },
 

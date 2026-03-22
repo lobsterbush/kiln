@@ -382,7 +382,7 @@ export function StudentSession() {
   const disconnectedBanner = (disconnected || queuedCount > 0 || flushedBanner) && (
     <div role="status" aria-live="polite" className="mb-4 flex flex-col gap-2">
       {disconnected && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+        <div className="flex items-center gap-2 px-4 py-2 bg-cyan-50 border border-cyan-200 rounded-xl text-sm text-cyan-700">
           <WifiOff className="w-4 h-4 shrink-0" />
           <span>Connection lost — reconnecting…</span>
         </div>
@@ -551,8 +551,8 @@ export function StudentSession() {
     // Peer-assignment types: waiting for the peer:assigned broadcast to arrive
     const isPeerAssignmentType = activity.type === 'peer_critique' || activity.type === 'peer_clarification' || activity.type === 'evidence_analysis'
     if (isPeerAssignmentType && roundEvent.round > 1 && !peerResponse) {
-      const spinColor = activity.type === 'peer_clarification' ? 'bg-teal-50' : activity.type === 'evidence_analysis' ? 'bg-amber-50' : 'bg-blue-50'
-      const iconColor = activity.type === 'peer_clarification' ? 'text-teal-500' : activity.type === 'evidence_analysis' ? 'text-amber-500' : 'text-blue-500'
+      const spinColor = activity.type === 'peer_clarification' ? 'bg-teal-50' : activity.type === 'evidence_analysis' ? 'bg-cyan-50' : 'bg-blue-50'
+      const iconColor = activity.type === 'peer_clarification' ? 'text-teal-500' : activity.type === 'evidence_analysis' ? 'text-cyan-500' : 'text-blue-500'
       return (
         <>
           {disconnectedBanner}

@@ -17,7 +17,7 @@ const ACTIVITY_COLORS: Record<string, string> = {
   peer_critique: 'bg-blue-100 text-blue-700',
   socratic_chain: 'bg-purple-100 text-purple-700',
   peer_clarification: 'bg-teal-100 text-teal-700',
-  evidence_analysis: 'bg-amber-100 text-amber-700',
+  evidence_analysis: 'bg-cyan-100 text-cyan-700',
 }
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -111,7 +111,7 @@ export function StudentSummary() {
   if (error === 'wrong-device') {
     return (
       <div className="max-w-md mx-auto text-center py-20 px-4 animate-fade-in">
-        <div className="p-4 bg-amber-50 rounded-2xl w-fit mx-auto mb-5">
+        <div className="p-4 bg-cyan-50 rounded-2xl w-fit mx-auto mb-5">
           <MessageSquare className="w-8 h-8 text-amber-400" />
         </div>
         <h2 className="text-xl font-bold text-slate-900 mb-2">Open on your original device</h2>

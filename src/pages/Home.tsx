@@ -38,10 +38,8 @@ export function Home() {
                 <span className="text-kiln-500 italic">for teaching.</span>
               </h1>
               <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-md">
-                Every activity is designed so that honest thinking is faster than any AI shortcut.
-                Timed rounds (30–120 s), peer dependency, and personalised context make each response
-                unique and irreproducible. Students join with a code — no accounts, no downloads.
-                Free for all instructors.
+                Timed rounds, peer dependency, and personalised context make honest thinking
+                faster than any AI shortcut. Students join with a code — no accounts, no downloads. Free.
               </p>
             </div>
 
@@ -106,7 +104,7 @@ export function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
-              { step: '01', title: 'Create an activity', body: 'Pick one of six activity types, write a prompt, set a timer. Templates included.', note: 'Takes under a minute.' },
+              { step: '01', title: 'Create an activity', body: 'Pick one of six activity types, write a prompt or attach an image, set a timer. Templates included.', note: 'Takes under a minute.' },
               { step: '02', title: 'Students join with a code', body: 'Share a 6-character code. Students open it on any phone, tablet, or laptop — no account needed.', note: 'Works on any device.' },
               { step: '03', title: 'Watch it happen live', body: 'Responses appear in real time. See who submitted and what they wrote before the class ends.', note: 'Export CSV when done.' },
             ].map((s) => (
@@ -164,70 +162,6 @@ export function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Scenario Solo */}
-            <div className="flex flex-col bg-rose-50 rounded-2xl overflow-hidden">
-              <div className="p-6 pb-5 border-b border-rose-100/60">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-white rounded-xl shadow-sm"><MessageCircle className="w-5 h-5 text-rose-600" /></div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">Scenario Solo</h3>
-                    <p className="text-xs text-rose-500 font-medium">Open-ended turns · one AI persona</p>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student's moves, creating a unique and irreproducible exchange.
-                </p>
-                <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds and diverging conversations mean no two students face the same exchange — pre-generated answers are useless.</p>
-              </div>
-              <div className="flex flex-col divide-y divide-rose-100/50 flex-1">
-                {[
-                  { round: 1, label: 'Enter the scenario', emoji: '🎭', text: 'The instructor sets context: your role, the stakes, who you are talking to. Students begin when the session opens.' },
-                  { round: 2, label: 'Exchange turns with an AI persona', emoji: '🤖', text: 'The AI responds in character — as foreign minister, employer, hostile journalist, or any persona the instructor defines. Each student’s conversation diverges immediately.' },
-                  { round: 3, label: 'Instructor evaluates with AI', emoji: '📋', text: 'One click runs a rubric evaluation across all transcripts. Scores and feedback per student, ready to review or export.' },
-                ].map((r) => (
-                  <div key={r.round} className="flex items-start gap-4 p-5">
-                    <span className="text-xs font-mono font-bold text-rose-400 bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
-                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Scenario Multi */}
-            <div className="flex flex-col bg-indigo-50 rounded-2xl overflow-hidden">
-              <div className="p-6 pb-5 border-b border-indigo-100/60">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-white rounded-xl shadow-sm"><Network className="w-5 h-5 text-indigo-600" /></div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">Scenario Multi</h3>
-                    <p className="text-xs text-indigo-500 font-medium">Open-ended turns · multiple AI personas</p>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  A richer simulation: each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn, making each conversation genuinely multi-party.
-                </p>
-                <p className="text-xs text-indigo-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds, multi-party dynamics, and branching turns make each session unpredictable and impossible to outsource.</p>
-              </div>
-              <div className="flex flex-col divide-y divide-indigo-100/50 flex-1">
-                {[
-                  { round: 1, label: 'Set the stage', emoji: '🏛️', text: 'Instructor defines the scenario, the student’s role, and a cast of personas — each with a name, position, and disposition.' },
-                  { round: 2, label: 'Engage a cast of stakeholders', emoji: '🗣️', text: 'Each student message is routed to the most contextually appropriate persona. The cast maintains consistent positions; the conversation is coherent, not random.' },
-                  { round: 3, label: 'Evaluate performance across the room', emoji: '📊', text: 'The same one-click AI evaluation runs across all transcripts, scoring against the same rubric so comparisons are fair.' },
-                ].map((r) => (
-                  <div key={r.round} className="flex items-start gap-4 p-5">
-                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
-                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             {/* Peer Critique */}
             <div className="flex flex-col bg-blue-50 rounded-2xl overflow-hidden">
@@ -324,28 +258,92 @@ export function Home() {
               </div>
             </div>
 
-            {/* Evidence Analysis */}
-            <div className="flex flex-col bg-amber-50 rounded-2xl overflow-hidden">
-              <div className="p-6 pb-5 border-b border-amber-100/60">
+            {/* Scenario Solo */}
+            <div className="flex flex-col bg-rose-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-rose-100/60">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-white rounded-xl shadow-sm"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><MessageCircle className="w-5 h-5 text-rose-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Scenario Solo</h3>
+                    <p className="text-xs text-rose-500 font-medium">Open-ended turns · one AI persona</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student's moves, creating a unique and irreproducible exchange.
+                </p>
+                <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds and diverging conversations mean no two students face the same exchange — pre-generated answers are useless.</p>
+              </div>
+              <div className="flex flex-col divide-y divide-rose-100/50 flex-1">
+                {[
+                  { round: 1, label: 'Enter the scenario', emoji: '🎭', text: 'The instructor sets context: your role, the stakes, who you are talking to. Students begin when the session opens.' },
+                  { round: 2, label: 'Exchange turns with an AI persona', emoji: '🤖', text: 'The AI responds in character — as foreign minister, employer, hostile journalist, or any persona the instructor defines. Each student’s conversation diverges immediately.' },
+                  { round: 3, label: 'Instructor evaluates with AI', emoji: '📋', text: 'One click runs a rubric evaluation across all transcripts. Scores and feedback per student, ready to review or export.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-rose-400 bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Scenario Multi */}
+            <div className="flex flex-col bg-indigo-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-indigo-100/60">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><Network className="w-5 h-5 text-indigo-600" /></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Scenario Multi</h3>
+                    <p className="text-xs text-indigo-500 font-medium">Open-ended turns · multiple AI personas</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  A richer simulation: each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn, making each conversation genuinely multi-party.
+                </p>
+                <p className="text-xs text-indigo-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> AI-resilient: timed rounds, multi-party dynamics, and branching turns make each session unpredictable and impossible to outsource.</p>
+              </div>
+              <div className="flex flex-col divide-y divide-indigo-100/50 flex-1">
+                {[
+                  { round: 1, label: 'Set the stage', emoji: '🏛️', text: 'Instructor defines the scenario, the student’s role, and a cast of personas — each with a name, position, and disposition.' },
+                  { round: 2, label: 'Engage a cast of stakeholders', emoji: '🗣️', text: 'Each student message is routed to the most contextually appropriate persona. The cast maintains consistent positions; the conversation is coherent, not random.' },
+                  { round: 3, label: 'Evaluate performance across the room', emoji: '📊', text: 'The same one-click AI evaluation runs across all transcripts, scoring against the same rubric so comparisons are fair.' },
+                ].map((r) => (
+                  <div key={r.round} className="flex items-start gap-4 p-5">
+                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Evidence Analysis */}
+            <div className="flex flex-col bg-cyan-50 rounded-2xl overflow-hidden">
+              <div className="p-6 pb-5 border-b border-cyan-100/60">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm"><BarChart2 className="w-5 h-5 text-cyan-600" /></div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Evidence Analysis</h3>
-                    <p className="text-xs text-amber-500 font-medium">2 rounds · mixed media · highest AI resistance</p>
+                    <p className="text-xs text-cyan-500 font-medium">2 rounds · mixed media · highest AI resistance</p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Reveal an image, dataset, document, or quotation the students haven't seen. They interpret it cold, then identify the inferential leap in a peer's reading.
                 </p>
-                <p className="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Highest AI-resilience: timed rounds, evidence that doesn't exist until it appears, and round 2 depends on a peer's interpretation that was just written.</p>
+                <p className="text-xs text-cyan-600 font-medium mt-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Highest AI-resilience: timed rounds, evidence that doesn't exist until it appears, and round 2 depends on a peer's interpretation that was just written.</p>
               </div>
-              <div className="flex flex-col divide-y divide-amber-100/50 flex-1">
+              <div className="flex flex-col divide-y divide-cyan-100/50 flex-1">
                 {[
                   { round: 1, label: 'Interpret the evidence', emoji: '🔬', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means, drawing on their own reasoning rather than pre-prepared material.' },
                   { round: 2, label: 'Identify the inferential gap', emoji: '🧩', text: 'Each student receives a peer\'s interpretation and must locate the biggest unsupported leap — the move from evidence to conclusion that doesn\'t hold.' },
                 ].map((r) => (
                   <div key={r.round} className="flex items-start gap-4 p-5">
-                    <span className="text-xs font-mono font-bold text-amber-500 bg-amber-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
+                    <span className="text-xs font-mono font-bold text-cyan-500 bg-cyan-50 w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5">{r.round}</span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800 mb-1">{r.emoji} {r.label}</p>
                       <p className="text-xs text-slate-500 leading-relaxed">{r.text}</p>
@@ -372,6 +370,7 @@ export function Home() {
                 'Unlimited students per session',
                 'Live instructor monitor',
                 'AI Debrief & Evaluate All',
+                'Image & document uploads',
                 'Projector view',
                 'CSV export',
                 'Results & analytics',

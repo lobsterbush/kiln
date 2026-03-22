@@ -121,7 +121,7 @@ export function LiveMonitor({
               </span>
             )}
             {sessionStatus === 'between_rounds' && (
-              <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg animate-pulse">
+              <span className="text-xs font-bold bg-cyan-100 text-cyan-700 px-2.5 py-1 rounded-lg animate-pulse">
                 ⏸ Paused
               </span>
             )}
@@ -156,11 +156,11 @@ export function LiveMonitor({
 
       {/* Peer assignment warning */}
       {peerWarning && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+        <div className="flex items-center gap-3 px-4 py-3 bg-cyan-50 border border-cyan-200 rounded-xl text-sm text-amber-800">
           <span className="flex-1">{peerWarning}</span>
           <button
             onClick={onDismissPeerWarning}
-            className="text-amber-400 hover:text-amber-600 font-bold text-base leading-none"
+            className="text-amber-400 hover:text-cyan-600 font-bold text-base leading-none"
             aria-label="Dismiss warning"
           >
             ×

@@ -306,12 +306,12 @@ export function Pedagogy() {
           </div>
 
           {/* Evidence Analysis */}
-          <div className="bg-white rounded-2xl border-2 border-amber-100 p-5">
+          <div className="bg-white rounded-2xl border-2 border-cyan-100 p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-amber-50 rounded-xl shrink-0"><BarChart2 className="w-5 h-5 text-amber-600" /></div>
+              <div className="p-2 bg-cyan-50 rounded-xl shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div>
               <div>
                 <h3 className="font-bold text-slate-900">Evidence Analysis</h3>
-                <span className="text-xs text-amber-600 font-medium">Live evidence · Inferential reasoning · Peer critique</span>
+                <span className="text-xs text-cyan-600 font-medium">Live evidence · Inferential reasoning · Peer critique</span>
               </div>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed mb-3">

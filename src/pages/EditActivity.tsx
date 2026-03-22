@@ -130,7 +130,7 @@ export function EditActivity() {
           activity.type === 'peer_clarification' ? 'bg-teal-100 text-teal-700' :
           activity.type === 'scenario_solo' ? 'bg-rose-100 text-rose-700' :
           activity.type === 'scenario_multi' ? 'bg-indigo-100 text-indigo-700' :
-          'bg-amber-100 text-amber-700'
+          'bg-cyan-100 text-cyan-700'
         }`}>
           {activity.type === 'peer_critique' ? 'Peer Critique' :
            activity.type === 'socratic_chain' ? 'Socratic Chain' :
@@ -197,7 +197,7 @@ export function EditActivity() {
               className="w-full h-40 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed text-sm"
             />
             {sourceMaterial.length > 3000 && (
-              <p className="text-xs text-amber-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
+              <p className="text-xs text-cyan-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
             )}
           </div>
         )}

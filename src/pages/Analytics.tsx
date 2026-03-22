@@ -152,7 +152,7 @@ export function Analytics() {
           { label: 'Total Students', value: totalStudents, icon: Users, color: 'text-blue-500 bg-blue-50' },
           { label: 'Avg Students/Session', value: avgStudents, icon: TrendingUp, color: 'text-emerald-500 bg-emerald-50' },
           { label: 'Total Responses', value: totalResponses, icon: MessageSquare, color: 'text-purple-500 bg-purple-50' },
-          { label: 'Avg Words/Response', value: avgWordsPerResponse, icon: FileText, color: 'text-amber-500 bg-amber-50' },
+          { label: 'Avg Words/Response', value: avgWordsPerResponse, icon: FileText, color: 'text-cyan-500 bg-cyan-50' },
           { label: 'Re-used Activities', value: `${reusedActivities}/${totalActivities}`, icon: RefreshCw, color: 'text-teal-500 bg-teal-50', subtitle: 'run >1 time' },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-2xl border border-slate-200 p-5">

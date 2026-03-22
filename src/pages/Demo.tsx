@@ -187,12 +187,12 @@ export function Demo() {
 
       {/* Completed state */}
       {completed && (
-        <div className="bg-gradient-to-br from-kiln-50 to-orange-50 border-2 border-kiln-200 rounded-2xl p-6 text-center animate-slide-up">
+        <div className="bg-gradient-to-br from-kiln-50 to-slate-50 border-2 border-kiln-200 rounded-2xl p-6 text-center animate-slide-up">
           <h3 className="text-lg font-bold text-slate-900 mb-2">Demo complete</h3>
           <p className="text-sm text-slate-500 mb-5 max-w-sm mx-auto">
-            That was one scenario with one AI persona. Kiln offers six activity types,
+            That was one scenario with one AI persona. Kiln offers six AI-resilient activity types,
             multi-stakeholder simulations, peer critique, Socratic questioning, and more —
-            all free during beta.
+            all free.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

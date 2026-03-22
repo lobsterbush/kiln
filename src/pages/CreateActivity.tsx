@@ -298,10 +298,10 @@ export function CreateActivity() {
           </button>
           <button
             onClick={() => { setType('evidence_analysis'); setRounds(2) }}
-            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-400 hover:shadow-md transition-all duration-200 text-left"
+            className="group flex items-center gap-5 p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-cyan-400 hover:shadow-md transition-all duration-200 text-left"
           >
-            <div className="p-3 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors shrink-0">
-              <BarChart2 className="w-7 h-7 text-amber-600" />
+            <div className="p-3 bg-cyan-50 rounded-xl group-hover:bg-cyan-100 transition-colors shrink-0">
+              <BarChart2 className="w-7 h-7 text-cyan-600" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900">Evidence Analysis</h3>
@@ -607,7 +607,7 @@ export function CreateActivity() {
               className="w-full h-40 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-kiln-400 transition-colors leading-relaxed text-sm"
             />
             {sourceMaterial.length > 3000 && (
-              <p className="text-xs text-amber-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
+              <p className="text-xs text-cyan-600">Long passages will be trimmed to ~3,000 characters. Consider pasting the most relevant excerpt.</p>
             )}
           </div>
         )}
