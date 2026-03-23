@@ -24,14 +24,14 @@ export function Layout() {
       {/* Skip to main content — WCAG 2.1 AA keyboard navigation */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-kiln-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-semibold focus:shadow-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-slate-900 focus:text-white focus:rounded-xl focus:text-sm focus:font-semibold focus:shadow-lg focus:outline-none"
       >
         {t('nav.skipToMain')}
       </a>
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 pt-safe" role="banner">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group" aria-label="Kiln home">
-            <div className="p-1.5 bg-kiln-600 rounded-lg">
+            <div className="p-1.5 bg-slate-900 rounded-lg">
               <Flame className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold tracking-tight text-slate-900">Kiln</span>
@@ -53,7 +53,7 @@ export function Layout() {
               to="/pedagogy"
               className={({ isActive }) =>
                 `text-sm transition-colors hidden sm:block ${
-                  isActive ? 'text-kiln-600 font-medium' : 'text-slate-500 hover:text-slate-800'
+                  isActive ? 'text-slate-600 font-medium' : 'text-slate-500 hover:text-slate-800'
                 }`
               }
             >
@@ -62,7 +62,7 @@ export function Layout() {
             {!loading && (
               <Link
                 to="/instructor"
-                className="text-sm font-medium px-4 py-2 text-kiln-700 border border-kiln-200 rounded-lg hover:bg-kiln-50 transition-colors hidden sm:block"
+                className="text-sm font-medium px-4 py-2 text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 hidden sm:block"
               >
                 {user ? 'Dashboard' : 'Instructor Sign In'}
               </Link>
@@ -98,7 +98,7 @@ export function Layout() {
               to="/pedagogy"
               className={({ isActive }) =>
                 `px-3 py-2.5 text-sm rounded-xl transition-colors ${
-                  isActive ? 'text-kiln-600 font-medium bg-kiln-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  isActive ? 'text-slate-600 font-medium bg-slate-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`
               }
             >
@@ -107,7 +107,7 @@ export function Layout() {
             {!loading && (
               <Link
                 to="/instructor"
-                className="mt-1 px-3 py-2.5 text-sm font-medium text-kiln-700 border border-kiln-200 rounded-lg hover:bg-kiln-50 transition-colors"
+                className="mt-1 px-3 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50"
               >
                 {user ? 'Dashboard' : 'Instructor Sign In'}
               </Link>
@@ -124,13 +124,13 @@ export function Layout() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-400">{t('common.copyright')}</p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
-            <Link to="/feedback" className="hover:text-kiln-600 transition-colors">
+            <Link to="/feedback" className="hover:text-slate-600 transition-colors">
               {t('common.feedback')}
             </Link>
-            <Link to="/pedagogy" className="hover:text-kiln-600 transition-colors hidden sm:block">
+            <Link to="/pedagogy" className="hover:text-slate-600 transition-colors hidden sm:block">
               {t('nav.pedagogy')}
             </Link>
-            <Link to="/privacy" className="hover:text-kiln-600 transition-colors hidden sm:block">
+            <Link to="/privacy" className="hover:text-slate-600 transition-colors hidden sm:block">
               {t('common.privacy')}
             </Link>
             {/* Language switcher */}

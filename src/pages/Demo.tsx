@@ -103,11 +103,11 @@ export function Demo() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto animate-fade-in pb-8">
       {/* Demo banner */}
-      <div className="bg-kiln-50 border border-kiln-200 rounded-xl px-5 py-4 text-center">
-        <p className="text-sm font-semibold text-kiln-700">
+      <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-center">
+        <p className="text-sm font-semibold text-slate-700">
           Live Demo — Foreign Policy Crisis Briefing
         </p>
-        <p className="text-xs text-kiln-500 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           This is a real AI-powered scenario. You have {MAX_TURNS} turns.
         </p>
       </div>
@@ -130,9 +130,9 @@ export function Demo() {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Scenario</p>
             <p className="text-sm text-slate-700 leading-relaxed">{SCENARIO_CONTEXT}</p>
           </div>
-          <div className="bg-kiln-50 border border-kiln-200 rounded-xl px-4 py-3 mb-3">
-            <p className="text-xs font-semibold text-kiln-600 uppercase tracking-wider mb-1">Your role</p>
-            <p className="text-sm text-kiln-900 font-medium">{STUDENT_ROLE}</p>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-3">
+            <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Your role</p>
+            <p className="text-sm text-slate-900 font-medium">{STUDENT_ROLE}</p>
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">You are briefing</p>
@@ -159,7 +159,7 @@ export function Demo() {
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                 msg.role === 'user'
-                  ? 'bg-kiln-500 text-white'
+                  ? 'bg-slate-500 text-white'
                   : 'bg-white border-2 border-slate-200'
               }`}
             >
@@ -187,7 +187,7 @@ export function Demo() {
 
       {/* Completed state */}
       {completed && (
-          <div className="bg-kiln-50 border border-kiln-200 rounded-xl p-6 text-center animate-slide-up">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center animate-slide-up">
           <h3 className="text-lg font-bold text-slate-900 mb-2">Demo complete</h3>
           <p className="text-sm text-slate-500 mb-5 max-w-sm mx-auto">
             That was one scenario with one AI persona. Kiln offers six AI-resilient activity types,
@@ -197,7 +197,7 @@ export function Demo() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to="/instructor"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors"
             >
               Create your first activity <ArrowRight className="w-4 h-4" />
             </Link>
@@ -217,7 +217,7 @@ export function Demo() {
           {error && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 mb-2">{error}</p>
           )}
-          <div className="flex items-end gap-2 bg-white border-2 border-slate-200 rounded-2xl p-2 focus-within:border-kiln-400 transition-colors">
+          <div className="flex items-end gap-2 bg-white border-2 border-slate-200 rounded-2xl p-2 focus-within:border-slate-300 transition-colors">
             <textarea
               ref={textareaRef}
               value={input}
@@ -231,7 +231,7 @@ export function Demo() {
             <button
               onClick={sendMessage}
               disabled={sending || !input.trim()}
-              className="p-2.5 bg-kiln-600 text-white rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>

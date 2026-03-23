@@ -4,22 +4,29 @@
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Newsreader', 'Georgia', ui-serif, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --color-kiln-50: #faf6f3;
-  --color-kiln-100: #f0e8e0;
-  --color-kiln-200: #ddd0c4;
-  --color-kiln-300: #c4aa94;
-  --color-kiln-400: #a37d62;
-  --color-kiln-500: #8b5e3c;
-  --color-kiln-600: #744b2e;
-  --color-kiln-700: #5c3a22;
-  --color-kiln-800: #4a2f1c;
-  --color-kiln-900: #3a2416;
+  --color-kiln-50: #f8f9fa;
+  --color-kiln-100: #f1f3f5;
+  --color-kiln-200: #dee2e6;
+  --color-kiln-300: #adb5bd;
+  --color-kiln-400: #868e96;
+  --color-kiln-500: #495057;
+  --color-kiln-600: #343a40;
+  --color-kiln-700: #212529;
+  --color-kiln-800: #1a1d21;
+  --color-kiln-900: #111315;
 }
 
-/* Smooth transitions globally */
+/* Smooth rendering + transitions globally */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions on all interactive elements */
+a, button, input, textarea, select, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /*
@@ -52,7 +59,7 @@ h1, h2, h3 {
 
 /* Brand selection color */
 ::selection {
-  background-color: rgba(139, 94, 60, 0.15);
+  background-color: rgba(52, 58, 64, 0.12);
   color: inherit;
 }
 
@@ -113,11 +120,11 @@ h1, h2, h3 {
 
 /* Textarea focus glow */
 textarea:focus {
-  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
+  box-shadow: 0 0 0 3px rgba(52, 58, 64, 0.08);
 }
 
 input:focus {
-  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
+  box-shadow: 0 0 0 3px rgba(52, 58, 64, 0.08);
 }
 
 /*
@@ -125,7 +132,7 @@ input:focus {
  * Uses :focus-visible so mouse clicks don't show the ring.
  */
 :focus-visible {
-  outline: 2px solid #8b5e3c;
+  outline: 2px solid #343a40;
   outline-offset: 2px;
   border-radius: 4px;
 }

@@ -41,8 +41,8 @@ export function Feedback() {
   if (done) {
     return (
       <div className="max-w-lg mx-auto py-16 text-center animate-fade-in">
-        <div className="p-4 bg-kiln-50 rounded-2xl w-fit mx-auto mb-5">
-          <CheckCircle className="w-10 h-10 text-kiln-500" />
+        <div className="p-4 bg-slate-50 rounded-2xl w-fit mx-auto mb-5">
+          <CheckCircle className="w-10 h-10 text-slate-500" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Thanks — received.</h1>
         <p className="text-slate-500 text-sm">
@@ -55,8 +55,8 @@ export function Feedback() {
   return (
     <div className="max-w-lg mx-auto py-10 animate-fade-in">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-kiln-50 rounded-lg">
-          <MessageSquare className="w-5 h-5 text-kiln-600" />
+        <div className="p-2 bg-slate-50 rounded-lg">
+          <MessageSquare className="w-5 h-5 text-slate-600" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Send feedback</h1>
@@ -78,7 +78,7 @@ export function Feedback() {
                 onClick={() => setCategory(c.value)}
                 className={`text-left px-3.5 py-3 rounded-xl border-2 transition-all ${
                   category === c.value
-                    ? 'border-kiln-400 bg-kiln-50 text-kiln-700'
+                    ? 'border-slate-300 bg-slate-50 text-slate-700'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
@@ -100,7 +100,7 @@ export function Feedback() {
             placeholder="Tell us what happened, what you expected, or what you'd love to see…"
             rows={5}
             required
-            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-kiln-400 transition-colors resize-none"
+            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-slate-300 transition-colors resize-none"
           />
         </div>
 
@@ -114,7 +114,7 @@ export function Feedback() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@institution.edu"
-            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-kiln-400 transition-colors"
+            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-slate-300 transition-colors"
           />
         </div>
 
@@ -125,7 +125,7 @@ export function Feedback() {
         <button
           type="submit"
           disabled={submitting || !message.trim()}
-          className="px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+          className="px-6 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
         >
           {submitting ? 'Sending…' : 'Send feedback'}
         </button>

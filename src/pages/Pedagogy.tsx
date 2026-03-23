@@ -17,7 +17,7 @@ function Ref({ children }: { children: React.ReactNode }) {
 
 function CallOut({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-slate-50 border-l-[3px] border-kiln-400 px-5 py-4 my-6 rounded-r-lg">
+    <div className="bg-slate-50 border-l-[3px] border-slate-300 px-5 py-4 my-6 rounded-r-lg">
       <p className="text-sm text-slate-700 leading-relaxed">{children}</p>
     </div>
   )
@@ -52,7 +52,7 @@ export function Pedagogy() {
             { href: '#mapping', label: '6. How each Kiln activity maps to the evidence' },
           ].map((item) => (
             <li key={item.href}>
-              <a href={item.href} className="text-sm text-kiln-600 hover:text-kiln-800 transition-colors">
+              <a href={item.href} className="text-sm text-slate-600 hover:text-slate-800 transition-colors">
                 {item.label}
               </a>
             </li>
@@ -215,7 +215,7 @@ export function Pedagogy() {
             { n: '3.', title: 'Accumulated context.', body: 'In the Socratic Chain, the AI follow-up is generated from each student\'s own submitted response. Using AI to answer a personalised question about your own prior writing requires more effort than just thinking.' },
           ].map((item) => (
             <li key={item.n} className="flex gap-3">
-              <span className="text-sm font-bold text-kiln-600 shrink-0 mt-0.5">{item.n}</span>
+              <span className="text-sm font-bold text-slate-600 shrink-0 mt-0.5">{item.n}</span>
               <p className="text-sm text-slate-600 leading-relaxed">
                 <strong>{item.title}</strong> {item.body}
               </p>
@@ -356,7 +356,7 @@ export function Pedagogy() {
         </div>
         <Link
           to="/instructor"
-          className="flex items-center gap-2 px-5 py-3 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-colors shrink-0"
+          className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors shrink-0"
         >
           Get started free <ArrowRight className="w-4 h-4" />
         </Link>

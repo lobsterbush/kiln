@@ -29,7 +29,7 @@ export function Home() {
             <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.08] mb-5">
                 AI-resilient tools<br />
-                <span className="text-kiln-600">for teaching.</span>
+                <span className="text-slate-400">for teaching.</span>
               </h1>
               <p className="text-lg text-slate-500 leading-relaxed max-w-md">
                 Timed rounds, peer dependency, and personalised context make honest thinking
@@ -48,12 +48,12 @@ export function Home() {
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="ABC123"
                   maxLength={6}
-                  className="flex-1 px-5 py-3.5 text-center text-xl font-mono font-bold tracking-[0.3em] bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-kiln-400 transition-colors placeholder:text-slate-200 placeholder:tracking-[0.15em] placeholder:font-normal"
+                  className="flex-1 px-5 py-3.5 text-center text-xl font-mono font-bold tracking-[0.3em] bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-slate-300 transition-colors placeholder:text-slate-200 placeholder:tracking-[0.15em] placeholder:font-normal"
                 />
                 <button
                   type="submit"
                   disabled={!code.trim()}
-                  className="px-5 py-3.5 bg-kiln-600 hover:bg-kiln-700 text-white rounded-xl disabled:opacity-40 transition-colors"
+                  className="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl disabled:opacity-40"
                 >
                   <ArrowRight className="w-5 h-5" />
                 </button>
@@ -62,7 +62,7 @@ export function Home() {
                 <p className="text-sm text-slate-400">Code is on the board or screen.</p>
                 <Link
                   to="/instructor"
-                  className="flex items-center gap-1.5 text-sm font-medium text-kiln-600 hover:text-kiln-700 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 whitespace-nowrap"
                 >
                   Instructor sign in <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -70,7 +70,7 @@ export function Home() {
 
               <Link
                 to="/demo"
-                className="flex items-center justify-center gap-2 mt-3 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 mt-3 px-5 py-3 border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-medium rounded-xl"
               >
                 <Play className="w-4 h-4" />
                 Try a live demo — no sign-up needed
@@ -137,7 +137,7 @@ export function Home() {
             </h2>
             <Link
               to="/pedagogy"
-              className="inline-flex items-center gap-1.5 text-sm text-kiln-600 hover:text-kiln-700 font-medium transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 font-medium shrink-0"
             >
               Evidence base <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -249,19 +249,19 @@ export function Home() {
                 'Results & analytics',
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <Check className="w-4 h-4 text-kiln-500 shrink-0" />{f}
+                  <Check className="w-4 h-4 text-slate-400 shrink-0" />{f}
                 </li>
               ))}
             </ul>
             <Link
               to="/instructor"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800"
             >
               Get started free
             </Link>
           </div>
           <p className="text-xs text-slate-400">
-            Questions? <a href="mailto:feedback@usekiln.org" className="text-kiln-600 hover:underline">feedback@usekiln.org</a>
+            Questions? <a href="mailto:feedback@usekiln.org" className="text-slate-600 hover:text-slate-900 underline">feedback@usekiln.org</a>
           </p>
         </div>
       </section>
@@ -296,7 +296,7 @@ function ActivityCard({ icon, borderColor, name, meta, description, resilience, 
         </div>
         <p className="text-sm text-slate-500 leading-relaxed">{description}</p>
         <p className="text-xs text-slate-500 mt-3 flex items-start gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-kiln-500 shrink-0 mt-0.5" />
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
           <span>{resilience}</span>
         </p>
       </div>
