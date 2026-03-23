@@ -1,7 +1,7 @@
 export function Privacy() {
   return (
     <div className="max-w-2xl mx-auto py-10 animate-fade-in">
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Privacy Policy</h1>
+      <h1 className="text-3xl font-bold text-slate-900 mb-2">Privacy Policy</h1>
       <p className="text-sm text-slate-400 mb-10">Last updated: March 2026</p>
 
       <div className="flex flex-col gap-8 text-sm text-slate-600 leading-relaxed">

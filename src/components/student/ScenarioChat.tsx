@@ -311,7 +311,7 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
             <button
               onClick={sendMessage}
               disabled={!input.trim() || sending}
-              className="p-3.5 bg-kiln-600 text-white rounded-2xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shrink-0"
+              className="p-3.5 bg-kiln-600 text-white rounded-2xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
             >
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>

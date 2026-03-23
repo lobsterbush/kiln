@@ -103,7 +103,7 @@ export function Demo() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto animate-fade-in pb-8">
       {/* Demo banner */}
-      <div className="bg-kiln-50 border border-kiln-200 rounded-2xl px-5 py-4 text-center">
+      <div className="bg-kiln-50 border border-kiln-200 rounded-xl px-5 py-4 text-center">
         <p className="text-sm font-semibold text-kiln-700">
           Live Demo — Foreign Policy Crisis Briefing
         </p>
@@ -187,7 +187,7 @@ export function Demo() {
 
       {/* Completed state */}
       {completed && (
-        <div className="bg-gradient-to-br from-kiln-50 to-slate-50 border-2 border-kiln-200 rounded-2xl p-6 text-center animate-slide-up">
+          <div className="bg-kiln-50 border border-kiln-200 rounded-xl p-6 text-center animate-slide-up">
           <h3 className="text-lg font-bold text-slate-900 mb-2">Demo complete</h3>
           <p className="text-sm text-slate-500 mb-5 max-w-sm mx-auto">
             That was one scenario with one AI persona. Kiln offers six AI-resilient activity types,
@@ -197,7 +197,7 @@ export function Demo() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to="/instructor"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-colors"
             >
               Create your first activity <ArrowRight className="w-4 h-4" />
             </Link>
@@ -231,7 +231,7 @@ export function Demo() {
             <button
               onClick={sendMessage}
               disabled={sending || !input.trim()}
-              className="p-2.5 bg-kiln-500 text-white rounded-xl hover:bg-kiln-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shrink-0"
+              className="p-2.5 bg-kiln-600 text-white rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>

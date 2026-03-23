@@ -55,12 +55,12 @@ export function Feedback() {
   return (
     <div className="max-w-lg mx-auto py-10 animate-fade-in">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-kiln-50 rounded-xl">
+        <div className="p-2 bg-kiln-50 rounded-lg">
           <MessageSquare className="w-5 h-5 text-kiln-600" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Send feedback</h1>
-          <p className="text-sm text-slate-400">Your input shapes the roadmap.</p>
+          <p className="text-sm text-slate-400">Your feedback shapes the roadmap.</p>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export function Feedback() {
         <button
           type="submit"
           disabled={submitting || !message.trim()}
-          className="px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+          className="px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
         >
           {submitting ? 'Sending…' : 'Send feedback'}
         </button>

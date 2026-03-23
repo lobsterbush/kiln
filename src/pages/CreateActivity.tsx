@@ -765,7 +765,7 @@ export function CreateActivity() {
         <button
           type="submit"
           disabled={saving || !title.trim() || !prompt.trim()}
-          className="px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+          className="px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
         >
           {saving ? 'Creating...' : 'Create Activity'}
         </button>

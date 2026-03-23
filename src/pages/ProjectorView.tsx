@@ -115,7 +115,7 @@ export function ProjectorView() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-8 py-4 border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-lg shadow-sm">
+          <div className="p-1.5 bg-kiln-600 rounded-lg shadow-sm">
             <Flame className="w-4 h-4 text-white" />
           </div>
           <div>

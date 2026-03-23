@@ -358,7 +358,7 @@ export function InstructorDashboard() {
                 <button
                   type="submit"
                   disabled={!email.trim()}
-                  className="px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+                  className="px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                 >
                   Send Magic Link
                 </button>
@@ -410,7 +410,7 @@ export function InstructorDashboard() {
                 <button
                   type="submit"
                   disabled={!email.trim() || !password.trim() || !confirmPassword.trim()}
-                  className="px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+                  className="px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                 >
                   Create Account
                 </button>
@@ -455,7 +455,7 @@ export function InstructorDashboard() {
                 <button
                   type="submit"
                   disabled={!email.trim() || !password.trim()}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                 >
                   Sign In <ChevronRight className="w-4 h-4" />
                 </button>
@@ -569,7 +569,7 @@ export function InstructorDashboard() {
           </Link>
           <Link
             to="/instructor/create"
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-medium rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-kiln-600 text-white font-medium rounded-xl hover:bg-kiln-700 transition-all shadow-sm"
           >
             <Plus className="w-4 h-4" />
             New Activity
@@ -603,7 +603,7 @@ export function InstructorDashboard() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to="/instructor/templates"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-all shadow-sm"
             >
               <Library className="w-4 h-4" /> Browse Templates
             </Link>
@@ -670,7 +670,7 @@ export function InstructorDashboard() {
                     <button
                       onClick={() => startSession(a)}
                       disabled={starting}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
                     >
                       <Play className="w-3.5 h-3.5" />
                       Start

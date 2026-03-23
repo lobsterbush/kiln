@@ -17,8 +17,8 @@ function Ref({ children }: { children: React.ReactNode }) {
 
 function CallOut({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-kiln-50 border-l-4 border-kiln-400 rounded-r-xl px-5 py-4 my-6">
-      <p className="text-sm text-slate-700 leading-relaxed font-medium">{children}</p>
+    <div className="bg-slate-50 border-l-[3px] border-kiln-400 px-5 py-4 my-6 rounded-r-lg">
+      <p className="text-sm text-slate-700 leading-relaxed">{children}</p>
     </div>
   )
 }
@@ -29,10 +29,7 @@ export function Pedagogy() {
 
       {/* Header */}
       <div className="mb-12">
-        <span className="inline-block text-xs font-bold text-kiln-700 bg-kiln-100 border border-kiln-200 px-3 py-1.5 rounded-full uppercase tracking-wider mb-5">
-          Pedagogical Foundation
-        </span>
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-4">
+        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-[1.1] mb-4">
           Why active, peer-based, timed learning works — and why it resists AI shortcuts
         </h1>
         <p className="text-lg text-slate-600 leading-relaxed">
@@ -43,8 +40,8 @@ export function Pedagogy() {
       </div>
 
       {/* TOC */}
-      <nav className="bg-slate-50 rounded-2xl border border-slate-200 p-5 mb-4">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">On this page</p>
+      <nav className="bg-slate-50 rounded-lg border border-slate-200 p-5 mb-4">
+        <p className="text-sm font-medium text-slate-400 mb-3">On this page</p>
         <ul className="flex flex-col gap-1.5">
           {[
             { href: '#passive', label: '1. The problem with passive learning' },
@@ -354,12 +351,12 @@ export function Pedagogy() {
       {/* CTA */}
       <div className="mt-16 pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <p className="font-bold text-slate-900">Ready to put this into practice?</p>
+          <p className="font-semibold text-slate-900">Ready to put this into practice?</p>
           <p className="text-sm text-slate-500 mt-1">Create your first activity in under a minute.</p>
         </div>
         <Link
           to="/instructor"
-          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95 shrink-0"
+          className="flex items-center gap-2 px-5 py-3 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-colors shrink-0"
         >
           Get started free <ArrowRight className="w-4 h-4" />
         </Link>

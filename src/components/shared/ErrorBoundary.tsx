@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
-          <p className="text-6xl font-extrabold text-slate-200">Oops</p>
+          <p className="text-6xl font-bold text-slate-200">Oops</p>
           <h1 className="text-xl font-bold text-slate-800">Something went wrong</h1>
           <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
             An unexpected error occurred. Try refreshing the page — if the problem persists,{' '}
@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-md shadow-kiln-200 active:scale-95"
+            className="px-6 py-2.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 transition-all shadow-sm"
           >
             Refresh page
           </button>

@@ -134,7 +134,7 @@ export function Templates() {
                 )}
                 <button
                   onClick={() => selectTemplate(template)}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white text-sm font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 transition-all shadow-sm active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-kiln-600 text-white text-sm font-semibold rounded-xl hover:bg-kiln-700 transition-all shadow-sm active:scale-[0.98]"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Use this template

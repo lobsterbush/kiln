@@ -36,7 +36,7 @@ function PageSpinner() {
 function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center gap-4">
-      <p className="text-6xl font-extrabold text-slate-200">404</p>
+      <p className="text-6xl font-bold text-slate-200">404</p>
       <h1 className="text-xl font-bold text-slate-800">Page not found</h1>
       <a href="/" className="text-sm text-kiln-600 hover:underline">Back to home</a>
     </div>

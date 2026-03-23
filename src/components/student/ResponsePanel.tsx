@@ -124,10 +124,10 @@ export function ResponsePanel({
                 onClick={handleSubmit}
                 disabled={isDisabled || !content.trim()}
                 className={cn(
-                  'flex items-center gap-2 px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95',
+                  'flex items-center gap-2 px-6 py-2.5 font-semibold rounded-xl transition-all',
                   submitted
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-kiln-500 hover:bg-kiln-600 text-white shadow-md shadow-kiln-200/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
+                    : 'bg-kiln-500 hover:bg-kiln-600 text-white shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
                 )}
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}

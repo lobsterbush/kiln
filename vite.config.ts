@@ -14,7 +14,7 @@ export default defineConfig({
         name: 'Kiln',
         short_name: 'Kiln',
         description: 'AI-resistant active learning for the classroom',
-        theme_color: '#f97316',
+        theme_color: '#8b5e3c',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',

@@ -30,7 +30,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
     <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center gap-3 mb-10">
-          <div className="p-3 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-2xl shadow-lg shadow-kiln-200">
+          <div className="p-3 bg-kiln-600 rounded-2xl shadow-sm">
             <Flame className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Join Session</h1>
@@ -76,7 +76,7 @@ export function JoinSession({ onJoin, error, initialCode = '' }: JoinSessionProp
           <button
             type="submit"
           disabled={joining || code.replace(/[^a-zA-Z0-9]/g, '').length === 0 || !name.trim()}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
           >
             {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join'}
             {!joining && <ArrowRight className="w-4 h-4" />}

@@ -251,9 +251,9 @@ export function LiveMonitor({
           onClick={onAdvanceRound}
           disabled={isAdvancing}
           className={cn(
-            'px-6 py-2.5 font-medium rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
+            'px-6 py-2.5 font-medium rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
             sessionStatus === 'between_rounds'
-              ? 'bg-gradient-to-r from-kiln-500 to-kiln-600 text-white hover:from-kiln-600 hover:to-kiln-700 shadow-kiln-200'
+              ? 'bg-kiln-600 text-white hover:bg-kiln-700 '
               : 'bg-slate-200 text-slate-500 hover:bg-slate-300 shadow-slate-100'
           )}
         >

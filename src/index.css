@@ -2,17 +2,18 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', 'Georgia', ui-serif, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --color-kiln-50: #fff7ed;
-  --color-kiln-100: #ffedd5;
-  --color-kiln-200: #fed7aa;
-  --color-kiln-300: #fdba74;
-  --color-kiln-400: #fb923c;
-  --color-kiln-500: #f97316;
-  --color-kiln-600: #ea580c;
-  --color-kiln-700: #c2410c;
-  --color-kiln-800: #9a3412;
-  --color-kiln-900: #7c2d12;
+  --color-kiln-50: #faf6f3;
+  --color-kiln-100: #f0e8e0;
+  --color-kiln-200: #ddd0c4;
+  --color-kiln-300: #c4aa94;
+  --color-kiln-400: #a37d62;
+  --color-kiln-500: #8b5e3c;
+  --color-kiln-600: #744b2e;
+  --color-kiln-700: #5c3a22;
+  --color-kiln-800: #4a2f1c;
+  --color-kiln-900: #3a2416;
 }
 
 /* Smooth transitions globally */
@@ -43,14 +44,15 @@ button, a, nav, header, footer, label, [role="button"] {
   user-select: none;
 }
 
-/* Tight tracking on headings for a more editorial feel */
+/* Editorial heading treatment */
 h1, h2, h3 {
-  letter-spacing: -0.025em;
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
 }
 
 /* Brand selection color */
 ::selection {
-  background-color: rgba(249, 115, 22, 0.18);
+  background-color: rgba(139, 94, 60, 0.15);
   color: inherit;
 }
 
@@ -111,11 +113,11 @@ h1, h2, h3 {
 
 /* Textarea focus glow */
 textarea:focus {
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
 }
 
 input:focus {
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
 }
 
 /*
@@ -123,7 +125,7 @@ input:focus {
  * Uses :focus-visible so mouse clicks don't show the ring.
  */
 :focus-visible {
-  outline: 2px solid #f97316;
+  outline: 2px solid #8b5e3c;
   outline-offset: 2px;
   border-radius: 4px;
 }

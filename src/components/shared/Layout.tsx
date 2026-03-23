@@ -30,11 +30,11 @@ export function Layout() {
       </a>
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 pt-safe" role="banner">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group" aria-label="Kiln home">
-            <div className="p-1.5 bg-gradient-to-br from-kiln-400 to-kiln-600 rounded-lg shadow-sm group-hover:shadow-md group-hover:shadow-kiln-200 transition-all">
+          <Link to="/" className="flex items-center gap-2 group" aria-label="Kiln home">
+            <div className="p-1.5 bg-kiln-600 rounded-lg">
               <Flame className="w-4 h-4 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-kiln-600 transition-colors">Kiln</span>
+            <span className="text-lg font-bold tracking-tight text-slate-900">Kiln</span>
           </Link>
           <nav className="flex items-center gap-5" aria-label="Main navigation">
             <a
@@ -62,7 +62,7 @@ export function Layout() {
             {!loading && (
               <Link
                 to="/instructor"
-                className="text-sm font-medium px-4 py-2 bg-kiln-50 text-kiln-700 rounded-xl hover:bg-kiln-100 transition-colors hidden sm:block"
+                className="text-sm font-medium px-4 py-2 text-kiln-700 border border-kiln-200 rounded-lg hover:bg-kiln-50 transition-colors hidden sm:block"
               >
                 {user ? 'Dashboard' : 'Instructor Sign In'}
               </Link>
@@ -107,7 +107,7 @@ export function Layout() {
             {!loading && (
               <Link
                 to="/instructor"
-                className="mt-1 px-3 py-2.5 text-sm font-semibold text-kiln-700 bg-kiln-50 rounded-xl hover:bg-kiln-100 transition-colors"
+                className="mt-1 px-3 py-2.5 text-sm font-medium text-kiln-700 border border-kiln-200 rounded-lg hover:bg-kiln-50 transition-colors"
               >
                 {user ? 'Dashboard' : 'Instructor Sign In'}
               </Link>

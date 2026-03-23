@@ -564,7 +564,7 @@ export function DemoPlayer() {
               <Sparkles className="w-3 h-3" />
               {sc.isScenario ? 'Evaluate All' : 'AI Debrief'}
             </div>
-            <div className="px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-gradient-to-r from-kiln-500 to-kiln-600 text-white">
+            <div className="px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-kiln-600 text-white">
               {sc.isScenario ? 'End Session' : 'Advance →'}
             </div>
           </div>

@@ -121,7 +121,7 @@ export function SessionLobby({ joinCode, participants, isInstructor, onStart, in
           <button
             onClick={() => onStart?.(customPrompt.trim() || undefined)}
             disabled={participants.length < 1 || isStarting}
-            className="px-8 py-3.5 bg-gradient-to-r from-kiln-500 to-kiln-600 text-white font-semibold rounded-xl hover:from-kiln-600 hover:to-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-kiln-200 hover:shadow-lg hover:shadow-kiln-300 active:scale-95 text-lg"
+            className="px-8 py-3.5 bg-kiln-600 text-white font-semibold rounded-xl hover:bg-kiln-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-lg hover:shadow-kiln-300 text-lg"
           >
             {isStarting ? 'Starting…' : 'Start Session'}
           </button>
