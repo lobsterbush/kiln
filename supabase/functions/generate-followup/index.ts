@@ -99,7 +99,16 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Fetch activity config (learning objectives)
+    // Fetch ALL prior responses by this participant (the full Socratic chain)
+    const { data: priorResponses } = await supabase
+      .from('responses')
+      .select('round, content, response_type')
+      .eq('session_id', session_id)
+      .eq('participant_id', participant_id)
+      .order('round', { ascending: true })
+    const responseChain = priorResponses ?? []
+
+    // Fetch activity config (learning objectives, source material, prompt)
     const { data: session } = await supabase
       .from('sessions')
       .select('activity:activities(config)')
@@ -123,14 +132,29 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Build the full conversation chain for Claude
+    const chainText = responseChain.map((r) => {
+      const label = r.response_type === 'initial' ? 'Initial response' :
+        r.response_type === 'followup_answer' ? 'Follow-up answer' : r.response_type
+      return `[Round ${r.round} — ${label}]\n${r.content}`
+    }).join('\n\n')
+
     const claudeData = await callClaude(anthropicKey, {
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 200,
-      system: `You are a Socratic tutor. You never provide information or answers. You only ask ONE targeted follow-up question that probes the weakest part of the student's reasoning. Be specific to what the student actually wrote. Do not be generic. Do not praise the student. Just ask the question.${originalPrompt ? `\n\nThe question students were answering: ${originalPrompt}` : ''}${sourceMaterial ? `\n\nSource material for this activity (use this to ground follow-up questions in the specific readings or lecture content):\n${sourceMaterial}` : ''}${objectives ? `\n\nLearning objectives: ${objectives}` : ''}`,
+      max_tokens: 300,
+      system: `You are a Socratic tutor conducting a sustained inquiry with one student. Your job is to ask ONE precise follow-up question that forces the student to confront the weakest point in their reasoning.
+
+Rules:
+- Quote or paraphrase a specific claim the student made, then ask why it holds.
+- If the student made a causal claim, ask about the mechanism. If they cited evidence, probe its limits. If they offered an analogy, ask where it breaks down.
+- Never provide information, answers, or hints. Never praise the student.
+- Your question must be impossible to answer with a generic response — it should require the student to think harder about what THEY specifically wrote.
+- If this is a later round, notice whether the student actually addressed the gap from their previous answer or just pivoted. Call that out if so.
+- Ground your question in the activity’s source material and learning objectives when possible.${originalPrompt ? `\n\nThe original question posed to students:\n${originalPrompt}` : ''}${sourceMaterial ? `\n\nSource material for this activity (use this to anchor your follow-up in the specific content students are engaging with):\n${sourceMaterial}` : ''}${objectives ? `\n\nLearning objectives the instructor wants students to work toward:\n${objectives}` : ''}`,
       messages: [
         {
           role: 'user',
-          content: `Student's response (Round ${round}):\n\n${response.content}`,
+          content: `Here is this student’s full response chain so far:\n\n${chainText}\n\nAsk your follow-up question about their Round ${round} response.`,
         },
       ],
     })

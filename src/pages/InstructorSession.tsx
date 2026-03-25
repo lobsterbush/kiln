@@ -79,6 +79,29 @@ export function InstructorSession() {
     }
   }, [session?.status, session?.id, navigate])
 
+  // Auto-advance: when every participant has submitted for the current round,
+  // wait 1.5 s (so the instructor sees the final card flip) then advance.
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (!session || !activity || session.status !== 'active') return
+    // Don't auto-advance scenario types (they don't have rounds)
+    if (activity.type === 'scenario_solo' || activity.type === 'scenario_multi') return
+    const roundResponses = responses.filter((r) => r.round === session.current_round)
+    const allSubmitted = participants.length > 0 && roundResponses.length >= participants.length
+    if (allSubmitted && !advancingRef.current) {
+      autoAdvanceRef.current = setTimeout(() => {
+        advanceRound()
+      }, 1500)
+    }
+    return () => {
+      if (autoAdvanceRef.current) {
+        clearTimeout(autoAdvanceRef.current)
+        autoAdvanceRef.current = null
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [responses.length, participants.length, session?.status, session?.current_round])
+
   // Listen for new participants and responses; set up persistent broadcast channel
   useEffect(() => {
     if (!id) return

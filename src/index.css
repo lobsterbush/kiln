@@ -14,6 +14,10 @@
   --color-kiln-700: #212529;
   --color-kiln-800: #1a1d21;
   --color-kiln-900: #111315;
+  /* Accent — warm editorial red, used sparingly for CTAs and key highlights */
+  --color-accent: #d64045;
+  --color-accent-light: #fef2f2;
+  --color-accent-dark: #b8333a;
 }
 
 /* Smooth rendering + transitions globally */
@@ -59,7 +63,7 @@ h1, h2, h3 {
 
 /* Brand selection color */
 ::selection {
-  background-color: rgba(52, 58, 64, 0.12);
+  background-color: rgba(214, 64, 69, 0.15);
   color: inherit;
 }
 
@@ -132,7 +136,7 @@ input:focus {
  * Uses :focus-visible so mouse clicks don't show the ring.
  */
 :focus-visible {
-  outline: 2px solid #343a40;
+  outline: 2px solid #d64045;
   outline-offset: 2px;
   border-radius: 4px;
 }

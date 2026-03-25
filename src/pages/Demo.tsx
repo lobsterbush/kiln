@@ -17,6 +17,14 @@ const SCENARIO_CONTEXT =
 const STUDENT_ROLE =
   'Foreign Minister. You are briefing the Prime Minister and must recommend a course of action and justify it.'
 
+// Canned responses used when the edge function is unavailable (not deployed, API key missing, etc.)
+const FALLBACK_RESPONSES: Record<number, string> = {
+  1: "Minister, that\'s a principle, not a plan. The Security Council meets in six hours. I need specifics: what resolution language are you proposing, which allies have you contacted, and what\'s our fallback if the vote fails? Three citizens are waiting.",
+  2: "You\'re still dancing around the trade question. Our largest trading partner backs the aggressor — that\'s $4.2 billion in annual trade at risk. If we invoke the mutual defence treaty, they retaliate within 48 hours. What\'s your mitigation strategy, or are you asking the PM to absorb that cost?",
+  3: "Better. But you haven\'t addressed the timeline gap between your diplomatic track and the physical safety of those aid workers. Diplomacy takes weeks; they may have hours. Are you prepared to recommend a parallel extraction operation, and if so, under whose authority?",
+  4: "That\'s the most coherent position I\'ve heard today. I still have serious concerns about the enforcement mechanism and the trade exposure, but at least you\'ve acknowledged the trade-offs honestly. I\'ll brief the PM with your recommendation — and my reservations. Prepare for hard questions.",
+}
+
 export function Demo() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -24,6 +32,7 @@ export function Demo() {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [briefVisible, setBriefVisible] = useState(true)
+  const [usingFallback, setUsingFallback] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -76,10 +85,17 @@ export function Demo() {
       setMessages((prev) => [...prev, aiMsg])
       if (data.completed || studentTurns + 1 >= MAX_TURNS) setCompleted(true)
     } catch {
-      setError('Could not get a response. Please try again.')
-      // Roll back optimistic message
-      setMessages(messages)
-      setInput(userContent)
+      // Edge function unavailable — use canned fallback so the demo still works
+      const turnNum = studentTurns + 1
+      const fallbackContent = FALLBACK_RESPONSES[turnNum] ?? FALLBACK_RESPONSES[4]
+      const aiMsg: Message = {
+        role: 'assistant',
+        content: fallbackContent,
+        speaker_name: 'Dr. Chen',
+      }
+      setMessages((prev) => [...prev, aiMsg])
+      setUsingFallback(true)
+      if (turnNum >= MAX_TURNS) setCompleted(true)
     } finally {
       setSending(false)
     }
@@ -98,12 +114,13 @@ export function Demo() {
     setError(null)
     setInput('')
     setBriefVisible(true)
+    setUsingFallback(false)
   }
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto animate-fade-in pb-8">
       {/* Demo banner */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-center">
+      <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
         <p className="text-sm font-semibold text-slate-700">
           Live Demo — Foreign Policy Crisis Briefing
         </p>
@@ -213,7 +230,7 @@ export function Demo() {
 
       {/* Input area */}
       {!completed && (
-        <div className="sticky bottom-0 bg-slate-50/80 backdrop-blur-sm pt-2 pb-1">
+        <div className="sticky bottom-0 bg-slate-50/80 backdrop-blur-sm pt-2 pb-6 pb-safe">
           {error && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 mb-2">{error}</p>
           )}
