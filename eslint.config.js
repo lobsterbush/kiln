@@ -31,6 +31,8 @@ export default defineConfig([
   // avoid importing the full recommendedTypeChecked config which adds ~50 rules.
   {
     files: ['src/**/*.{ts,tsx}'],
+    // Exclude test files — they're not in tsconfig.app.json so typed parsing fails on them
+    ignores: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/__mocks__/**'],
     languageOptions: {
       parserOptions: {
         project: ['./tsconfig.app.json'],
