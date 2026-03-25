@@ -17,7 +17,10 @@ AI-resistant active learning platform for higher education classrooms.
 ## Key Commands
 - `npm run dev` — local dev server
 - `npm run build` — production build (code-split, ~485 KB core)
-- `npm run lint` — ESLint (0 errors, 0 warnings)
+- `npm run lint` — ESLint (0 errors, 58 floating-promise warnings in existing code)
+- `npm test` — Vitest unit + component tests (162 tests)
+- `npm run test:e2e` — Playwright E2E tests (requires `npm run build` first)
+- `deno test supabase/functions/**/*.test.ts --no-check` — edge function tests (52 tests)
 - `npx tsc --noEmit` — type check
 - `npm run build && npx cap sync ios` — build + sync to iOS project
 - `npm run build && npx cap sync android` — build + sync to Android project
@@ -32,7 +35,7 @@ AI-resistant active learning platform for higher education classrooms.
 - `generate-feedback` — per-student feedback generation
 - `evaluate-scenario` — scenario performance evaluation
 - `generate-debrief` — session debrief (themes, gaps, notable quotes)
-- `send-welcome-email`
+- `send-welcome-email` — onboarding email via Resend API (triggered on signup)
 - `lti-launch` — Canvas LTI 1.3 OIDC login + JWT launch handler (stores context in `lti_launches`)
 - `lti-grade` — AGS grade passback (OAuth2 client_credentials → score post)
 - AI functions use `_shared/anthropic.ts` retry helper; LTI functions use `_shared/lti.ts` (JWT, CORS)
@@ -72,7 +75,6 @@ AI-resistant active learning platform for higher education classrooms.
 
 ## Pending manual steps
 - Deploy migrations 013–014: `supabase db push`
-- Deploy new edge functions: `supabase functions deploy send-welcome-email lti-launch lti-grade`
 - Set LTI secrets: `supabase secrets set LTI_PLATFORM_ISSUER=... LTI_PLATFORM_JWKS_URL=... LTI_CLIENT_ID=... LTI_OIDC_AUTH_URL=... LTI_PLATFORM_TOKEN_URL=... LTI_CLIENT_SECRET=... KILN_BASE_URL=https://usekiln.org`
 - Set RESEND_API_KEY secret: `supabase secrets set RESEND_API_KEY=re_xxxxx`
 - Set up Supabase Database Webhook: auth.users INSERT → send-welcome-email
