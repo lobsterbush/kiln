@@ -28,11 +28,11 @@ AI-resistant active learning platform for higher education classrooms.
 ## Edge Functions (deployed)
 - `generate-scenario-turn` — solo/multi-stakeholder scenario AI turns
 - `generate-followup` — Socratic Chain personalised follow-up questions (full prior response chain passed for context)
+- `demo-turn` — stateless demo scenario (no auth, no DB) for landing page conversion
 - `generate-feedback` — per-student feedback generation
 - `evaluate-scenario` — scenario performance evaluation
 - `generate-debrief` — session debrief (themes, gaps, notable quotes)
-- `demo-turn` — stateless demo scenario (no auth, no DB) for landing page conversion
-- `send-welcome-email` — onboarding email via Resend API (triggered on signup)
+- `send-welcome-email`
 - `lti-launch` — Canvas LTI 1.3 OIDC login + JWT launch handler (stores context in `lti_launches`)
 - `lti-grade` — AGS grade passback (OAuth2 client_credentials → score post)
 - AI functions use `_shared/anthropic.ts` retry helper; LTI functions use `_shared/lti.ts` (JWT, CORS)
@@ -71,7 +71,7 @@ AI-resistant active learning platform for higher education classrooms.
 
 ## Pending manual steps
 - Deploy migrations 013–014: `supabase db push`
-- Deploy new edge functions: `supabase functions deploy demo-turn send-welcome-email lti-launch lti-grade`
+- Deploy new edge functions: `supabase functions deploy send-welcome-email lti-launch lti-grade`
 - Set LTI secrets: `supabase secrets set LTI_PLATFORM_ISSUER=... LTI_PLATFORM_JWKS_URL=... LTI_CLIENT_ID=... LTI_OIDC_AUTH_URL=... LTI_PLATFORM_TOKEN_URL=... LTI_CLIENT_SECRET=... KILN_BASE_URL=https://usekiln.org`
 - Set RESEND_API_KEY secret: `supabase secrets set RESEND_API_KEY=re_xxxxx`
 - Set up Supabase Database Webhook: auth.users INSERT → send-welcome-email
