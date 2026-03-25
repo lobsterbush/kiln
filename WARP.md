@@ -27,7 +27,7 @@ AI-resistant active learning platform for higher education classrooms.
 
 ## Edge Functions (deployed)
 - `generate-scenario-turn` — solo/multi-stakeholder scenario AI turns
-- `generate-followup` — Socratic Chain personalised follow-up questions
+- `generate-followup` — Socratic Chain personalised follow-up questions (full prior response chain passed for context)
 - `generate-feedback` — per-student feedback generation
 - `evaluate-scenario` — scenario performance evaluation
 - `generate-debrief` — session debrief (themes, gaps, notable quotes)
@@ -44,12 +44,13 @@ AI-resistant active learning platform for higher education classrooms.
 - Realtime: broadcast channels for round events, postgres_changes for responses/participants
 - Response dedup: `submit_response` RPC + UNIQUE constraint (migration 012)
 - Peer assignment auto-recovery: 15s timeout falls back to DB query via RPC
+- Auto-advance: `InstructorSession` automatically advances round 1.5s after all participants submit
 - Push notifications: register on instructor sign-in, store APNs token in `device_tokens` table
 - Capacitor iOS: bundle ID `org.usekiln.app`, deployment target iOS 16.0
 - Capacitor Android: same bundle ID `org.usekiln.app`
 - Activity templates: 20 pre-built activities across 7 disciplines in `src/lib/templates.ts`
 - Templates page: `/instructor/templates` — filterable grid, one-click to CreateActivity with pre-fill
-- Demo mode: `/demo` — 4-turn Foreign Policy Crisis scenario, no auth needed, CTA to signup
+- Demo mode: `/demo` — 4-turn Foreign Policy Crisis scenario, no auth needed, CTA to signup; canned FALLBACK_RESPONSES for turns 1–4 when edge function is unavailable
 - Analytics: `/instructor/analytics` — sessions/week, word count trend, retention metric, summary cards, activity usage
 - Plausible analytics: privacy-respecting tracking (session created, demo started, template used)
 - Social proof: testimonial section on landing page (between How it Works and Activity Types)
