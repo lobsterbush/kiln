@@ -45,6 +45,7 @@ AI-resistant active learning platform for higher education classrooms.
 - Response dedup: `submit_response` RPC + UNIQUE constraint (migration 012)
 - Peer assignment auto-recovery: 15s timeout falls back to DB query via RPC
 - Auto-advance: `InstructorSession` automatically advances round 1.5s after all participants submit
+- Peer assignment: done client-side in `InstructorSession` (`assignPeers`, `assignRebuttals`) — no edge function needed; inserts into `peer_assignments` and broadcasts `peer:assigned` realtime events
 - Push notifications: register on instructor sign-in, store APNs token in `device_tokens` table
 - Capacitor iOS: bundle ID `org.usekiln.app`, deployment target iOS 16.0
 - Capacitor Android: same bundle ID `org.usekiln.app`
