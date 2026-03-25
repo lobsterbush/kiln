@@ -19,10 +19,10 @@ const STUDENT_ROLE =
 
 // Canned responses used when the edge function is unavailable (not deployed, API key missing, etc.)
 const FALLBACK_RESPONSES: Record<number, string> = {
-  1: "Minister, that\'s a principle, not a plan. The Security Council meets in six hours. I need specifics: what resolution language are you proposing, which allies have you contacted, and what\'s our fallback if the vote fails? Three citizens are waiting.",
-  2: "You\'re still dancing around the trade question. Our largest trading partner backs the aggressor — that\'s $4.2 billion in annual trade at risk. If we invoke the mutual defence treaty, they retaliate within 48 hours. What\'s your mitigation strategy, or are you asking the PM to absorb that cost?",
-  3: "Better. But you haven\'t addressed the timeline gap between your diplomatic track and the physical safety of those aid workers. Diplomacy takes weeks; they may have hours. Are you prepared to recommend a parallel extraction operation, and if so, under whose authority?",
-  4: "That\'s the most coherent position I\'ve heard today. I still have serious concerns about the enforcement mechanism and the trade exposure, but at least you\'ve acknowledged the trade-offs honestly. I\'ll brief the PM with your recommendation — and my reservations. Prepare for hard questions.",
+  1: "Minister, that's a principle, not a plan. The Security Council meets in six hours. I need specifics: what resolution language are you proposing, which allies have you contacted, and what's our fallback if the vote fails? Three citizens are waiting.",
+  2: "You're still dancing around the trade question. Our largest trading partner backs the aggressor — that's $4.2 billion in annual trade at risk. If we invoke the mutual defence treaty, they retaliate within 48 hours. What's your mitigation strategy, or are you asking the PM to absorb that cost?",
+  3: "Better. But you haven't addressed the timeline gap between your diplomatic track and the physical safety of those aid workers. Diplomacy takes weeks; they may have hours. Are you prepared to recommend a parallel extraction operation, and if so, under whose authority?",
+  4: "That's the most coherent position I've heard today. I still have serious concerns about the enforcement mechanism and the trade exposure, but at least you've acknowledged the trade-offs honestly. I'll brief the PM with your recommendation — and my reservations. Prepare for hard questions.",
 }
 
 export function Demo() {
@@ -32,7 +32,8 @@ export function Demo() {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [briefVisible, setBriefVisible] = useState(true)
-  const [usingFallback, setUsingFallback] = useState(false)
+  // usingFallback tracks whether canned fallback is being used (for analytics)
+  const [, setUsingFallback] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -248,7 +249,8 @@ export function Demo() {
             <button
               onClick={sendMessage}
               disabled={sending || !input.trim()}
-              className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            aria-label="Send"
+            className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
