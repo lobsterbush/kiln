@@ -26,7 +26,7 @@ export async function registerPushNotifications(userId: string): Promise<void> {
 
   await PushNotifications.register()
 
-  PushNotifications.addListener('registration', async (token) => {
+  void PushNotifications.addListener('registration', async (token) => {
     registered = true
     // Upsert: one row per user+platform, updated on each sign-in
     await supabase.from('device_tokens').upsert(
@@ -40,12 +40,12 @@ export async function registerPushNotifications(userId: string): Promise<void> {
     )
   })
 
-  PushNotifications.addListener('registrationError', (err) => {
+  void PushNotifications.addListener('registrationError', (err) => {
     console.warn('[Kiln] Push registration failed:', err.error)
   })
 
   // Handle notification taps (app was backgrounded or closed)
-  PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+  void PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
     const data = notification.notification.data
     // Deep-link to session if the notification includes a session_id
     if (data?.session_id) {

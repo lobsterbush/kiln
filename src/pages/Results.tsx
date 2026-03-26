@@ -38,7 +38,7 @@ export function Results() {
   const [evaluationError, setEvaluationError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const loadData = useCallback(async () => {
@@ -95,7 +95,7 @@ export function Results() {
   }, [id, user])
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [loadData])
 
   async function runAgain() {
@@ -108,7 +108,7 @@ export function Results() {
       .select()
       .single()
     if (!error && newSession) {
-      navigate(`/instructor/session/${newSession.id}`)
+      void navigate(`/instructor/session/${newSession.id}`)
     } else {
       setRunningAgain(false)
     }
@@ -303,15 +303,15 @@ export function Results() {
         const author = participants.find((q) => q.id === asReviewer.author_id)
         const name = author?.display_name ?? 'a classmate'
         if (activity?.type === 'peer_clarification') {
-          context = `\u2192 explained ${name}'s confusion`
+          context = `→ explained ${name}'s confusion`
         } else if (activity?.type === 'evidence_analysis') {
-          context = `\u2192 found gap in ${name}'s interpretation`
+          context = `→ found gap in ${name}'s interpretation`
         } else {
-          context = `\u2192 critiqued ${name}`
+          context = `→ critiqued ${name}`
         }
       } else if (asAuthor && r.response_type === 'rebuttal') {
         const reviewer = participants.find((q) => q.id === asAuthor.reviewer_id)
-        context = `\u2192 rebutted ${reviewer?.display_name ?? 'a classmate'}'s critique`
+        context = `→ rebutted ${reviewer?.display_name ?? 'a classmate'}'s critique`
       }
 
       return { ...r, context }

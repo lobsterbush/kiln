@@ -58,7 +58,7 @@ export function InstructorDashboard() {
         const bc = supabase.channel(`session:${sessionId}`)
         bc.subscribe((status) => {
           if (status === 'SUBSCRIBED') {
-            bc.send({
+            void bc.send({
               type: 'broadcast',
               event: 'session:status',
               payload: { status: 'completed' },
@@ -137,11 +137,11 @@ export function InstructorDashboard() {
    
   useEffect(() => {
     if (user) {
-      loadActivities()
-      loadActiveSessions()
-      loadPastSessions()
-      loadSessionStats()
-      checkUsage(user.id).then(setUsage)
+      void loadActivities()
+      void loadActiveSessions()
+      void loadPastSessions()
+      void loadSessionStats()
+      void checkUsage(user.id).then(setUsage)
     }
   }, [user, loadActivities, loadActiveSessions, loadPastSessions, loadSessionStats])
 
@@ -236,8 +236,8 @@ export function InstructorDashboard() {
     setStarting(false)
     trackEvent('Session Created', { activity_type: activity.type })
     // Refresh usage count
-    checkUsage(user!.id).then(setUsage)
-    navigate(`/instructor/session/${session.id}`)
+    void checkUsage(user!.id).then(setUsage)
+    void navigate(`/instructor/session/${session.id}`)
   }
 
   async function handleOAuth(provider: 'google' | 'github' | 'azure') {
@@ -684,16 +684,16 @@ export function InstructorDashboard() {
               <div className="flex items-center justify-between mt-3">
                 <p className="text-xs text-slate-400 font-medium">
                   {isScenario
-                    ? `${a.config.max_turns ?? 8} turns${a.config.ai_personas?.length ? ` \u00b7 ${a.config.ai_personas.length} persona${a.config.ai_personas.length !== 1 ? 's' : ''}` : ''}`
+                    ? `${a.config.max_turns ?? 8} turns${a.config.ai_personas?.length ? ` · ${a.config.ai_personas.length} persona${a.config.ai_personas.length !== 1 ? 's' : ''}` : ''}`
                     : a.type === 'peer_critique'
                     ? a.config.rounds === 2
-                      ? `Claim \u2192 Critique \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                      : `Claim \u2192 Critique \u2192 Rebuttal \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                      ? `Claim → Critique · ${formatDuration(a.config.round_duration_sec)}`
+                      : `Claim → Critique → Rebuttal · ${formatDuration(a.config.round_duration_sec)}`
                     : a.type === 'peer_clarification'
-                    ? `Confusion \u2192 Explanation \u00b7 ${formatDuration(a.config.round_duration_sec)}`
+                    ? `Confusion → Explanation · ${formatDuration(a.config.round_duration_sec)}`
                     : a.type === 'evidence_analysis'
-                    ? `Interpretation \u2192 Gap Analysis \u00b7 ${formatDuration(a.config.round_duration_sec)}`
-                    : `${a.config.rounds} rounds \u00b7 ${formatDuration(a.config.round_duration_sec)} each`
+                    ? `Interpretation → Gap Analysis · ${formatDuration(a.config.round_duration_sec)}`
+                    : `${a.config.rounds} rounds · ${formatDuration(a.config.round_duration_sec)} each`
                   }
                 </p>
                 {sessionStats.has(a.id) && (() => {
@@ -703,7 +703,7 @@ export function InstructorDashboard() {
                   const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(!sameYear && { year: 'numeric' }) })
                   return (
                     <span className="text-xs text-slate-300 shrink-0">
-                      {stats.count} run{stats.count !== 1 ? 's' : ''} \u00b7 {dateStr}
+                      {stats.count} run{stats.count !== 1 ? 's' : ''} · {dateStr}
                     </span>
                   )
                 })()}
@@ -722,7 +722,7 @@ export function InstructorDashboard() {
             </div>
             {!showAllPast && pastSessions.length === 5 && (
               <button
-                onClick={() => { setShowAllPast(true); loadPastSessions(true) }}
+                onClick={() => { setShowAllPast(true); void loadPastSessions(true) }}
                 className="text-xs text-kiln-600 hover:text-kiln-700 font-medium transition-colors"
               >
                 Show all
@@ -749,7 +749,7 @@ export function InstructorDashboard() {
                     to={`/instructor/results/${s.id}`}
                     className="text-xs font-medium text-kiln-600 hover:text-kiln-700 transition-colors shrink-0"
                   >
-                    View results \u2192
+                    View results →
                   </Link>
                 </div>
               )

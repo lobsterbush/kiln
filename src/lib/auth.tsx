@@ -22,12 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
       // Register for push notifications if already signed in (app relaunch)
-      if (session?.user) registerPushNotifications(session.user.id)
+      if (session?.user) void registerPushNotifications(session.user.id)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session)
         setUser(session?.user ?? null)
         // Register on sign-in, handled idempotently
-        if (session?.user) registerPushNotifications(session.user.id)
+        if (session?.user) void registerPushNotifications(session.user.id)
       }
     )
 
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
-    if (uid) unregisterPushNotifications(uid)
+    if (uid) void unregisterPushNotifications(uid)
   }
 
   return (

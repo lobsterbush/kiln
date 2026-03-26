@@ -19,7 +19,7 @@ export function ProjectorView() {
   const [showNames, setShowNames] = useState(true)
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const loadData = useCallback(async () => {
@@ -30,7 +30,7 @@ export function ProjectorView() {
       supabase.from('participants').select('*').eq('session_id', id),
       supabase.from('responses').select('*').eq('session_id', id),
     ])
-    if (!sessResult.data) { navigate('/instructor'); return }
+    if (!sessResult.data) { void navigate('/instructor'); return }
     setSession(sessResult.data)
     setActivity(sessResult.data.activity as Activity)
     if (partsResult.data) setParticipants(partsResult.data)
@@ -38,7 +38,7 @@ export function ProjectorView() {
   }, [id, user, navigate])
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [loadData])
 
   useEffect(() => {
@@ -75,8 +75,8 @@ export function ProjectorView() {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(responseSub)
-      supabase.removeChannel(bc)
+      void supabase.removeChannel(responseSub)
+      void supabase.removeChannel(bc)
     }
   }, [id])
 

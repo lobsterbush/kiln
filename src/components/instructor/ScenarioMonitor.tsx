@@ -71,7 +71,7 @@ export function ScenarioMonitor({
 
   // Initial load of existing messages
   useEffect(() => {
-    loadMessages()
+    void loadMessages()
   }, [loadMessages])
 
   // Subscribe to new scenario_messages
@@ -100,7 +100,7 @@ export function ScenarioMonitor({
       .subscribe()
 
     channelRef.current = ch
-    return () => { supabase.removeChannel(ch) }
+    return () => { void supabase.removeChannel(ch) }
   }, [sessionId])
 
   const participantsWithMessages = participants.filter((p) => (messagesByParticipant.get(p.id)?.length ?? 0) > 0)

@@ -97,7 +97,7 @@ export function StudentSummary() {
   }, [id, studentToken])
 
   useEffect(() => {
-    load()
+    void load()
   }, [load])
 
   if (loading) {

@@ -22,7 +22,7 @@ export function StudentSession() {
   // Redirect to join if there is no token or if it belongs to a different session
   useEffect(() => {
     if (!studentToken || studentToken.session_id !== id) {
-      navigate('/join', { replace: true })
+      void navigate('/join', { replace: true })
     }
   }, [studentToken, id, navigate])
 
@@ -216,7 +216,7 @@ export function StudentSession() {
   }, [id, studentToken])
 
   useEffect(() => {
-    loadSession()
+    void loadSession()
   }, [loadSession])
 
   // Subscribe to realtime
@@ -278,7 +278,7 @@ export function StudentSession() {
           setDisconnected(false)
           // After the first subscription, subsequent SUBSCRIBED events are reconnects
           if (subscribedOnceRef.current) {
-            loadSession()
+            void loadSession()
           }
           subscribedOnceRef.current = true
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
@@ -288,7 +288,7 @@ export function StudentSession() {
 
     return () => {
       subscribedOnceRef.current = false
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, studentToken?.participant_id])

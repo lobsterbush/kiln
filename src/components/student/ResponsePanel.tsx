@@ -49,7 +49,7 @@ export function ResponsePanel({
   function handleExpire() {
     setLocked(true)
     if (content.trim() && !submitted && !submitting) {
-      handleSubmit()
+      void handleSubmit()
     }
   }
 

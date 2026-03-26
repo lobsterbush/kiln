@@ -39,7 +39,7 @@ export function Templates() {
 
   function selectTemplate(template: ActivityTemplate) {
     try { window.plausible?.('Template Used', { props: { template: template.id, discipline: template.discipline } }) } catch { /* non-critical */ }
-    navigate('/instructor/create', { state: { template } })
+    void navigate('/instructor/create', { state: { template } })
   }
 
   return (

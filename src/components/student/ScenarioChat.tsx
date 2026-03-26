@@ -56,7 +56,7 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   }, [sessionId, maxTurns, studentToken])
 
   useEffect(() => {
-    loadTranscript()
+    void loadTranscript()
   }, [loadTranscript])
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export function ScenarioChat({ sessionId, activity, sessionStatus }: Props) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage()
+      void sendMessage()
     }
   }
 

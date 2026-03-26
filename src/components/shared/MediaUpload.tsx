@@ -59,12 +59,12 @@ export function MediaUpload({ instructorId, mediaUrl, mediaType, onChange }: Med
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
-    if (file) handleFile(file)
+    if (file) void handleFile(file)
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) handleFile(file)
+    if (file) void handleFile(file)
     // Reset input so the same file can be re-selected
     e.target.value = ''
   }

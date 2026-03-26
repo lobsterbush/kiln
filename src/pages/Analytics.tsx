@@ -38,7 +38,7 @@ export function Analytics() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const loadData = useCallback(async () => {
@@ -61,7 +61,7 @@ export function Analytics() {
   }, [user])
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [loadData])
 
   if (authLoading || loading) {

@@ -32,3 +32,4 @@ ios/App/Pods/
 *.sln
 *.sw?
 anthropic-key.md
+coverage/

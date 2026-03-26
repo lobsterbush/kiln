@@ -26,7 +26,7 @@ export function InstructorSession() {
   const advancingRef = useRef(false)
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const loadSession = useCallback(async () => {
@@ -39,7 +39,7 @@ export function InstructorSession() {
     ])
 
     if (!sessResult.data) {
-      navigate('/instructor')
+      void navigate('/instructor')
       return
     }
     setSession(sessResult.data)
@@ -69,13 +69,13 @@ export function InstructorSession() {
   }, [id, user, navigate])
 
   useEffect(() => {
-    loadSession()
+    void loadSession()
   }, [loadSession])
 
   // Navigate to results once session completes (avoids calling navigate() during render)
   useEffect(() => {
     if (session?.status === 'completed' && session.id) {
-      navigate(`/instructor/results/${session.id}`)
+      void navigate(`/instructor/results/${session.id}`)
     }
   }, [session?.status, session?.id, navigate])
 
@@ -90,7 +90,7 @@ export function InstructorSession() {
     const allSubmitted = participants.length > 0 && roundResponses.length >= participants.length
     if (allSubmitted && !advancingRef.current) {
       autoAdvanceRef.current = setTimeout(() => {
-        advanceRound()
+        void advanceRound()
       }, 1500)
     }
     return () => {
@@ -137,10 +137,10 @@ export function InstructorSession() {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(bc)
+      void supabase.removeChannel(bc)
       broadcastChannelRef.current = null
-      supabase.removeChannel(participantSub)
-      supabase.removeChannel(responseSub)
+      void supabase.removeChannel(participantSub)
+      void supabase.removeChannel(responseSub)
     }
   }, [id])
 
@@ -361,7 +361,7 @@ export function InstructorSession() {
       .update({ status: 'completed' })
       .eq('id', session.id)
     await broadcastEvent('session:status', { status: 'completed' })
-    navigate(`/instructor/results/${session.id}`)
+    void navigate(`/instructor/results/${session.id}`)
   }
 
   async function endSession() {

@@ -159,7 +159,7 @@ export function CreateActivity() {
   const incomingTemplate = (location.state as { template?: ActivityTemplate } | null)?.template
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const [type, setType] = useState<ActivityType | null>(incomingTemplate?.type ?? null)
@@ -236,7 +236,7 @@ export function CreateActivity() {
       return
     }
 
-    navigate('/instructor')
+    void navigate('/instructor')
   }
 
   function applyScenarioTemplate(t: typeof SCENARIO_SOLO_TEMPLATES[0]) {

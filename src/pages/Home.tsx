@@ -10,12 +10,12 @@ export function Home() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
   useEffect(() => {
-    if (!loading && user) navigate('/instructor', { replace: true })
+    if (!loading && user) void navigate('/instructor', { replace: true })
   }, [user, loading, navigate])
 
   function handleJoin(e: React.FormEvent) {
     e.preventDefault()
-    if (code.trim()) navigate(`/join?code=${encodeURIComponent(code.trim().toUpperCase())}`)
+    if (code.trim()) void navigate(`/join?code=${encodeURIComponent(code.trim().toUpperCase())}`)
   }
 
   return (
@@ -152,8 +152,8 @@ export function Home() {
               description="Argumentation in three moves: construct a claim, locate the weakness in opposing reasoning, defend under scrutiny. All three in a single session."
               resilience="Timed rounds plus peer dependency — round 2 critiques a peer's argument that didn't exist until the session started; round 3 rebuts a critique of your own words."
               steps={[
-                { n: 1, label: 'Construct a claim', text: 'State a position and the evidence for it. Every argument is the student\u2019s own.' },
-                { n: 2, label: 'Locate the weakest assumption', text: 'Each student receives a peer\u2019s argument and must identify what it takes for granted.' },
+                { n: 1, label: 'Construct a claim', text: 'State a position and the evidence for it. Every argument is the student’s own.' },
+                { n: 2, label: 'Locate the weakest assumption', text: 'Each student receives a peer’s argument and must identify what it takes for granted.' },
                 { n: 3, label: 'Respond to the critique', text: 'Students receive a critique of their own argument and write a rebuttal.' },
               ]}
             />
@@ -162,13 +162,13 @@ export function Home() {
               icon={<BookOpen className="w-5 h-5 text-purple-600" />}
               borderColor="border-l-purple-400"
               name="Socratic Chain"
-              meta="2\u20135 rounds"
-              description="The Socratic method at scale. The AI reads each student\u2019s response and generates a follow-up that targets the specific gap in their reasoning."
+              meta="2–5 rounds"
+              description="The Socratic method at scale. The AI reads each student’s response and generates a follow-up that targets the specific gap in their reasoning."
               resilience="Timed rounds and personalised follow-ups generated from your own prior response — copying it into a separate tool is slower than just thinking."
               steps={[
                 { n: 1, label: 'State your position', text: 'Everyone answers the same opening question. From here, every path diverges.' },
                 { n: 2, label: 'The question your argument provoked', text: 'The AI generates a follow-up aimed at the weakest point in your reasoning. Every student receives a different question.' },
-                { n: 3, label: 'Pursue the question', text: 'Each student responds to their personal challenge \u2014 the gap their own argument created.' },
+                { n: 3, label: 'Pursue the question', text: 'Each student responds to their personal challenge — the gap their own argument created.' },
               ]}
             />
 
@@ -177,11 +177,11 @@ export function Home() {
               borderColor="border-l-teal-400"
               name="Peer Clarification"
               meta="2 rounds"
-              description="Students first articulate what they don\u2019t understand \u2014 harder than it looks \u2014 then explain a different classmate\u2019s confusion in plain terms."
-              resilience="Timed rounds enforce real-time thinking. Naming your own confusion requires genuine metacognition; explaining a peer\u2019s specific confusion can\u2019t be pre-generated."
+              description="Students first articulate what they don’t understand — harder than it looks — then explain a different classmate’s confusion in plain terms."
+              resilience="Timed rounds enforce real-time thinking. Naming your own confusion requires genuine metacognition; explaining a peer’s specific confusion can’t be pre-generated."
               steps={[
-                { n: 1, label: 'Name your confusion', text: 'Identify what you don\u2019t yet understand well enough to explain. Describe precisely what\u2019s unclear.' },
-                { n: 2, label: 'Explain it back', text: 'Receive a classmate\u2019s confusion and explain it in plain language \u2014 no jargon, no looking it up.' },
+                { n: 1, label: 'Name your confusion', text: 'Identify what you don’t yet understand well enough to explain. Describe precisely what’s unclear.' },
+                { n: 2, label: 'Explain it back', text: 'Receive a classmate’s confusion and explain it in plain language — no jargon, no looking it up.' },
               ]}
             />
 
@@ -189,12 +189,12 @@ export function Home() {
               icon={<BarChart2 className="w-5 h-5 text-cyan-600" />}
               borderColor="border-l-cyan-400"
               name="Evidence Analysis"
-              meta="2 rounds \u00b7 mixed media \u00b7 highest AI resistance"
-              description="Reveal an image, dataset, document, or quotation the students haven\u2019t seen. They interpret it cold, then identify the inferential leap in a peer\u2019s reading."
-              resilience="Highest AI-resilience: timed rounds, evidence that doesn\u2019t exist until it appears, and round 2 depends on a peer\u2019s interpretation that was just written."
+              meta="2 rounds · mixed media · highest AI resistance"
+              description="Reveal an image, dataset, document, or quotation the students haven’t seen. They interpret it cold, then identify the inferential leap in a peer’s reading."
+              resilience="Highest AI-resilience: timed rounds, evidence that doesn’t exist until it appears, and round 2 depends on a peer’s interpretation that was just written."
               steps={[
                 { n: 1, label: 'Interpret the evidence', text: 'Evidence not in the assigned readings is revealed live. Students interpret what it means from their own reasoning.' },
-                { n: 2, label: 'Identify the inferential gap', text: 'Each student receives a peer\u2019s interpretation and must locate the biggest unsupported leap.' },
+                { n: 2, label: 'Identify the inferential gap', text: 'Each student receives a peer’s interpretation and must locate the biggest unsupported leap.' },
               ]}
             />
 
@@ -202,12 +202,12 @@ export function Home() {
               icon={<MessageCircle className="w-5 h-5 text-rose-600" />}
               borderColor="border-l-rose-400"
               name="Scenario Solo"
-              meta="Open-ended turns \u00b7 one AI persona"
-              description="Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student\u2019s moves."
-              resilience="Timed rounds and diverging conversations mean no two students face the same exchange \u2014 pre-generated answers are useless."
+              meta="Open-ended turns · one AI persona"
+              description="Each student negotiates, argues, or navigates a scenario with a single AI persona. The AI adapts its position to each student’s moves."
+              resilience="Timed rounds and diverging conversations mean no two students face the same exchange — pre-generated answers are useless."
               steps={[
                 { n: 1, label: 'Enter the scenario', text: 'The instructor sets context: your role, the stakes, who you are talking to.' },
-                { n: 2, label: 'Exchange turns with an AI persona', text: 'The AI responds in character. Each student\u2019s conversation diverges immediately.' },
+                { n: 2, label: 'Exchange turns with an AI persona', text: 'The AI responds in character. Each student’s conversation diverges immediately.' },
                 { n: 3, label: 'Instructor evaluates with AI', text: 'One click runs a rubric evaluation across all transcripts.' },
               ]}
             />
@@ -216,11 +216,11 @@ export function Home() {
               icon={<Network className="w-5 h-5 text-indigo-600" />}
               borderColor="border-l-indigo-400"
               name="Scenario Multi"
-              meta="Open-ended turns \u00b7 multiple AI personas"
+              meta="Open-ended turns · multiple AI personas"
               description="Each student faces a cast of personas the instructor defines. An AI orchestrator decides which stakeholder responds to each turn."
               resilience="Timed rounds, multi-party dynamics, and branching turns make each session unpredictable and impossible to outsource."
               steps={[
-                { n: 1, label: 'Set the stage', text: 'Instructor defines the scenario, the student\u2019s role, and a cast of personas.' },
+                { n: 1, label: 'Set the stage', text: 'Instructor defines the scenario, the student’s role, and a cast of personas.' },
                 { n: 2, label: 'Engage a cast of stakeholders', text: 'Each message is routed to the most contextually appropriate persona.' },
                 { n: 3, label: 'Evaluate performance', text: 'The same one-click AI evaluation runs across all transcripts.' },
               ]}

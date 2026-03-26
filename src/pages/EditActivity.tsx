@@ -28,7 +28,7 @@ export function EditActivity() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/instructor')
+    if (!authLoading && !user) void navigate('/instructor')
   }, [user, authLoading, navigate])
 
   const loadActivity = useCallback(async () => {
@@ -58,7 +58,7 @@ export function EditActivity() {
   }, [id, user])
 
   useEffect(() => {
-    loadActivity()
+    void loadActivity()
   }, [loadActivity])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -106,7 +106,7 @@ export function EditActivity() {
       return
     }
 
-    navigate('/instructor')
+    void navigate('/instructor')
   }
 
   if (authLoading) {

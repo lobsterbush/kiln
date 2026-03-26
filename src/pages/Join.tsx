@@ -102,7 +102,7 @@ export function Join() {
       resolvedParticipantId = participant.id
 
       // Navigate before broadcast — broadcast must never block this
-      navigate(`/session/${session.id}`)
+      void navigate(`/session/${session.id}`)
 
     } catch (err) {
       // Catches anything unexpected: crypto failure, network throw, etc.
@@ -118,7 +118,7 @@ export function Join() {
         const bc = supabase.channel(`session:${resolvedSessionId}`)
         bc.subscribe((status) => {
           if (status === 'SUBSCRIBED') {
-            bc.send({
+            void bc.send({
               type: 'broadcast',
               event: 'participant:joined',
               payload: { participant_id: resolvedParticipantId, display_name: resolvedName },
