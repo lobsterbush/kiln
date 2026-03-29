@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
     }).join('\n\n')
 
     const claudeData = await callClaude(anthropicKey, {
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 300,
       system: `You are a Socratic tutor conducting a sustained inquiry with one student. Your job is to ask ONE precise follow-up question that forces the student to confront the weakest point in their reasoning.
 

@@ -190,7 +190,7 @@ Stay fully in character as ${respondingPersonaName}. Do NOT break character or m
 
     // Generate AI response
     const aiData = await callClaude(anthropicKey, {
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 400,
       system: systemPrompt,
       messages: historyMessages,

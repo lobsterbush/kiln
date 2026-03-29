@@ -9,7 +9,7 @@ import { assertEquals, assertRejects } from 'https://deno.land/std@0.224.0/asser
 import { callClaude } from './anthropic.ts'
 
 const DUMMY_BODY = {
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-sonnet-4-6',
   max_tokens: 100,
   system: 'You are a test bot.',
   messages: [{ role: 'user' as const, content: 'Hello' }],
