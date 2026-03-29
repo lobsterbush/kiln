@@ -28,6 +28,8 @@ export function InstructorDashboard() {
   const [sessionError, setSessionError] = useState<string | null>(null)
   const [activeSessions, setActiveSessions] = useState<{ id: string; join_code: string; status: string; activity: { title: string }[] | null }[]>([])
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
+  const [deletingAll, setDeletingAll] = useState(false)
   const [pastSessions, setPastSessions] = useState<{ id: string; join_code: string; created_at: string; activity: { title: string }[] | null; participants: { count: number }[] }[]>([])
   const [showAllPast, setShowAllPast] = useState(false)
   const [sessionStats, setSessionStats] = useState<Map<string, { count: number; lastRun: string }>>(new Map())
@@ -118,6 +120,24 @@ export function InstructorDashboard() {
     }
     setActivities((prev) => prev.filter((a) => a.id !== activityId))
     setConfirmDelete(null)
+  }
+
+  async function handleDeleteAll() {
+    if (!user) return
+    setDeletingAll(true)
+    const { error } = await supabase
+      .from('activities')
+      .delete()
+      .eq('instructor_id', user.id)
+    if (error) {
+      setSessionError('Could not delete all activities. Some may have data that prevents deletion.')
+    } else {
+      setActivities([])
+      setPastSessions([])
+      setSessionStats(new Map())
+    }
+    setConfirmDeleteAll(false)
+    setDeletingAll(false)
   }
 
   const loadActivities = useCallback(async () => {
@@ -713,6 +733,39 @@ export function InstructorDashboard() {
           }
         </div>
       )}
+
+      {/* Delete all activities */}
+      {activities.length > 1 && (
+        <div className="flex justify-end">
+          {confirmDeleteAll ? (
+            <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+              <span className="text-sm text-red-700">Delete all {activities.length} activities and their sessions?</span>
+              <button
+                onClick={() => setConfirmDeleteAll(false)}
+                className="text-xs px-3 py-1.5 text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleDeleteAll()}
+                disabled={deletingAll}
+                className="text-xs px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors font-medium"
+              >
+                {deletingAll ? 'Deleting…' : 'Yes, delete all'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDeleteAll(true)}
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <Trash2 className="w-3 h-3" />
+              Delete all activities
+            </button>
+          )}
+        </div>
+      )}
+
       {pastSessions.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">

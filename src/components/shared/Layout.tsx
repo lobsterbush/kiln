@@ -143,7 +143,7 @@ export function Layout() {
                 aria-label="Language"
               >
                 {LOCALES.map((l) => (
-                  <option key={l.code} value={l.code}>{l.nativeLabel}</option>
+                  <option key={l.code} value={l.code}>{l.label}</option>
                 ))}
               </select>
             </div>
