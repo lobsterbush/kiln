@@ -10,7 +10,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
     alias: {
       // Resolve the Vite virtual PWA module to a hand-written stub
-      'virtual:pwa-register/react': '/Users/f00421k/Documents/GitHub/kiln/src/__mocks__/pwa-register-react.ts',
+      'virtual:pwa-register/react': new URL('./src/__mocks__/pwa-register-react.ts', import.meta.url).pathname,
     },
     coverage: {
       provider: 'v8',
