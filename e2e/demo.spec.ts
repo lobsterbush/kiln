@@ -28,14 +28,11 @@ test.describe('Demo page', () => {
     await page.getByRole('textbox').fill('My recommendation is to pursue diplomacy via the UN.')
     await page.getByRole('button', { name: /send/i }).click()
 
-    // Either a live AI response or a fallback response should appear
-    // Fallback turn 1 contains "principle, not a plan"
-    // We just verify some AI response appears within 10s
+    // Wait for the AI response — either live or fallback. The response appears
+    // inside a bubble with "Dr. Chen" label (rose-500 text).
     await expect(
-      page.locator('[class*="rose"]').first().or(
-        page.getByText(/principle, not a plan|strategy|Minister|recommendation/i).first()
-      )
-    ).toBeVisible({ timeout: 10_000 })
+      page.getByText('Dr. Chen').nth(1) // nth(1) = the one in the chat, not the brief
+    ).toBeVisible({ timeout: 15_000 })
   })
 
   test('turn counter decrements after sending a message', async ({ page }) => {
@@ -53,26 +50,24 @@ test.describe('Demo page', () => {
   })
 
   test('shows completion screen after 4 turns', async ({ page }) => {
-    // Use fallback responses (don't need live API) by sending any messages
     for (let i = 1; i <= 4; i++) {
       await page.getByRole('textbox').fill(`Turn ${i}`)
       await page.getByRole('button', { name: /send/i }).click()
-      // Wait for AI response before sending next
-      if (i < 4) {
-        await expect(page.getByText(/\d turns remaining/i)).toBeVisible({ timeout: 10_000 })
-      }
+      // Wait for the AI response bubble to appear before sending next turn
+      await expect(
+        page.locator('text=Dr. Chen').nth(i) // nth(i) = the i-th chat response label
+      ).toBeVisible({ timeout: 15_000 })
     }
     await expect(page.getByText(/demo complete/i)).toBeVisible({ timeout: 10_000 })
   })
 
   test('"Try again" resets the demo to initial state', async ({ page }) => {
-    // Send 4 turns to reach completed state
     for (let i = 1; i <= 4; i++) {
       await page.getByRole('textbox').fill(`Turn ${i}`)
       await page.getByRole('button', { name: /send/i }).click()
-      if (i < 4) {
-        await expect(page.getByText(/\d turns remaining/i)).toBeVisible({ timeout: 10_000 })
-      }
+      await expect(
+        page.locator('text=Dr. Chen').nth(i)
+      ).toBeVisible({ timeout: 15_000 })
     }
     await expect(page.getByText(/demo complete/i)).toBeVisible({ timeout: 10_000 })
     await page.getByRole('button', { name: /try again/i }).click()
